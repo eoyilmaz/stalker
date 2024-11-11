@@ -1236,7 +1236,6 @@ def test_to_tjp_is_working_as_expected(setup_user_db_tests):
     expected_tjp = 'resource User_{} "User_{}" {{\n    efficiency 1.0\n}}'.format(
         data["test_user"].id, data["test_user"].id
     )
-
     assert data["test_user"].to_tjp == expected_tjp
 
 
@@ -1270,9 +1269,13 @@ def test_to_tjp_is_working_as_expected_for_a_user_with_vacations(setup_user_db_t
         data["test_user"].id,
     )
 
-    # print expected_tjp
-    # print '---------------'
-    # print data["test_user"].to_tjp
+    # print("Expected:")
+    # print("---------")
+    # print(expected_tjp)
+    # print('---------------')
+    # print("Result:")
+    # print("-------")
+    # print(data["test_user"].to_tjp)
 
     assert data["test_user"].to_tjp == expected_tjp
 

@@ -824,7 +824,7 @@ def test_html_class_attr_is_working_as_expected(setup_simple_entity_tests):
     assert data["test_simple_entity"].html_class == test_value
 
 
-def test_to_tjp_wil_raise_a_not_implemented_error(setup_simple_entity_tests):
+def test_to_tjp_will_raise_a_not_implemented_error(setup_simple_entity_tests):
     """calling to_tjp() method will raise a NotImplementedError."""
     data = setup_simple_entity_tests
     with pytest.raises(NotImplementedError):

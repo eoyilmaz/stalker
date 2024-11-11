@@ -105,13 +105,17 @@ class Department(Entity):
     def to_tjp(self):
         """Output a TaskJuggler compatible representation.
 
-        This uses the ``defaults.tjp_department_template``.
-
         Returns:
             str: The TaskJuggler compatible representation.
         """
-        temp = Template(defaults.tjp_department_template, trim_blocks=True)
-        return temp.render({"department": self})
+        tab = "    "
+        indent = tab
+        tjp = f'resource {self.tjp_id} "{self.tjp_id}" {{'
+        for resource in self.users:
+            tjp += "\n"
+            tjp += "\n".join(f"{indent}{l}" for l in resource.to_tjp.split("\n"))
+        tjp += "\n}"
+        return tjp
 
 
 # DEPARTMENTS_USERS

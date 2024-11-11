@@ -841,8 +841,7 @@ def test_to_tjp_attribute_is_working_as_expected(setup_studio_db_tests):
     data["test_studio"].working_hours[6] = []
 
     expected_tjp_template = Template(
-        """
-project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
+        """project Studio_{{studio.id}} "Studio_{{studio.id}}" 2013-04-15 - 2013-06-30 {
     timingresolution 60min
     now {{ studio.now.strftime('%Y-%m-%d-%H:%M') }}
     dailyworkinghours 8

@@ -2728,36 +2728,36 @@ def test_to_tjp_attr_is_working_as_expected_for_a_root_task(setup_task_tests):
     data["test_user4"].id = 127
     data["test_user5"].id = 128
 
-    expected_tjp = """
-task Task_%(t1_id)s "Task_%(t1_id)s" {
-
-    
-            depends Project_%(project1_id)s.Task_%(dep_t1_id)s {onend}, Project_%(project1_id)s.Task_%(dep_t2_id)s {onend}        
-            
-            effort 10d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}""" % {
-        "project1_id": data["test_project1"].id,
-        "t1_id": t1.id,
-        "dep_t1_id": dep_t1.id,
-        "dep_t2_id": dep_t2.id,
-        "user1_id": data["test_user1"].id,
-        "user2_id": data["test_user2"].id,
-        "user3_id": data["test_user3"].id,
-        "user4_id": data["test_user4"].id,
-        "user5_id": data["test_user5"].id,
-    }
-    # print(t1.to_tjp)
-    # print('---------------------------------')
+    expected_tjp = """task Task_{t1_id} "Task_{t1_id}" {{
+    depends Project_{project1_id}.Task_{dep_t1_id} {{onend}}, Project_{project1_id}.Task_{dep_t2_id} {{onend}}
+    effort 10d
+    allocate User_{user1_id} {{
+        alternative
+        User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+        persistent
+    }}, User_{user2_id} {{
+        alternative
+        User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+        persistent
+    }}
+}}""".format(
+        project1_id=data["test_project1"].id,
+        t1_id=t1.id,
+        dep_t1_id=dep_t1.id,
+        dep_t2_id=dep_t2.id,
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+    )
+    # print("Expected:")
+    # print("---------")
     # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(t1.to_tjp)
     assert t1.to_tjp == expected_tjp
 
 
@@ -2796,37 +2796,37 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task(setup_task_tests):
     data["test_user5"].id = 129
 
     # data["maxDiff"] = None
-    expected_tjp = """
-task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
-
-    
-            depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend}        
-            
-            effort 1003h
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}""" % {
-        "project1_id": data["test_project1"].id,
-        "new_task_id": new_task.id,
-        "new_task2_id": new_task2.id,
-        "dep_task1_id": dep_task1.id,
-        "dep_task2_id": dep_task2.id,
-        "user1_id": data["test_user1"].id,
-        "user2_id": data["test_user2"].id,
-        "user3_id": data["test_user3"].id,
-        "user4_id": data["test_user4"].id,
-        "user5_id": data["test_user5"].id,
-    }
-    # print(new_task2.to_tjp)
-    # print('---------------------------------')
+    expected_tjp = """    task Task_{new_task2_id} "Task_{new_task2_id}" {{
+        depends Project_{project1_id}.Task_{new_task_id}.Task_{dep_task1_id} {{onend}}, Project_{project1_id}.Task_{new_task_id}.Task_{dep_task2_id} {{onend}}
+        effort 1003h
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}""".format(
+        project1_id=data["test_project1"].id,
+        new_task_id=new_task.id,
+        new_task2_id=new_task2.id,
+        dep_task1_id=dep_task1.id,
+        dep_task2_id=dep_task2.id,
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+    )
+    # print("Expected:")
+    # print("---------")
     # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(new_task2.to_tjp)
     assert new_task2.to_tjp == expected_tjp
 
 
@@ -2876,37 +2876,37 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_deta
     data["test_user4"].id = 128
     data["test_user5"].id = 129
 
-    expected_tjp = """
-task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
-
-    
-            depends Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
-            
-            effort 1003h
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}""" % {
-        "project1_id": data["test_project1"].id,
-        "new_task_id": new_task.id,
-        "new_task2_id": new_task2.id,
-        "dep_task1_id": dep_task1.id,
-        "dep_task2_id": dep_task2.id,
-        "user1_id": data["test_user1"].id,
-        "user2_id": data["test_user2"].id,
-        "user3_id": data["test_user3"].id,
-        "user4_id": data["test_user4"].id,
-        "user5_id": data["test_user5"].id,
-    }
-    # print new_task.to_tjp
-    # print '---------------------------------'
-    # print expected_tjp
+    expected_tjp = """    task Task_{new_task2_id} "Task_{new_task2_id}" {{
+        depends Project_{project1_id}.Task_{new_task_id}.Task_{dep_task1_id} {{onstart gaplength 2d}}, Project_{project1_id}.Task_{new_task_id}.Task_{dep_task2_id} {{onend gapduration 4d}}
+        effort 1003h
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}""".format(
+        project1_id=data["test_project1"].id,
+        new_task_id=new_task.id,
+        new_task2_id=new_task2.id,
+        dep_task1_id=dep_task1.id,
+        dep_task2_id=dep_task2.id,
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+    )
+    # print("Expected:")
+    # print("---------")
+    # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(new_task2.to_tjp)
     assert new_task2.to_tjp == expected_tjp
 
 
@@ -2960,37 +2960,37 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
     data["test_user4"].id = 128
     data["test_user5"].id = 129
 
-    expected_tjp = """
-task Task_%(new_task2_id)s "Task_%(new_task2_id)s" {
-
-    
-            depends Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task1_id)s {onstart gaplength 2d}, Project_%(project1_id)s.Task_%(new_task1_id)s.Task_%(dep_task2_id)s {onend gapduration 4d}        
-            
-            effort 1003h
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s select minloaded
-                    persistent
-                }            
-}""" % {
-        "project1_id": data["test_project1"].id,
-        "new_task1_id": new_task1.id,
-        "new_task2_id": new_task2.id,
-        "dep_task1_id": dep_task1.id,
-        "dep_task2_id": dep_task2.id,
-        "user1_id": data["test_user1"].id,
-        "user2_id": data["test_user2"].id,
-        "user3_id": data["test_user3"].id,
-        "user4_id": data["test_user4"].id,
-        "user5_id": data["test_user5"].id,
-    }
-    # print(new_task2.to_tjp)
-    # print('---------------------------------')
+    expected_tjp = """    task Task_{new_task2_id} "Task_{new_task2_id}" {{
+        depends Project_{project1_id}.Task_{new_task1_id}.Task_{dep_task1_id} {{onstart gaplength 2d}}, Project_{project1_id}.Task_{new_task1_id}.Task_{dep_task2_id} {{onend gapduration 4d}}
+        effort 1003h
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id} select minloaded
+            persistent
+        }}
+    }}""".format(
+        project1_id=data["test_project1"].id,
+        new_task1_id=new_task1.id,
+        new_task2_id=new_task2.id,
+        dep_task1_id=dep_task1.id,
+        dep_task2_id=dep_task2.id,
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+    )
+    # print("Expected:")
+    # print("---------")
     # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(new_task2.to_tjp)
     assert new_task2.to_tjp == expected_tjp
 
 
@@ -3030,74 +3030,63 @@ def test_to_tjp_attr_is_working_as_expected_for_a_container_task(setup_task_test
     dep_task1.id = 131
     dep_task2.id = 132
 
-    expected_tjp = """
-task Task_%(t1_id)s "Task_%(t1_id)s" {
-
-    
-    
-task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
-
-    
-            
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
-
-    
-            
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(t2_id)s "Task_%(t2_id)s" {
-
-    
-            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-}""" % {
-        "user1_id": data["test_user1"].id,
-        "user2_id": data["test_user2"].id,
-        "user3_id": data["test_user3"].id,
-        "user4_id": data["test_user4"].id,
-        "user5_id": data["test_user5"].id,
-        "project1_id": data["test_project1"].id,
-        "t1_id": t1.id,
-        "t2_id": t2.id,
-        "dep_task1_id": dep_task1.id,
-        "dep_task2_id": dep_task2.id,
-    }
-    # print(t1.to_tjp)
-    # print('---------------------------------')
+    expected_tjp = """task Task_{t1_id} "Task_{t1_id}" {{
+    task Task_{dep_task1_id} "Task_{dep_task1_id}" {{
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+    task Task_{dep_task2_id} "Task_{dep_task2_id}" {{
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+    task Task_{t2_id} "Task_{t2_id}" {{
+        depends Project_{project1_id}.Task_{t1_id}.Task_{dep_task1_id} {{onend}}, Project_{project1_id}.Task_{t1_id}.Task_{dep_task2_id} {{onend}}
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+}}""".format(
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+        project1_id=data["test_project1"].id,
+        t1_id=t1.id,
+        t2_id=t2.id,
+        dep_task1_id=dep_task1.id,
+        dep_task2_id=dep_task2.id,
+    )
+    # print("Expected:")
+    # print("---------")
     # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(t1.to_tjp)
     assert t1.to_tjp == expected_tjp
 
 
@@ -3163,75 +3152,66 @@ def test_to_tjp_attr_is_working_as_expected_for_a_container_task_with_dependency
     dep_task1.id = 132
     dep_task2.id = 133
 
-    expected_tjp = """
-task Task_%(t1_id)s "Task_%(t1_id)s" {
-
+    expected_tjp = """task Task_{t1_id} "Task_{t1_id}" {{
     priority 888
-            depends Project_%(project1_id)s.Task_%(t0_id)s {onend}
-task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
-
-    
-            
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
-
-    
-            
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(t2_id)s "Task_%(t2_id)s" {
-
-    
-            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-}""" % {
-        "user1_id": data["test_user1"].id,
-        "user2_id": data["test_user2"].id,
-        "user3_id": data["test_user3"].id,
-        "user4_id": data["test_user4"].id,
-        "user5_id": data["test_user5"].id,
-        "project1_id": data["test_project1"].id,
-        "t0_id": t0.id,
-        "t1_id": t1.id,
-        "t2_id": t2.id,
-        "dep_task1_id": dep_task1.id,
-        "dep_task2_id": dep_task2.id,
-    }
-    # print(t1.to_tjp)
-    # print('---------------------------------')
+    depends Project_{project1_id}.Task_{t0_id} {{onend}}
+    task Task_{dep_task1_id} "Task_{dep_task1_id}" {{
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+    task Task_{dep_task2_id} "Task_{dep_task2_id}" {{
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+    task Task_{t2_id} "Task_{t2_id}" {{
+        depends Project_{project1_id}.Task_{t1_id}.Task_{dep_task1_id} {{onend}}, Project_{project1_id}.Task_{t1_id}.Task_{dep_task2_id} {{onend}}
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+}}""".format(
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+        project1_id=data["test_project1"].id,
+        t0_id=t0.id,
+        t1_id=t1.id,
+        t2_id=t2.id,
+        dep_task1_id=dep_task1.id,
+        dep_task2_id=dep_task2.id,
+    )
+    # print("Expected:")
+    # print("---------")
     # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(t1.to_tjp)
     assert t1.to_tjp == expected_tjp
 
 
@@ -3282,76 +3262,65 @@ def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(setup_task_tests):
     dep_task1.id = 128
     dep_task2.id = 129
 
-    expected_tjp = """
-task Task_%(t1_id)s "Task_%(t1_id)s" {
-
-    
-    
-task Task_%(dep_task1_id)s "Task_%(dep_task1_id)s" {
-
-    
-            
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(dep_task2_id)s "Task_%(dep_task2_id)s" {
-
-    
-            
-            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-task Task_%(t2_id)s "Task_%(t2_id)s" {
-
-    
-            depends Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task1_id)s {onend}, Project_%(project1_id)s.Task_%(t1_id)s.Task_%(dep_task2_id)s {onend}        
-                                                start 2013-05-03-14:00
-                                end 2013-05-04-14:00
-                            
-            effort 1d
-            allocate User_%(user1_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }, User_%(user2_id)s {
-                    alternative
-                    User_%(user3_id)s, User_%(user4_id)s, User_%(user5_id)s select minloaded
-                    persistent
-                }            
-}
-}""" % {
-        "user1_id": data["test_user1"].id,
-        "user2_id": data["test_user2"].id,
-        "user3_id": data["test_user3"].id,
-        "user4_id": data["test_user4"].id,
-        "user5_id": data["test_user5"].id,
-        "project1_id": data["test_project1"].id,
-        "t1_id": t1.id,
-        "t2_id": t2.id,
-        "dep_task1_id": dep_task1.id,
-        "dep_task2_id": dep_task2.id,
-    }
-    # print(t1.to_tjp)
-    # print('-----------------------')
+    expected_tjp = """task Task_{t1_id} "Task_{t1_id}" {{
+    task Task_{dep_task1_id} "Task_{dep_task1_id}" {{
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+    task Task_{dep_task2_id} "Task_{dep_task2_id}" {{
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+    task Task_{t2_id} "Task_{t2_id}" {{
+        depends Project_{project1_id}.Task_{t1_id}.Task_{dep_task1_id} {{onend}}, Project_{project1_id}.Task_{t1_id}.Task_{dep_task2_id} {{onend}}
+        start 2013-05-03-14:00
+        end 2013-05-04-14:00
+        effort 1d
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+    }}
+}}""".format(
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+        project1_id=data["test_project1"].id,
+        t1_id=t1.id,
+        t2_id=t2.id,
+        dep_task1_id=dep_task1.id,
+        dep_task2_id=dep_task2.id,
+    )
+    # print("Expected:")
+    # print("---------")
     # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(t1.to_tjp)
     data["maxDiff"] = None
     assert t1.to_tjp == expected_tjp
 

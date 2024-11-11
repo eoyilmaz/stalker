@@ -354,19 +354,18 @@ def test_tjp_id_is_working_as_expected(setup_department_db_tests):
 def test_to_tjp_is_working_as_expected(setup_department_db_tests):
     """to_tjp property is working as expected."""
     data = setup_department_db_tests
-    expected_tjp = """
-resource Department_36 "Department_36" {
+    expected_tjp = """resource Department_36 "Department_36" {
     resource User_31 "User_31" {
-    efficiency 1.0
-}
+        efficiency 1.0
+    }
     resource User_32 "User_32" {
-    efficiency 1.0
-}
+        efficiency 1.0
+    }
     resource User_33 "User_33" {
-    efficiency 1.0
-}
+        efficiency 1.0
+    }
     resource User_34 "User_34" {
-    efficiency 1.0
-}
+        efficiency 1.0
+    }
 }"""
     assert data["test_department"].to_tjp == expected_tjp

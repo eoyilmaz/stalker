@@ -1348,8 +1348,12 @@ def test_to_tjp_is_working_as_expected(get_data_file, setup_project_db_test):
         }
     )
 
+    # print("Expected:")
+    # print("---------")
     # print(expected_tjp)
     # print("-----------------")
+    # print("Result:")
+    # print("-------")
     # print(data["test_project"].to_tjp)
 
     assert data["test_project"].to_tjp == expected_tjp

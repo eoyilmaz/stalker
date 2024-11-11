@@ -472,11 +472,15 @@ class Version(Link, DAGMixin):
                 "project".format(entity_type=self.task.entity_type)
             )
 
-        temp_filename = jinja2.Template(vers_template.filename).render(**kwargs)
+        temp_filename = jinja2.Template(vers_template.filename).render(
+            **kwargs, trim_blocks=True, lstrip_blocks=True
+        )
         if isinstance(temp_filename, bytes):
             temp_filename = temp_filename.decode("utf-8")
 
-        temp_path = jinja2.Template(vers_template.path).render(**kwargs)
+        temp_path = jinja2.Template(vers_template.path).render(
+            **kwargs, trim_blocks=True, lstrip_blocks=True
+        )
         if isinstance(temp_path, bytes):
             temp_path = temp_path.decode("utf-8")
 

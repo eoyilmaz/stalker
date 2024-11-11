@@ -497,13 +497,21 @@ def test_to_tjp_attribute_is_working_as_expected():
     wh["sat"] = []
     wh["sun"] = []
 
-    expected_tjp = """    workinghours mon 09:30 - 18:30
-    workinghours tue 09:30 - 18:30
-    workinghours wed 09:30 - 18:30
-    workinghours thu 09:30 - 18:30
-    workinghours fri 09:30 - 18:30
-    workinghours sat off
-    workinghours sun off"""
+    expected_tjp = """workinghours mon 09:30 - 18:30
+workinghours tue 09:30 - 18:30
+workinghours wed 09:30 - 18:30
+workinghours thu 09:30 - 18:30
+workinghours fri 09:30 - 18:30
+workinghours sat off
+workinghours sun off"""
+
+    # print("Expected:")
+    # print("---------")
+    # print(expected_tjp)
+    # print("--------------------")
+    # print("Result:")
+    # print("-------")
+    # print(wh.to_tjp)
 
     assert wh.to_tjp == expected_tjp
 
@@ -519,13 +527,21 @@ def test_to_tjp_attribute_is_working_as_expected_for_multiple_work_hour_ranges()
     wh["sat"] = [[570, 720]]
     wh["sun"] = []
 
-    expected_tjp = """    workinghours mon 09:30 - 12:00, 13:00 - 18:30
-    workinghours tue 09:30 - 12:00, 13:00 - 18:30
-    workinghours wed 09:30 - 12:00, 13:00 - 18:30
-    workinghours thu 09:30 - 12:00, 13:00 - 18:30
-    workinghours fri 09:30 - 12:00, 13:00 - 18:30
-    workinghours sat 09:30 - 12:00
-    workinghours sun off"""
+    expected_tjp = """workinghours mon 09:30 - 12:00, 13:00 - 18:30
+workinghours tue 09:30 - 12:00, 13:00 - 18:30
+workinghours wed 09:30 - 12:00, 13:00 - 18:30
+workinghours thu 09:30 - 12:00, 13:00 - 18:30
+workinghours fri 09:30 - 12:00, 13:00 - 18:30
+workinghours sat 09:30 - 12:00
+workinghours sun off"""
+
+    # print("Expected:")
+    # print("---------")
+    # print(expected_tjp)
+    # print("--------------------")
+    # print("Result:")
+    # print("-------")
+    # print(wh.to_tjp)
 
     assert wh.to_tjp == expected_tjp
 

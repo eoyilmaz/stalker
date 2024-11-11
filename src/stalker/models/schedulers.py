@@ -502,7 +502,9 @@ order by path_as_text"""  # noqa: B950
                 "csv_file_full_path": self.temp_file_full_path,
                 "compute_resources": self.compute_resources,
                 "tasks_buffer": tasks_buffer,
-            }
+            },
+            trim_blocks=True,
+            lstrip_blocks=True,
         )
 
         logger.debug(f"total number of records: {num_of_records}")
