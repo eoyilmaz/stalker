@@ -605,13 +605,13 @@ def test___strictly_typed___attr_set_to_true_and_type_arg_is_not_type(
         NewClass(**data["kwargs"])
 
 
-def test___stalker_version__attr_is_automatically_set_to_the_current_stalker_version(
+def test_stalker_version_attr_is_automatically_set_to_the_current_stalker_version(
     setup_simple_entity_tests,
 ):
-    """__stalker_version__ is automatically set for the newly created SimpleEntities."""
+    """stalker_version is automatically set for the newly created SimpleEntities."""
     data = setup_simple_entity_tests
     new_simple_entity = SimpleEntity(**data["kwargs"])
-    assert new_simple_entity.__stalker_version__ == stalker.__version__
+    assert new_simple_entity.stalker_version == stalker.__version__
 
     # update stalker.__version__ to a test value
     current_version = stalker.__version__
@@ -624,7 +624,7 @@ def test___stalker_version__attr_is_automatically_set_to_the_current_stalker_ver
 
     # create a new SimpleEntity and check if it is following the version
     new_simple_entity2 = SimpleEntity(**data["kwargs"])
-    assert new_simple_entity2.__stalker_version__ == test_version
+    assert new_simple_entity2.stalker_version == test_version
 
     # restore the stalker.__version__
     stalker.__version__ = current_version

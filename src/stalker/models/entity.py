@@ -209,7 +209,7 @@ class SimpleEntity(Base):
     html_style = Column(String(64), nullable=True, default="")
     html_class = Column(String(64), nullable=True, default="")
 
-    __stalker_version__ = Column("stalker_version", String(256))
+    stalker_version = Column("stalker_version", String(256))
 
     def __init__(
         self,
@@ -250,7 +250,7 @@ class SimpleEntity(Base):
 
         import stalker
 
-        self.__stalker_version__ = stalker.__version__
+        self.stalker_version = stalker.__version__
 
     def __repr__(self):
         """Return the str representation of this SimpleEntity.

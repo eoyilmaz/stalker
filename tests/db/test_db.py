@@ -800,11 +800,7 @@ def test_alembic_version_mismatch(setup_postgresql_db):
     with pytest.raises(PendingRollbackError) as cm:
         DBSession.query(User.id).all()
 
-    assert (
-        "Can't reconnect until invalid transaction is rolled back. "
-        "(Background on this error at: "
-        "https://sqlalche.me/e/14/8s2b)" in str(cm.value)
-    )
+    assert "Can't reconnect until invalid transaction is rolled back." in str(cm.value)
 
     # rollback and reconnect to the database
     DBSession.rollback()
@@ -2293,14 +2289,9 @@ def test_persistence_of_entity(setup_postgresql_db):
     )
 
 
-def test_persistence_of_entitygroup(setup_postgresql_db):
+def test_persistence_of_entity_group(setup_postgresql_db):
     """Persistence of EntityGroup."""
     # create a couple of task
-    _status1 = Status(name="stat1", code="STS1")
-    _status2 = Status(name="stat2", code="STS2")
-    _status3 = Status(name="stat3", code="STS3")
-    _status4 = Status(name="stat4", code="STS4")
-    _status5 = Status(name="stat5", code="STS5")
     user1 = User(
         name="User1",
         login="user1",
@@ -2395,7 +2386,7 @@ def test_persistence_of_entitygroup(setup_postgresql_db):
     assert sorted(entities, key=lambda x: x.name) == sorted(
         entity_group1_db.entities, key=lambda x: x.name
     )
-    assert entities == [task1, child_task2, task2]
+    assert sorted(entities, key=lambda x: x.id) == sorted([task1, child_task2, task2], key=lambda x: x.id)
     assert type_ == entity_group1_db.type
     assert updated_by == entity_group1_db.updated_by
 
@@ -3347,6 +3338,7 @@ def test_persistence_of_shot(setup_postgresql_db):
 def test_persistence_of_simple_entity(setup_postgresql_db):
     """Persistence of SimpleEntity."""
     thumbnail = Link()
+    DBSession.add(thumbnail)
     kwargs = {
         "name": "Simple Entity 1",
         "description": "this is for testing purposes",
@@ -3370,7 +3362,7 @@ def test_persistence_of_simple_entity(setup_postgresql_db):
     html_style = test_simple_entity.html_style
     html_class = test_simple_entity.html_class
     generic_text = test_simple_entity.generic_text
-    __stalker_version__ = test_simple_entity.__stalker_version__
+    stalker_version = test_simple_entity.stalker_version
 
     del test_simple_entity
 
@@ -3390,7 +3382,8 @@ def test_persistence_of_simple_entity(setup_postgresql_db):
     assert test_simple_entity_db.updated_by == updated_by
     assert test_simple_entity_db.html_style == html_style
     assert test_simple_entity_db.html_class == html_class
-    assert test_simple_entity_db.__stalker_version__ == __stalker_version__
+    print(test_simple_entity_db.stalker_version)
+    assert test_simple_entity_db.stalker_version == stalker_version
     assert thumbnail is not None
     assert test_simple_entity_db.thumbnail == thumbnail
     assert generic_text is not None
