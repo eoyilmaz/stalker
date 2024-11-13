@@ -8,7 +8,8 @@ import pytest
 
 import pytz
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 import stalker
 from stalker import DateRangeMixin, SimpleEntity, defaults, log
@@ -23,8 +24,8 @@ class DateRangeMixFooMixedInClass(SimpleEntity, DateRangeMixin):
 
     __tablename__ = "DateRangeMixFooMixedInClasses"
     __mapper_args__ = {"polymorphic_identity": "DateRangeMixFooMixedInClass"}
-    schedMixFooMixedInClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    schedMixFooMixedInClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):

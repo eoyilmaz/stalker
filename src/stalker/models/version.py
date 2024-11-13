@@ -3,15 +3,13 @@
 
 import os
 import re
-from typing import Generator, List, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 
 import jinja2
 
-from six import string_types
-
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
@@ -91,29 +89,28 @@ class Version(Link, DAGMixin):
 
     __dag_cascade__ = "save-update, merge"
 
-    version_id = Column("id", Integer, ForeignKey("Links.id"), primary_key=True)
+    version_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Links.id"), primary_key=True
+    )
 
     __id_column__ = "version_id"
 
-    task_id = Column(Integer, ForeignKey("Tasks.id"), nullable=False)
-    task = relationship(
-        "Task",
+    task_id: Mapped[int] = mapped_column(ForeignKey("Tasks.id"), nullable=False)
+    task: Mapped[Task] = relationship(
         primaryjoin="Versions.c.task_id==Tasks.c.id",
-        doc="""The :class:`.Task` instance that this Version is created for.
-        """,
+        doc="The :class:`.Task` instance that this Version is created for.",
         uselist=False,
         back_populates="versions",
     )
 
-    variant_name = Column(
+    variant_name: Mapped[Optional[str]] = mapped_column(
         String(256),
         default=defaults.version_variant_name,
         doc="""Variants in Versions are used for representing different variants of the
         same version.""",
     )
 
-    version_number = Column(
-        Integer,
+    version_number: Mapped[int] = mapped_column(
         default=1,
         nullable=False,
         doc="""The :attr:`.version_number` attribute is read-only.
@@ -121,8 +118,7 @@ class Version(Link, DAGMixin):
         """,
     )
 
-    inputs = relationship(
-        "Link",
+    inputs: Mapped[Optional[List[Link]]] = relationship(
         secondary="Version_Inputs",
         primaryjoin="Versions.c.id==Version_Inputs.c.version_id",
         secondaryjoin="Version_Inputs.c.link_id==Links.c.id",
@@ -132,8 +128,7 @@ class Version(Link, DAGMixin):
         """,
     )
 
-    outputs = relationship(
-        "Link",
+    outputs: Mapped[Optional[List[Link]]] = relationship(
         secondary="Version_Outputs",
         primaryjoin="Versions.c.id==Version_Outputs.c.version_id",
         secondaryjoin="Version_Outputs.c.link_id==Links.c.id",
@@ -143,21 +138,21 @@ class Version(Link, DAGMixin):
         """,
     )
 
-    is_published = Column(Boolean, default=False)
+    is_published: Mapped[Optional[bool]] = mapped_column(default=False)
 
-    created_with = Column(String(256))
+    created_with: Mapped[Optional[str]] = mapped_column(String(256))
 
     def __init__(
         self,
-        task=None,
-        variant_name=defaults.version_variant_name,
-        inputs=None,
-        outputs=None,
-        parent=None,
-        full_path=None,
-        created_with=None,
-        **kwargs,
-    ):
+        task: Optional[Task] = None,
+        variant_name: str = defaults.version_variant_name,
+        inputs: Optional[List["Version"]] = None,
+        outputs: Optional[List["Version"]] = None,
+        parent: Optional["Version"] = None,
+        full_path: Optional[str] = None,
+        created_with: Optional[str] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         # call supers __init__
         kwargs["full_path"] = full_path
         super(Version, self).__init__(**kwargs)
@@ -234,7 +229,7 @@ class Version(Link, DAGMixin):
         Returns:
             str: The validated variant name value.
         """
-        if not isinstance(variant_name, string_types):
+        if not isinstance(variant_name, str):
             raise TypeError(
                 "{}.variant_name should be a string, not {}: '{}'".format(
                     self.__class__.__name__,
@@ -550,7 +545,7 @@ class Version(Link, DAGMixin):
         Returns:
             Union[None, str]: The validated created with value.
         """
-        if created_with is not None and not isinstance(created_with, string_types):
+        if created_with is not None and not isinstance(created_with, str):
             raise TypeError(
                 "{}.created_with should be an instance of str, not {}: '{}'".format(
                     self.__class__.__name__,

@@ -4,6 +4,7 @@
 import pytest
 
 from sqlalchemy import Column, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import ACLMixin, Permission
 from stalker.db.declarative import Base
@@ -13,7 +14,7 @@ class TestClassForACL(Base, ACLMixin):
     """A class for testing ACLMixing."""
 
     __tablename__ = "TestClassForACLs"
-    id = Column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(primary_key=True)
 
     def __init__(self):
         super(TestClassForACL, self).__init__()

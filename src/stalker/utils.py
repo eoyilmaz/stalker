@@ -1,8 +1,10 @@
 # -*- coding: utf-8 -*-
 """Utilities are situated here."""
 import calendar
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Any, Generator
+
+import pytz
 
 from stalker.exceptions import CircularDependencyError
 
@@ -91,7 +93,7 @@ def check_circular_dependency(entity: Any, other_entity: Any, attr_name: str) ->
             )
 
 
-def utc_to_local(utc_datetime) -> datetime:
+def utc_to_local(utc_datetime: datetime) -> datetime:
     """Convert utc time to local time.
 
     Based on the answer of J.F. Sebastian on
@@ -109,7 +111,7 @@ def utc_to_local(utc_datetime) -> datetime:
     return local_dt.replace(microsecond=utc_datetime.microsecond)
 
 
-def local_to_utc(local_datetime) -> datetime:
+def local_to_utc(local_datetime: datetime) -> datetime:
     """Convert local datetime to utc datetime.
 
     Based on the answer of J.F. Sebastian on
@@ -119,8 +121,42 @@ def local_to_utc(local_datetime) -> datetime:
         local_datetime (datetime): The local `datetime` instance.
 
     Returns:
-        datetime: The UTC datetime instace.
+        datetime: The UTC datetime instance.
     """
     # get the utc_datetime as if the local_datetime is utc and calculate the timezone
     # difference and add it to the local datetime object
     return local_datetime - (utc_to_local(local_datetime) - local_datetime)
+
+
+def datetime_to_millis(dt: datetime) -> int:
+    """Calculate the milliseconds since epoch for the given datetime value.
+
+    This is used as the default JSON serializer for datetime objects.
+
+    Code is based on the answer of Jay Taylor in
+    http://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable-in-python
+
+    Args:
+        dt (datetime): The ``datetime`` instance.
+
+    Returns:
+        int: The int value of milliseconds since epoch.
+    """
+    if isinstance(dt, datetime) and dt.utcoffset() is not None:
+        dt = dt - dt.utcoffset()
+    millis = int(calendar.timegm(dt.timetuple()) * 1000 + dt.microsecond / 1000)
+    return millis
+
+
+def millis_to_datetime(millis: int) -> datetime:
+    """Calculate the datetime from the given milliseconds value.
+
+    Args:
+        millis (int): An int value showing the millis from unix EPOCH
+
+    Returns:
+        datetime: The corresponding ``datetime`` instance to
+            the given milliseconds.
+    """
+    epoch = datetime(1970, 1, 1, tzinfo=pytz.utc)
+    return epoch + timedelta(milliseconds=millis)

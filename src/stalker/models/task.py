@@ -3,22 +3,18 @@
 import copy
 import datetime
 import os
-from typing import Generator, List, Union
+from typing import Any, Dict, Generator, List, Optional, TYPE_CHECKING, Union
 
 from jinja2 import Template
 
 import pytz
 
-from six import string_types
-
 import sqlalchemy
 from sqlalchemy import (
-    Boolean,
     CheckConstraint,
     Column,
     DDL,
     Enum,
-    Float,
     ForeignKey,
     Integer,
     Table,
@@ -33,10 +29,16 @@ from sqlalchemy.exc import (
     UnboundExecutionError,
 )
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import reconstructor, relationship, synonym, validates
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    reconstructor,
+    relationship,
+    synonym,
+    validates,
+)
 from sqlalchemy.orm.attributes import AttributeEvent
 
-import stalker
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.exceptions import (
@@ -61,6 +63,9 @@ from stalker.models.status import Status
 from stalker.models.ticket import Ticket
 from stalker.utils import check_circular_dependency, walk_hierarchy
 
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.project import Project
+    from stalker.models.version import Version
 
 logger = get_logger(__name__)
 
@@ -166,24 +171,28 @@ class TimeLog(Entity, DateRangeMixin):
         CheckConstraint('"end" > start'),  # this will be ignored in SQLite3
     )
 
-    time_log_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
-    task_id = Column(
-        Integer,
+    time_log_id: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
+    task_id: Mapped[int] = mapped_column(
         ForeignKey("Tasks.id"),
         nullable=False,
         doc="""The id of the related task.""",
     )
-    task = relationship(
-        "Task",
+    task: Mapped["Task"] = relationship(
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         uselist=False,
         back_populates="time_logs",
         doc="""The :class:`.Task` instance that this time log is created for""",
     )
 
-    resource_id = Column(Integer, ForeignKey("Users.id"), nullable=False)
-    resource = relationship(
-        "User",
+    resource_id: Mapped[int] = mapped_column(
+        ForeignKey("Users.id"),
+        nullable=False,
+    )
+    resource: Mapped[User] = relationship(
         primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         uselist=False,
         back_populates="time_logs",
@@ -191,8 +200,14 @@ class TimeLog(Entity, DateRangeMixin):
     )
 
     def __init__(
-        self, task=None, resource=None, start=None, end=None, duration=None, **kwargs
-    ):
+        self,
+        task: Optional["Task"] = None,
+        resource: Optional[User] = None,
+        start: Optional[datetime.datetime] = None,
+        end: Optional[datetime.datetime] = None,
+        duration: Optional[datetime.timedelta] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         super(TimeLog, self).__init__(**kwargs)
         kwargs["start"] = start
         kwargs["end"] = end
@@ -202,7 +217,7 @@ class TimeLog(Entity, DateRangeMixin):
         self.resource = resource
 
     @validates("task")
-    def _validate_task(self, key, task: "Task") -> "Task":
+    def _validate_task(self, key: str, task: "Task") -> "Task":
         """Validate the given task value.
 
         Args:
@@ -292,7 +307,7 @@ class TimeLog(Entity, DateRangeMixin):
         return task
 
     @validates("resource")
-    def _validate_resource(self, key, resource):
+    def _validate_resource(self, key: str, resource: User) -> User:
         """Validate the given resource value.
 
         Args:
@@ -360,11 +375,11 @@ class TimeLog(Entity, DateRangeMixin):
 
         return resource
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a TimeLog instance and has the same task,
@@ -920,9 +935,8 @@ class Task(
     __auto_name__ = False
     __tablename__ = "Tasks"
     __mapper_args__ = {"polymorphic_identity": "Task"}
-    task_id = Column(
+    task_id: Mapped[int] = mapped_column(
         "id",
-        Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
         doc="""The ``primary_key`` attribute for the ``Tasks`` table used by
@@ -931,24 +945,21 @@ class Task(
     )
     __id_column__ = "task_id"
 
-    project_id = Column(
-        "project_id",
-        Integer,
+    project_id: Mapped[Optional[int]] = mapped_column(
         ForeignKey("Projects.id"),
         doc="""The id of the owner :class:`.Project` of this Task. This
         attribute is mainly used by **SQLAlchemy** to map a :class:`.Project`
         instance to a Task.
         """,
     )
-    _project = relationship(
-        "Project",
+    _project: Mapped[Optional["Project"]] = relationship(
         primaryjoin="Tasks.c.project_id==Projects.c.id",
         back_populates="tasks",
         uselist=False,
         post_update=True,
     )
 
-    tasks = synonym(
+    tasks: Mapped[Optional[List["Task"]]] = synonym(
         "children",
         doc="""A synonym for the :attr:`.children` attribute used by the
         descendants of the :class:`Task` class (currently :class:`.Asset`,
@@ -956,8 +967,7 @@ class Task(
         """,
     )
 
-    is_milestone = Column(
-        Boolean,
+    is_milestone: Mapped[Optional[bool]] = mapped_column(
         doc="""Specifies if this Task is a milestone.
 
         Milestones doesn't need any duration, any effort and any resources. It
@@ -974,8 +984,7 @@ class Task(
         "task_dependent_of", "task", creator=lambda n: TaskDependency(task=n)
     )
 
-    task_depends_on = relationship(
-        "TaskDependency",
+    task_depends_on: Mapped[Optional[List["TaskDependency"]]] = relationship(
         back_populates="task",
         cascade="all, delete-orphan",
         primaryjoin="Tasks.c.id==Task_Dependencies.c.task_id",
@@ -987,8 +996,7 @@ class Task(
         some way depends on this one again.""",
     )
 
-    task_dependent_of = relationship(
-        "TaskDependency",
+    task_dependent_of: Mapped[Optional[List["TaskDependency"]]] = relationship(
         back_populates="depends_on",
         cascade="all, delete-orphan",
         primaryjoin="Tasks.c.id==Task_Dependencies.c.depends_on_id",
@@ -1001,8 +1009,7 @@ class Task(
         """,
     )
 
-    resources = relationship(
-        "User",
+    resources: Mapped[Optional[List[User]]] = relationship(
         secondary="Task_Resources",
         primaryjoin="Tasks.c.id==Task_Resources.c.task_id",
         secondaryjoin="Task_Resources.c.resource_id==Users.c.id",
@@ -1010,8 +1017,7 @@ class Task(
         doc="The list of :class:`.User` s assigned to this Task.",
     )
 
-    alternative_resources = relationship(
-        "User",
+    alternative_resources: Mapped[Optional[List[User]]] = relationship(
         secondary="Task_Alternative_Resources",
         primaryjoin="Tasks.c.id==Task_Alternative_Resources.c.task_id",
         secondaryjoin="Task_Alternative_Resources.c.resource_id==Users.c.id",
@@ -1020,22 +1026,18 @@ class Task(
         "alternative resource.",
     )
 
-    allocation_strategy = Column(
+    allocation_strategy: Mapped[str] = mapped_column(
         Enum(*defaults.allocation_strategy, name="ResourceAllocationStrategy"),
         default=defaults.allocation_strategy[0],
-        nullable=False,
         doc="Please read :class:`.Task` class documentation for details.",
     )
 
-    persistent_allocation = Column(
-        Boolean,
+    persistent_allocation: Mapped[bool] = mapped_column(
         default=True,
-        nullable=False,
         doc="Please read :class:`.Task` class documentation for details.",
     )
 
-    watchers = relationship(
-        "User",
+    watchers: Mapped[Optional[List[User]]] = relationship(
         secondary="Task_Watchers",
         primaryjoin="Tasks.c.id==Task_Watchers.c.task_id",
         secondaryjoin="Task_Watchers.c.watcher_id==Users.c.id",
@@ -1043,8 +1045,7 @@ class Task(
         doc="The list of :class:`.User` s watching this Task.",
     )
 
-    _responsible = relationship(
-        "User",
+    _responsible: Mapped[Optional[List[User]]] = relationship(
         secondary="Task_Responsible",
         primaryjoin="Tasks.c.id==Task_Responsible.c.task_id",
         secondaryjoin="Task_Responsible.c.responsible_id==Users.c.id",
@@ -1052,14 +1053,13 @@ class Task(
         doc="The list of :class:`.User` s responsible from this Task.",
     )
 
-    priority = Column(
-        Integer,
+    priority: Mapped[Optional[int]] = mapped_column(
         doc="""An integer number between 0 and 1000 used by TaskJuggler to
         determine the priority of this Task. The default value is 500.""",
+        default=500,
     )
 
-    time_logs = relationship(
-        "TimeLog",
+    time_logs: Mapped[Optional[List[TimeLog]]] = relationship(
         primaryjoin="TimeLogs.c.task_id==Tasks.c.id",
         back_populates="task",
         cascade="all, delete-orphan",
@@ -1067,8 +1067,7 @@ class Task(
         spent how much effort on this task.""",
     )
 
-    versions = relationship(
-        "Version",
+    versions: Mapped[Optional[List["Version"]]] = relationship(
         primaryjoin="Versions.c.task_id==Tasks.c.id",
         back_populates="task",
         cascade="all, delete-orphan",
@@ -1077,8 +1076,7 @@ class Task(
         """,
     )
 
-    _computed_resources = relationship(
-        "User",
+    _computed_resources: Mapped[Optional[List[User]]] = relationship(
         secondary="Task_Computed_Resources",
         primaryjoin="Tasks.c.id==Task_Computed_Resources.c.task_id",
         secondaryjoin="Task_Computed_Resources.c.resource_id==Users.c.id",
@@ -1087,39 +1085,33 @@ class Task(
         "result of scheduling.",
     )
 
-    bid_timing = Column(
-        Float,
-        nullable=True,
+    bid_timing: Mapped[Optional[float]] = mapped_column(
         default=0,
         doc="""The value of the initial bid of this Task. It is an integer or
         a float.
         """,
     )
 
-    bid_unit = Column(
+    bid_unit: Mapped[Optional[str]] = mapped_column(
         Enum(*defaults.datetime_units, name="TimeUnit"),
-        nullable=True,
         doc="""The unit of the initial bid of this Task. It is a string value.
         And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
         """,
     )
 
-    _schedule_seconds = Column(
+    _schedule_seconds: Mapped[Optional[int]] = mapped_column(
         "schedule_seconds",
         Integer,
         nullable=True,
         doc="cache column for schedule_seconds",
     )
 
-    _total_logged_seconds = Column(
+    _total_logged_seconds: Mapped[Optional[int]] = mapped_column(
         "total_logged_seconds",
-        Integer,
-        nullable=True,
         doc="cache column for total_logged_seconds",
     )
 
-    reviews = relationship(
-        "Review",
+    reviews: Mapped[Optional[List[Review]]] = relationship(
         primaryjoin="Reviews.c.task_id==Tasks.c.id",
         back_populates="task",
         cascade="all, delete-orphan",
@@ -1127,12 +1119,11 @@ class Task(
         created for this task.""",
     )
 
-    _review_number = Column("review_number", Integer, default=0)
+    _review_number: Mapped[Optional[int]] = mapped_column("review_number", default=0)
 
-    good_id = Column(Integer, ForeignKey("Goods.id"))
+    good_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Goods.id"))
 
-    good = relationship(
-        "Good",
+    good: Mapped[Optional[Good]] = relationship(
         primaryjoin="Tasks.c.good_id==Goods.c.id",
         uselist=False,
         post_update=True,
@@ -1147,28 +1138,28 @@ class Task(
 
     def __init__(
         self,
-        project=None,
-        parent=None,
-        depends_on=None,
-        resources=None,
-        alternative_resources=None,
-        responsible=None,
-        watchers=None,
-        start=None,
-        end=None,
-        schedule_timing=1.0,
-        schedule_unit="h",
-        schedule_model=None,
-        schedule_constraint=0,
-        bid_timing=None,
-        bid_unit=None,
-        is_milestone=False,
-        priority=defaults.task_priority,
-        allocation_strategy=defaults.allocation_strategy[0],
-        persistent_allocation=True,
-        good=None,
-        **kwargs,
-    ):
+        project: Optional["Project"] = None,
+        parent: Optional["Task"] = None,
+        depends_on: Optional[List["Task"]] = None,
+        resources: Optional[List[User]] = None,
+        alternative_resources: Optional[List[User]] = None,
+        responsible: Optional[List[User]] = None,
+        watchers: Optional[List[User]] = None,
+        start: Optional[datetime.datetime] = None,
+        end: Optional[datetime.datetime] = None,
+        schedule_timing: float = 1.0,
+        schedule_unit: str = "h",
+        schedule_model: Optional[str] = None,
+        schedule_constraint: int = 0,
+        bid_timing: Optional[Union[int, float]] = None,
+        bid_unit: Optional[str] = None,
+        is_milestone: bool = False,
+        priority: int = defaults.task_priority,
+        allocation_strategy: str = defaults.allocation_strategy[0],
+        persistent_allocation: bool = True,
+        good: Optional[Good] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         # temp attribute for remove event
         self._previously_removed_dependent_tasks = []
 
@@ -1249,16 +1240,16 @@ class Task(
         self.good = good
 
     @reconstructor
-    def __init_on_load__(self):
+    def __init_on_load__(self) -> None:
         """Update defaults on load."""
         # temp attribute for remove event
         self._previously_removed_dependent_tasks = []
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> None:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Task instance and has the same project,
@@ -1286,7 +1277,7 @@ class Task(
         return super(Task, self).__hash__()
 
     @validates("time_logs")
-    def _validate_time_logs(self, key, time_log) -> TimeLog:
+    def _validate_time_logs(self, key: str, time_log: TimeLog) -> TimeLog:
         """Validate the given time_log value.
 
         Args:
@@ -1316,12 +1307,12 @@ class Task(
         return time_log
 
     @validates("reviews")
-    def _validate_reviews(self, key, review) -> Review:
+    def _validate_reviews(self, key: str, review: Review) -> Review:
         """Validate the given review value.
 
         Args:
             key (str): The name of the validated column.
-            review (stalker.models.review.Review): The validtaed review value.
+            review (Review): The validated review value.
 
         Raises:
             TypeError: If the review is not a :class:`stalker.models.review.Review`
@@ -1430,7 +1421,9 @@ class Task(
         return task_depends_on
 
     @validates("schedule_timing")
-    def _validate_schedule_timing(self, key, schedule_timing):
+    def _validate_schedule_timing(
+        self, key: str, schedule_timing: Union[int, float]
+    ) -> Union[int, float]:
         """Validate the given schedule_timing value.
 
         Args:
@@ -1451,7 +1444,7 @@ class Task(
         return schedule_timing
 
     @validates("schedule_unit")
-    def _validate_schedule_unit(self, key, schedule_unit):
+    def _validate_schedule_unit(self, key: str, schedule_unit: str) -> str:
         """Validate the given schedule_unit value.
 
         Args:
@@ -1468,7 +1461,9 @@ class Task(
 
         return schedule_unit
 
-    def _reschedule(self, schedule_timing, schedule_unit) -> None:
+    def _reschedule(
+        self, schedule_timing: Union[int, float], schedule_unit: str
+    ) -> None:
         """Update the start and end date with schedule_timing and schedule_unit values.
 
         Args:
@@ -1477,39 +1472,41 @@ class Task(
             schedule_unit (str): One of 'min', 'h', 'd', 'w', 'm', 'y'
         """
         # update end date value by using the start and calculated duration
-        if self.is_leaf:
-            from stalker import defaults
+        if not self.is_leaf:
+            return
 
-            unit = defaults.datetime_units_to_timedelta_kwargs.get(schedule_unit, None)
-            if not unit:  # we are in a pre flushing state do not do anything
-                return
+        from stalker import defaults
 
-            kwargs = {unit["name"]: schedule_timing * unit["multiplier"]}
-            calculated_duration = datetime.timedelta(**kwargs)
-            if (
-                self.schedule_constraint == CONSTRAIN_NONE
-                or self.schedule_constraint == CONSTRAIN_START
-            ):
-                # get end
-                self._start, self._end, self._duration = self._validate_dates(
-                    self.start, None, calculated_duration
-                )
-            elif self.schedule_constraint == CONSTRAIN_END:
-                # get start
-                self._start, self._end, self._duration = self._validate_dates(
-                    None, self.end, calculated_duration
-                )
-            elif self.schedule_constraint == CONSTRAIN_BOTH:
-                # restore duration
-                self._start, self._end, self._duration = self._validate_dates(
-                    self.start, self.end, None
-                )
+        unit = defaults.datetime_units_to_timedelta_kwargs.get(schedule_unit, None)
+        if not unit:  # we are in a pre flushing state do not do anything
+            return
 
-            # also update cached _schedule_seconds value
-            self._schedule_seconds = self.schedule_seconds
+        kwargs = {unit["name"]: schedule_timing * unit["multiplier"]}
+        calculated_duration = datetime.timedelta(**kwargs)
+        if (
+            self.schedule_constraint == CONSTRAIN_NONE
+            or self.schedule_constraint == CONSTRAIN_START
+        ):
+            # get end
+            self._start, self._end, self._duration = self._validate_dates(
+                self.start, None, calculated_duration
+            )
+        elif self.schedule_constraint == CONSTRAIN_END:
+            # get start
+            self._start, self._end, self._duration = self._validate_dates(
+                None, self.end, calculated_duration
+            )
+        elif self.schedule_constraint == CONSTRAIN_BOTH:
+            # restore duration
+            self._start, self._end, self._duration = self._validate_dates(
+                self.start, self.end, None
+            )
+
+        # also update cached _schedule_seconds value
+        self._schedule_seconds = self.schedule_seconds
 
     @validates("is_milestone")
-    def _validate_is_milestone(self, key, is_milestone):
+    def _validate_is_milestone(self, key: str, is_milestone: Union[None, bool]) -> bool:
         """Validate the given is_milestone value.
 
         Args:
@@ -1589,9 +1586,7 @@ class Task(
         return parent
 
     @validates("_project")
-    def _validate_project(
-        self, key: str, project: "stalker.models.project.Project"
-    ) -> "stalker.models.project.Project":
+    def _validate_project(self, key: str, project: "Project") -> "Project":
         """Validate the given project value.
 
         Args:
@@ -1703,7 +1698,7 @@ class Task(
         return int(priority)
 
     @validates("children")
-    def _validate_children(self, key, child):
+    def _validate_children(self, key: str, child: "Task") -> "Task":
         """Validate the given child value.
 
         Args:
@@ -1767,7 +1762,7 @@ class Task(
         return resource
 
     @validates("alternative_resources")
-    def _validate_alternative_resources(self, key, resource):
+    def _validate_alternative_resources(self, key: str, resource: User) -> User:
         """Validate the given resource value.
 
         Args:
@@ -1779,7 +1774,7 @@ class Task(
                 :class:`stalker.models.auth.User` instance.
 
         Returns:
-            stalker.models.auth.User: The validated User instance.
+            User: The validated User instance.
         """
         if not isinstance(resource, User):
             raise TypeError(
@@ -1793,7 +1788,7 @@ class Task(
         return resource
 
     @validates("_computed_resources")
-    def _validate_computed_resources(self, key, resource):
+    def _validate_computed_resources(self, key: str, resource: User) -> User:
         """Validate the computed resources value.
 
         Args:
@@ -1805,12 +1800,12 @@ class Task(
                 :class:`stalker.models.auth.User` instance.
 
         Returns:
-            stalker.models.auth.User: The validated User instance.
+            User: The validated User instance.
         """
         if not isinstance(resource, User):
             raise TypeError(
-                "{}.computed_resources should be a list of stalker.models.auth.User "
-                "instances, not {}: '{}'".format(
+                "{}.computed_resources should be a list of "
+                "stalker.models.auth.User instances, not {}: '{}'".format(
                     self.__class__.__name__, resource.__class__.__name__, resource
                 )
             )
@@ -1820,29 +1815,29 @@ class Task(
         """Return the _computed_resources attribute value.
 
         Returns:
-            stalker.models.auth.User: The computed_user attribute value if there are any
-                else the same content of the resources attribute.
+            User: The computed_user attribute value if there are any else the
+                same content of the resources attribute.
         """
         if not self.is_scheduled:
             self._computed_resources = self.resources
         return self._computed_resources
 
-    def _computed_resources_setter(self, resources: List[User]):
+    def _computed_resources_setter(self, resources: List[User]) -> None:
         """Set the _computed_resources attribute value.
 
         Args:
-            resources (List[User]): List of User instances to set the computed resources
-                too.
+            resources (List[User]): List of User instances to set the computed
+                resources too.
         """
         self._computed_resources = resources
 
-    computed_resources = synonym(
+    computed_resources: Mapped[Optional[List["User"]]] = synonym(
         "_computed_resources",
         descriptor=property(_computed_resources_getter, _computed_resources_setter),
     )
 
     @validates("allocation_strategy")
-    def _validate_allocation_strategy(self, key, strategy):
+    def _validate_allocation_strategy(self, key: str, strategy: str) -> str:
         """Validate the given allocation_strategy value.
 
         Args:
@@ -1862,7 +1857,7 @@ class Task(
         if strategy is None:
             strategy = defaults.allocation_strategy[0]
 
-        if not isinstance(strategy, string_types):
+        if not isinstance(strategy, str):
             raise TypeError(
                 "{}.allocation_strategy should be one of {}, not {}: '{}'".format(
                     self.__class__.__name__,
@@ -1884,7 +1879,9 @@ class Task(
         return strategy
 
     @validates("persistent_allocation")
-    def _validate_persistent_allocation(self, key, persistent_allocation):
+    def _validate_persistent_allocation(
+        self, key: str, persistent_allocation: bool
+    ) -> bool:
         """Validate the given persistent_allocation value.
 
         Args:
@@ -1903,12 +1900,12 @@ class Task(
         return bool(persistent_allocation)
 
     @validates("watchers")
-    def _validate_watchers(self, key, watcher):
+    def _validate_watchers(self, key: str, watcher: User) -> User:
         """Validate the given watcher value.
 
         Args:
             key (str): The name of the validated column.
-            watcher (stalker.models.auth.User): The watcher value to be validated.
+            watcher (User): The watcher value to be validated.
 
         Raises:
             TypeError: If the watcher is not a :class:`stalker.models.auth.User`
@@ -1919,20 +1916,21 @@ class Task(
         """
         if not isinstance(watcher, User):
             raise TypeError(
-                "{}.watchers should be a list of stalker.models.auth.User instances, "
-                "not {}: '{}'".format(
+                "{}.watchers should be a list of stalker.models.auth.User "
+                "instances, not {}: '{}'".format(
                     self.__class__.__name__, watcher.__class__.__name__, watcher
                 )
             )
         return watcher
 
     @validates("versions")
-    def _validate_versions(self, key, version):
+    def _validate_versions(self, key: str, version: "Version"):
         """Validate the given version value.
 
         Args:
             key (str): The name of the validated column.
-            version (stalker.models.version.Version): The version value to be validated.
+            version (stalker.models.version.Version): The version value to be
+                validated.
 
         Raises:
             TypeError: If the version is not an Version instance.
@@ -1983,7 +1981,7 @@ class Task(
         return bid_timing
 
     @validates("bid_unit")
-    def _validate_bid_unit(self, key, bid_unit):
+    def _validate_bid_unit(self, key: str, bid_unit: str) -> str:
         """Validate the given bid_unit value.
 
         Args:
@@ -2004,7 +2002,7 @@ class Task(
 
         from stalker import defaults
 
-        if not isinstance(bid_unit, string_types):
+        if not isinstance(bid_unit, str):
             raise TypeError(
                 "{cls}.bid_unit should be a string value one of {units} showing the "
                 "unit of the bid timing of this {cls}, not {bid_cls}: '{bid}'".format(
@@ -2048,7 +2046,9 @@ class Task(
 
     # TODO: Why these methods are not in the DateRangeMixin class.
     @validates("computed_start")
-    def _validate_computed_start(self, key, computed_start):
+    def _validate_computed_start(
+        self, key: str, computed_start: datetime.datetime
+    ) -> datetime.datetime:
         """Validate the given computed_start value.
 
         Args:
@@ -2063,7 +2063,9 @@ class Task(
         return computed_start
 
     @validates("computed_end")
-    def _validate_computed_end(self, key, computed_end):
+    def _validate_computed_end(
+        self, key: str, computed_end: datetime.datetime
+    ) -> datetime.datetime:
         """Validate the given computed_end value.
 
         Args:
@@ -2085,7 +2087,7 @@ class Task(
         """
         return self._start
 
-    def _start_setter(self, start):
+    def _start_setter(self, start: datetime.datetime) -> None:
         """Set the start value.
 
         Args:
@@ -2096,7 +2098,7 @@ class Task(
         )
         self._expand_dates(self.parent, self.start, self.end)
 
-    def _end_getter(self):
+    def _end_getter(self) -> datetime.datetime:
         """Return the end value.
 
         Returns:
@@ -2104,7 +2106,7 @@ class Task(
         """
         return self._end
 
-    def _end_setter(self, end):
+    def _end_setter(self, end: datetime.datetime) -> None:
         """Set the end value.
 
         Args:
@@ -2116,7 +2118,7 @@ class Task(
         )
         self._expand_dates(self.parent, self.start, self.end)
 
-    def _project_getter(self):
+    def _project_getter(self) -> "Project":
         """Return the project value.
 
         Returns:
@@ -2125,7 +2127,7 @@ class Task(
         """
         return self._project
 
-    project = synonym(
+    project: Mapped[Optional["Project"]] = synonym(
         "_project",
         descriptor=property(_project_getter),
         doc="""The owner Project of this task.
@@ -2146,7 +2148,7 @@ class Task(
         return f"{abs_id}.{self.tjp_id}"
 
     @property
-    def to_tjp(self):
+    def to_tjp(self) -> str:
         """Return the TaskJuggler representation of this task.
 
         Returns:
@@ -2175,27 +2177,28 @@ class Task(
             has_inner_data = True
             if self.schedule_constraint:
                 if self.schedule_constraint in [1, 3]:
-                    tjp += f"\n{indent}{tab}start {self.start.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M')}"
+                    tjp += f"\n{indent}{tab}start {self.start.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M')}"  # noqa: B950
                 if self.schedule_constraint in [2, 3]:
-                    tjp += f"\n{indent}{tab}end {self.end.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M')}"
-            tjp += f"\n{indent}{tab}{self.schedule_model} {self.schedule_timing}{self.schedule_unit}"
+                    tjp += f"\n{indent}{tab}end {self.end.astimezone(pytz.utc).strftime('%Y-%m-%d-%H:%M')}"  # noqa: B950
+            tjp += f"\n{indent}{tab}{self.schedule_model} {self.schedule_timing}{self.schedule_unit}"  # noqa: B950
             tjp += f"\n{indent}{tab}allocate "
             for i, resource in enumerate(sorted(self.resources, key=lambda x: x.id)):
                 if i != 0:
                     tjp += ", "
                 tjp += resource.tjp_id
-                if self.alternative_resources:
-                    tjp += f" {{\n{indent}{tab}{tab}alternative\n{indent}{tab}{tab}"
-                    for i, alt_res in enumerate(
-                        sorted(self.alternative_resources, key=lambda x: x.id)
-                    ):
-                        if i != 0:
-                            tjp += ", "
-                        tjp += alt_res.tjp_id
-                    tjp += f" select {self.allocation_strategy}"
-                    if self.persistent_allocation:
-                        tjp += f"\n{indent}{tab}{tab}persistent"
-                    tjp += f"\n{indent}{tab}}}"
+                if not self.alternative_resources:
+                    continue
+                tjp += f" {{\n{indent}{tab}{tab}alternative\n{indent}{tab}{tab}"
+                for i, alt_res in enumerate(
+                    sorted(self.alternative_resources, key=lambda x: x.id)
+                ):
+                    if i != 0:
+                        tjp += ", "
+                    tjp += alt_res.tjp_id
+                tjp += f" select {self.allocation_strategy}"
+                if self.persistent_allocation:
+                    tjp += f"\n{indent}{tab}{tab}persistent"
+                tjp += f"\n{indent}{tab}}}"
         for time_log in self.time_logs:
             has_inner_data = True
             tjp += (
@@ -2307,7 +2310,7 @@ class Task(
                     seconds = past_as_seconds
                 return seconds
 
-    def _total_logged_seconds_setter(self, seconds: int):
+    def _total_logged_seconds_setter(self, seconds: int) -> None:
         """Set the total_logged_seconds value.
 
         This is mainly used for container tasks, to cache the child logged_seconds
@@ -2327,7 +2330,7 @@ class Task(
                     self.parent.total_logged_seconds - old_value + seconds
                 )
 
-    total_logged_seconds = synonym(
+    total_logged_seconds: Mapped[Optional[int]] = synonym(
         "_total_logged_seconds",
         descriptor=property(_total_logged_seconds_getter, _total_logged_seconds_setter),
     )
@@ -2350,7 +2353,7 @@ class Task(
                 self.schedule_timing, self.schedule_unit, self.schedule_model
             )
 
-    def _schedule_seconds_setter(self, seconds: int):
+    def _schedule_seconds_setter(self, seconds: int) -> None:
         """Set the schedule_seconds of this task.
 
         Mainly used for container tasks.
@@ -2371,7 +2374,7 @@ class Task(
                     )
                 self._schedule_seconds = seconds
 
-    schedule_seconds = synonym(
+    schedule_seconds: Mapped[Optional[int]] = synonym(
         "_schedule_seconds",
         descriptor=property(_schedule_seconds_getter, _schedule_seconds_setter),
     )
@@ -2456,7 +2459,7 @@ class Task(
         # so parents do not have a responsible
         return self._responsible
 
-    def _responsible_setter(self, responsible: List[User]):
+    def _responsible_setter(self, responsible: List[User]) -> None:
         """Set the responsible attribute.
 
         Args:
@@ -2489,7 +2492,7 @@ class Task(
             )
         return responsible
 
-    responsible = synonym(
+    responsible: Mapped[Optional[List[User]]] = synonym(
         "_responsible",
         descriptor=property(
             _responsible_getter,
@@ -2588,7 +2591,7 @@ class Task(
         return TimeLog(task=self, resource=resource, start=start, end=end)
         # also updating parent statuses are done in TimeLog._validate_task
 
-    def request_review(self):
+    def request_review(self) -> List[Review]:
         """Create and return Review instances for each of the responsible of this task.
 
         Also set the task status to PREV.
@@ -2605,8 +2608,8 @@ class Task(
                 stopped, hold or completed.
 
         Returns:
-            List[Review]: The list of :class:`stalker.models.review.Reivew` instances
-                creeated.
+            List[Review]: The list of :class:`stalker.models.review.Review` instances
+                created.
         """
         # check task status
         with DBSession.no_autoflush:
@@ -2634,7 +2637,7 @@ class Task(
 
     def request_revision(
         self,
-        reviewer: User = None,
+        reviewer: Optional[User] = None,
         description: str = "",
         schedule_timing: int = 1,
         schedule_unit: str = "h",
@@ -2653,22 +2656,24 @@ class Task(
         review_number attributes).
 
         Args:
-            reviewer (User): This is the user that requested the revision. They don't
-                need to be the responsible, anybody that has a Permission to create a
-                Review instance can request a revision.
+            reviewer (User): This is the user that requested the revision. They
+                don't need to be the responsible, anybody that has a Permission
+                to create a Review instance can request a revision.
             description (str): The description of the requested revision.
-            schedule_timing (int): The timing value of the requested revision. The task
-                will be extended this much of duration. Works along with the
-                ``schedule_unit`` parameter. The default value is 1.
-            schedule_unit (str): The timin unit value of the requested revision. The
-                task will be extended this much of duration. Works along with the
-                ``schedule_timing`` parameter. The default value is 'h' for 'hour'.
+            schedule_timing (int): The timing value of the requested revision.
+                The task will be extended this much of duration. Works along
+                with the ``schedule_unit`` parameter. The default value is 1.
+            schedule_unit (str): The timing unit value of the requested
+                revision. The task will be extended this much of duration.
+                Works along with the ``schedule_timing`` parameter. The default
+                value is 'h' for 'hour'.
 
         Raises:
             StatusError: If the status of the current task is not PREV or CMPL.
 
         Returns:
-            Review: The newly created :class:`stalker.models.review.Review` instance.
+            Review: The newly created :class:`stalker.models.review.Review`
+                instance.
         """
         # check status
         with DBSession.no_autoflush:
@@ -2677,10 +2682,9 @@ class Task(
 
         if self.status not in [prev, cmpl]:
             raise StatusError(
-                "{task} (id: {id}) is a {status} task, and it is not suitable for "
-                "requesting a revision, please supply a PREV or CMPL task".format(
-                    task=self.name, id=self.id, status=self.status.code
-                )
+                "{task} (id: {id}) is a {status} task, and it is not suitable "
+                "for requesting a revision, please supply a PREV or CMPL "
+                "task".format(task=self.name, id=self.id, status=self.status.code)
             )
 
         # *********************************************************************
@@ -2832,17 +2836,18 @@ class Task(
         """Return the reviews with the given review_number.
 
         Args:
-            review_number (Union[None, int]): The review number. If review_number is
-                skipped it will return the latest set of reviews.
+            review_number (Union[None, int]): The review number. If
+                review_number is skipped it will return the latest set of
+                reviews.
 
         Raises:
             TypeError: If the review_number is not None and not an integer.
             ValueError: If the review_number is less than 0.
 
         Returns:
-            List[Review]: The reviews with the given review number or the latest set of
-                :class:`stalker.models.review.Review` instances if the review number is
-                is skipped or None.
+            List[Review]: The reviews with the given review number or the
+                latest set of :class:`stalker.models.review.Review` instances
+                if the review number is is skipped or None.
         """
         review_set = []
         if review_number is None:
@@ -2853,20 +2858,18 @@ class Task(
 
         if not isinstance(review_number, int):
             raise TypeError(
-                "review_number argument in {cls}.review_set should be a positive "
-                "integer, not {review_number_class}: '{review_number}'".format(
-                    cls=self.__class__.__name__,
-                    review_number_class=review_number.__class__.__name__,
-                    review_number=review_number,
+                "review_number argument in {}.review_set should be a positive "
+                "integer, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    review_number.__class__.__name__,
+                    review_number,
                 )
             )
 
         if review_number < 1:
             raise ValueError(
-                "review_number argument in {cls}.review_set should be a positive "
-                "integer, not {review_number}".format(
-                    cls=self.__class__.__name__, review_number=review_number
-                )
+                "review_number argument in {}.review_set should be a positive "
+                "integer, not {}".format(self.__class__.__name__, review_number)
             )
 
         for review in self.reviews:
@@ -2875,12 +2878,15 @@ class Task(
 
         return review_set
 
-    def update_status_with_dependent_statuses(self, removing=None):  # noqa: C901
+    def update_status_with_dependent_statuses(
+        self,
+        removing: Optional["Task"] = None,
+    ) -> None:  # noqa: C901
         """Update the status by looking at the dependent tasks.
 
         Args:
-            removing (Task): The item that is being removed right now, used for the
-                remove event to overcome the update issue.
+            removing (Task): The item that is being removed right now, used for
+                the remove event to overcome the update issue.
         """
         if self.is_container:
             # do nothing, its status will be decided by its children
@@ -3016,7 +3022,7 @@ class Task(
             if self.parent:
                 self.parent.update_status_with_children_statuses()
 
-    def update_status_with_children_statuses(self):
+    def update_status_with_children_statuses(self) -> None:
         """Update the task status according to its children statuses."""
         logger.debug(f"setting statuses with child statuses for: {self.name}")
 
@@ -3059,7 +3065,7 @@ class Task(
         # go to parents
         self.update_parent_statuses()
 
-    def _review_number_getter(self):
+    def _review_number_getter(self) -> None:
         """Return the revision number value.
 
         Returns:
@@ -3067,7 +3073,7 @@ class Task(
         """
         return self._review_number
 
-    review_number = synonym(
+    review_number: Mapped[Optional[int]] = synonym(
         "_review_number",
         descriptor=property(_review_number_getter),
         doc="returns the _review_number attribute value",
@@ -3135,17 +3141,19 @@ class Task(
         if not task_template:
             raise RuntimeError(
                 "There are no suitable FilenameTemplate "
-                "(target_entity_type == '{entity_type}') defined in the Structure of "
-                "the related Project instance, please create a new "
-                "stalker.models.template.FilenameTemplate instance with its "
-                "'target_entity_type' attribute is set to '{entity_type}' and assign "
-                "it to the `templates` attribute of the structure of the "
-                "project".format(entity_type=self.entity_type)
+                "(target_entity_type == '{entity_type}') defined in the "
+                "Structure of the related Project instance, please create a "
+                "new stalker.models.template.FilenameTemplate instance with "
+                "its 'target_entity_type' attribute is set to '{entity_type}' "
+                "and assign it to the `templates` attribute of the structure "
+                "of the project".format(entity_type=self.entity_type)
             )
 
         return os.path.normpath(
             Template(task_template.path).render(
-                **self._template_variables(), trim_blocks=True, lstrip_blocks=True
+                **self._template_variables(),
+                trim_blocks=True,
+                lstrip_blocks=True,
             )
         ).replace("\\", "/")
 
@@ -3153,10 +3161,10 @@ class Task(
     def absolute_path(self) -> str:
         """Return the absolute file path of this task.
 
-        This is the absolute verion of the :attr:`.Task.path` attribute and depends on
-        the :class:`stalker.models.template.FilenameTemplate` found in the
-        :class:`stalker.models.structure.Structure` instance of the related
-        :class:`stalker.models.project.Project` instance.
+        This is the absolute version of the :attr:`.Task.path` attribute and
+        depends on the :class:`stalker.models.template.FilenameTemplate` found
+        in the :class:`stalker.models.structure.Structure` instance of the
+        related :class:`stalker.models.project.Project` instance.
 
         Returns:
             str: The rendered absolute file path of this task.
@@ -3177,26 +3185,27 @@ class TaskDependency(Base, ScheduleMixin):
     __tablename__ = "Task_Dependencies"
 
     # depends_on_id
-    depends_on_id = Column(Integer, ForeignKey("Tasks.id"), primary_key=True)
+    depends_on_id: Mapped[int] = mapped_column(
+        ForeignKey("Tasks.id"),
+        primary_key=True,
+    )
 
     # depends_on
-    depends_on = relationship(
-        Task,
+    depends_on: Mapped[Task] = relationship(
         back_populates="task_dependent_of",
         primaryjoin="Task.task_id==TaskDependency.depends_on_id",
     )
 
     # task_id
-    task_id = Column(Integer, ForeignKey("Tasks.id"), primary_key=True)
+    task_id: Mapped[int] = mapped_column(ForeignKey("Tasks.id"), primary_key=True)
 
     # task
-    task = relationship(
-        Task,
+    task: Mapped[Task] = relationship(
         back_populates="task_depends_on",
         primaryjoin="Task.task_id==TaskDependency.task_id",
     )
 
-    dependency_target = Column(
+    dependency_target: Mapped[str] = mapped_column(
         Enum(*defaults.task_dependency_targets, name="TaskDependencyTarget"),
         nullable=False,
         doc="""The dependency target of the relation. The default value is
@@ -3210,7 +3219,7 @@ class TaskDependency(Base, ScheduleMixin):
         default=defaults.task_dependency_targets[0],
     )
 
-    gap_timing = synonym(
+    gap_timing: Mapped[Optional[float]] = synonym(
         "schedule_timing",
         doc="""A positive float value showing the desired gap between the
         dependent and dependee tasks. The meaning of the gap value, either is
@@ -3221,9 +3230,9 @@ class TaskDependency(Base, ScheduleMixin):
         """,
     )
 
-    gap_unit = synonym("schedule_unit")
+    gap_unit: Mapped[Optional[str]] = synonym("schedule_unit")
 
-    gap_model = synonym(
+    gap_model: Mapped[str] = synonym(
         "schedule_model",
         doc="""An enumeration value one of ["length", "duration"]. The value of
         this attribute defines if the :attr:`.gap` value is in *Work Time* or
@@ -3234,14 +3243,13 @@ class TaskDependency(Base, ScheduleMixin):
 
     def __init__(
         self,
-        task=None,
-        depends_on=None,
-        dependency_target=None,
-        gap_timing=0,
-        gap_unit="h",
-        gap_model="length",
-    ):
-
+        task: Optional["Task"] = None,
+        depends_on: Optional["Task"] = None,
+        dependency_target: Optional[str] = None,
+        gap_timing: Optional[Union[float, int]] = 0,
+        gap_unit: Optional[str] = "h",
+        gap_model: Optional[str] = "length",
+    ) -> None:
         ScheduleMixin.__init__(
             self,
             schedule_timing=gap_timing,
@@ -3305,15 +3313,17 @@ class TaskDependency(Base, ScheduleMixin):
 
     @validates("dependency_target")
     def _validate_dependency_target(self, key: str, dependency_target: str) -> str:
-        """Validate the given dependency_taget value.
+        """Validate the given dependency_target value.
 
         Args:
             key (str): The name of the validated column.
             dependency_target (str): The dependency_target value to be validated.
 
         Raises:
-            TypeError: If the dependency_target value is not None and not a string.
-            ValueError: If the dependency_taget is not one of ["onend", "onstart"].
+            TypeError: If the dependency_target value is not None and not a
+                string.
+            ValueError: If the dependency_target is not one of ["onend",
+                "onstart"].
 
         Returns:
             str: The validated dependency_target value.
@@ -3323,10 +3333,10 @@ class TaskDependency(Base, ScheduleMixin):
         if dependency_target is None:
             dependency_target = defaults.task_dependency_targets[0]
 
-        if not isinstance(dependency_target, string_types):
+        if not isinstance(dependency_target, str):
             raise TypeError(
-                "{}.dependency_target should be a string with a value one of {}, "
-                "not {}: '{}'".format(
+                "{}.dependency_target should be a string with a value one of "
+                "{}, not {}: '{}'".format(
                     self.__class__.__name__,
                     defaults.task_dependency_targets,
                     dependency_target.__class__.__name__,
@@ -3460,21 +3470,23 @@ def update_time_log_task_parents_for_end(
 
 
 def __update_total_logged_seconds__(
-    tlog: TimeLog, new_duration: datetime.timedelta, old_duration: datetime.timedelta
-):
+    time_log: TimeLog,
+    new_duration: datetime.timedelta,
+    old_duration: datetime.timedelta,
+) -> None:
     """Update the given parent tasks total_logged_seconds attr with the new duration.
 
     Args:
-        tlog (TimeLog): A :class:`.Task` instance which is the parent of the.
+        time_log (TimeLog): A :class:`.Task` instance which is the parent of the.
         new_duration (datetime.timedelta): The new duration value.
         old_duration (datetime.timedelta): The old duration value.
     """
-    if not tlog.task:
-        logger.debug(f"TimeLog doesn't have a task yet: {tlog}")
-        return
+    # if not time_log.task:
+    #     logger.debug(f"TimeLog doesn't have a task yet: {time_log}")
+    #     return
 
-    logger.debug(f"TimeLog has a task: {tlog.task}")
-    parent = tlog.task.parent
+    logger.debug(f"TimeLog has a task: {time_log.task}")
+    parent = time_log.task.parent
     if not parent:
         logger.debug("TimeLog.task doesn't have a parent!")
         return
@@ -3501,14 +3513,14 @@ def update_parents_schedule_seconds_with_schedule_timing(
     new_schedule_timing: int,
     old_schedule_timing: int,
     initiator: sqlalchemy.orm.attributes.AttributeEvent,
-):
+) -> None:
     """Update parent task's schedule_seconds attr if schedule_timing attr is updated.
 
     Args:
         task (Task): The base task.
         new_schedule_timing (int): An integer showing the schedule_timing of the task.
         old_schedule_timing (int): The old value of schedule_timing.
-        initiator (sqlchemy.orm.attribute.AttributeEvent): Currently not used.
+        initiator (sqlalchemy.orm.attribute.AttributeEvent): Currently not used.
     """
     logger.debug(f"Received set event for new_schedule_timing in target: {task}")
     # update parents schedule_seconds attribute
@@ -3544,7 +3556,7 @@ def update_parents_schedule_seconds_with_schedule_unit(
         new_schedule_unit (str): A string with a value of 'min', 'h', 'd', 'w', 'm' or
             'y' showing the timing unit.
         old_schedule_unit (str): The old value of new_schedule_unit.
-        initiator (sqlchemy.orm.attribute.AttributeEvent): Currently not used.
+        initiator (sqlalchemy.orm.attribute.AttributeEvent): Currently not used.
     """
     logger.debug(f"Received set event for new_schedule_unit in target: {task}")
     # update parents schedule_seconds attribute
@@ -3581,7 +3593,7 @@ def update_task_date_values(
     Args:
         task (Task): The task that a child is removed from.
         removed_child (Task): The removed child.
-        initiator (sqlchemy.orm.attribute.AttributeEvent): Currently not used.
+        initiator (sqlalchemy.orm.attribute.AttributeEvent): Currently not used.
     """
     # update start and end date values of the task
     with DBSession.no_autoflush:
@@ -3619,7 +3631,8 @@ def removed_a_dependency(
 
     Args:
         task (Task): The task that a dependent is being removed from.
-        task_dependency (Task): The association object that has the relation.
+        task_dependency (TaskDependency): The association object that has the
+            relation.
         initiator (sqlalchemy.orm.attributes.AttributeEvent): Currently not used.
     """
     # update task status with dependencies

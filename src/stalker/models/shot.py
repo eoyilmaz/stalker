@@ -1,18 +1,30 @@
 # -*- coding: utf-8 -*-
 """Shot related functions and classes are situated here."""
 
-from typing import Union
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 from sqlalchemy import Column, Float, ForeignKey, Integer, Table
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
-from sqlalchemy.orm import reconstructor, relationship, synonym, validates
+from sqlalchemy.orm import (
+    Mapped,
+    mapped_column,
+    reconstructor,
+    relationship,
+    synonym,
+    validates,
+)
 
-from stalker import ImageFormat
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
+from stalker.models.format import ImageFormat
 from stalker.models.mixins import CodeMixin, ReferenceMixin, StatusMixin
 from stalker.models.task import Task
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.project import Project
+    from stalker.models.scene import Scene
+    from stalker.models.sequence import Sequence
 
 logger = get_logger(__name__)
 
@@ -142,26 +154,30 @@ class Shot(Task, CodeMixin):
     __tablename__ = "Shots"
     __mapper_args__ = {"polymorphic_identity": "Shot"}
 
-    shot_id = Column("id", Integer, ForeignKey("Tasks.id"), primary_key=True)
+    shot_id: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("Tasks.id"),
+        primary_key=True,
+    )
 
-    sequences = relationship(
-        "Sequence",
+    sequences: Mapped[Optional[List["Sequence"]]] = relationship(
         secondary="Shot_Sequences",
         primaryjoin="Shots.c.id==Shot_Sequences.c.shot_id",
         secondaryjoin="Shot_Sequences.c.sequence_id==Sequences.c.id",
         back_populates="shots",
     )
 
-    scenes = relationship(
-        "Scene",
+    scenes: Mapped[Optional[List["Scene"]]] = relationship(
         secondary="Shot_Scenes",
         primaryjoin="Shots.c.id==Shot_Scenes.c.shot_id",
         secondaryjoin="Shot_Scenes.c.scene_id==Scenes.c.id",
         back_populates="shots",
     )
 
-    image_format_id = Column(Integer, ForeignKey("ImageFormats.id"))
-    _image_format = relationship(
+    image_format_id: Mapped[Optional[int]] = mapped_column(
+        ForeignKey("ImageFormats.id")
+    )
+    _image_format: Mapped[Optional[ImageFormat]] = relationship(
         "ImageFormat",
         primaryjoin="Shots.c.image_format_id==ImageFormats.c.id",
         doc="""The :class:`.ImageFormat` of this shot.
@@ -173,63 +189,55 @@ class Shot(Task, CodeMixin):
 
     # the cut_duration attribute is not going to be stored in the database,
     # only the cut_in and cut_out will be enough to calculate the cut_duration
-    cut_in = Column(
-        Integer,
+    cut_in: Mapped[Optional[int]] = mapped_column(
         doc="The start frame of this shot. It is the start frame of the "
         "playback range in the application (Maya, Nuke etc.).",
         default=1,
     )
-    cut_out = Column(
-        Integer,
+    cut_out: Mapped[Optional[int]] = mapped_column(
         doc="The end frame of this shot. It is the end frame of the "
         "playback range in the application (Maya, Nuke etc.).",
         default=1,
     )
 
-    source_in = Column(
-        Integer,
+    source_in: Mapped[Optional[int]] = mapped_column(
         doc="The start frame of the used range, should be in between"
         ":attr:`.cut_in` and :attr:`.cut_out`",
     )
-    source_out = Column(
-        Integer,
+    source_out: Mapped[Optional[int]] = mapped_column(
         doc="The end frame of the used range, should be in between"
         ":attr:`.cut_in and :attr:`.cut_out`",
     )
-    record_in = Column(
-        Integer,
+    record_in: Mapped[Optional[int]] = mapped_column(
         doc="The start frame in the Editors timeline specifying the start "
         "frame general placement of this shot.",
     )
-    # record_out = Column(Integer)
 
-    _fps = Column(
+    _fps: Mapped[Optional[float]] = mapped_column(
         "fps",
         Float(precision=3),
         doc="""The fps of the project.
 
         It is a float value, any other types will be converted to float. The
-        default value is equal to :attr:`stalker.modesl.project..Project.fps`.
+        default value is equal to :attr:`stalker.models.project..Project.fps`.
         """,
     )
 
     def __init__(
         self,
-        code=None,
-        project=None,
-        sequences=None,
-        scenes=None,
-        cut_in=None,
-        cut_out=None,
-        source_in=None,
-        source_out=None,
-        record_in=None,
-        image_format=None,
-        fps=None,
-        **kwargs,
-    ):
-
-        # initialize TaskableMixin
+        code: Optional[str] = None,
+        project: Optional["Project"] = None,
+        sequences: Optional[List["Sequence"]] = None,
+        scenes: Optional[List["Scene"]] = None,
+        cut_in: Optional[int] = None,
+        cut_out: Optional[int] = None,
+        source_in: Optional[int] = None,
+        source_out: Optional[int] = None,
+        record_in: Optional[int] = None,
+        image_format: Optional[ImageFormat] = None,
+        fps: Optional[float] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         kwargs["project"] = project
         kwargs["code"] = code
 
@@ -292,11 +300,11 @@ class Shot(Task, CodeMixin):
         """
         return f"<{self.entity_type} ({self.name}, {self.code})>"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Shot instance and has the same code and
@@ -308,7 +316,7 @@ class Shot(Task, CodeMixin):
             and self.project == other.project
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -319,13 +327,16 @@ class Shot(Task, CodeMixin):
         return super(Shot, self).__hash__()
 
     @classmethod
-    def _check_code_availability(cls, code, project):
+    def _check_code_availability(cls, code: str, project: "Project") -> bool:
         """Check if the given code is available in the given project.
 
         Args:
             code (str): The code to check the availability of.
             project (Project): The stalker.models.project.Project instance that this
                 shot is a part of.
+
+        Raises:
+            TypeError: If the code is not a str.
 
         Returns:
             bool: True if the given code is available, False otherwise.
@@ -364,7 +375,7 @@ class Shot(Task, CodeMixin):
                     return False
         return True
 
-    def _fps_getter(self):
+    def _fps_getter(self) -> float:
         """Return the fps value either from the Project or from the _fps attribute.
 
         Returns:
@@ -375,15 +386,15 @@ class Shot(Task, CodeMixin):
         else:
             return self._fps
 
-    def _fps_setter(self, fps):
+    def _fps_setter(self, fps: float) -> None:
         """Set the fps value.
 
         Args:
-            fps (Union[int, float]): The fps value to set the fps attribute to.
+            fps (float): The fps value to set the fps attribute to.
         """
         self._fps = self._validate_fps(fps)
 
-    fps = synonym(
+    fps: Mapped[Optional[float]] = synonym(
         "_fps",
         descriptor=property(_fps_getter, _fps_setter),
         doc="The fps of this shot.",
@@ -424,7 +435,7 @@ class Shot(Task, CodeMixin):
         return float(fps)
 
     @validates("cut_in")
-    def _validate_cut_in(self, key, cut_in):
+    def _validate_cut_in(self, key: str, cut_in: int) -> int:
         """Validate the cut_in value.
 
         Args:
@@ -453,7 +464,7 @@ class Shot(Task, CodeMixin):
         return cut_in
 
     @validates("cut_out")
-    def _validate_cut_out(self, key, cut_out) -> int:
+    def _validate_cut_out(self, key: str, cut_out: int) -> int:
         """Validate the cut_out value.
 
         Args:
@@ -485,7 +496,7 @@ class Shot(Task, CodeMixin):
         return cut_out
 
     @validates("source_in")
-    def _validate_source_in(self, key, source_in) -> int:
+    def _validate_source_in(self, key: str, source_in: int) -> int:
         """Validate the source_in value.
 
         Args:
@@ -546,7 +557,7 @@ class Shot(Task, CodeMixin):
         return source_in
 
     @validates("source_out")
-    def _validate_source_out(self, key, source_out):
+    def _validate_source_out(self, key: str, source_out: int) -> int:
         """Validate the source_out value.
 
         Args:
@@ -613,7 +624,7 @@ class Shot(Task, CodeMixin):
     #     return record_in
 
     @property
-    def cut_duration(self):
+    def cut_duration(self) -> int:
         """Return the cut_duration property value.
 
         Returns:
@@ -622,7 +633,7 @@ class Shot(Task, CodeMixin):
         return self.cut_out - self.cut_in + 1
 
     @cut_duration.setter
-    def cut_duration(self, cut_duration):
+    def cut_duration(self, cut_duration: int) -> None:
         """Set the cut_duration attribute.
 
         Args:
@@ -634,21 +645,22 @@ class Shot(Task, CodeMixin):
         """
         if not isinstance(cut_duration, int):
             raise TypeError(
-                f"{self.__class__.__name__}.cut_duration should be a positive integer "
-                f"value, not {cut_duration.__class__.__name__}: '{cut_duration}'"
+                f"{self.__class__.__name__}.cut_duration should be a positive "
+                "integer value, "
+                f"not {cut_duration.__class__.__name__}: '{cut_duration}'"
             )
 
         if cut_duration < 1:
             raise ValueError(
-                f"{self.__class__.__name__}.cut_duration cannot be set to zero or a "
-                "negative value"
+                f"{self.__class__.__name__}.cut_duration cannot be set to "
+                "zero or a negative value"
             )
 
         # always extend or contract the shot from end
         self.cut_out = self.cut_in + cut_duration - 1
 
     @validates("sequences")
-    def _validate_sequence(self, key, sequence):
+    def _validate_sequence(self, key: str, sequence: "Sequence") -> "Sequence":
         """Validate the given sequence value.
 
         Args:
@@ -672,7 +684,7 @@ class Shot(Task, CodeMixin):
         return sequence
 
     @validates("scenes")
-    def _validate_scenes(self, key, scene):
+    def _validate_scenes(self, key: str, scene: "Scene") -> "Scene":
         """Validate the given scene value.
 
         Args:
@@ -716,14 +728,16 @@ class Shot(Task, CodeMixin):
         """
         self._image_format = self._validate_image_format(imf)
 
-    image_format = synonym(
+    image_format: Mapped[Optional[ImageFormat]] = synonym(
         "_image_format",
         descriptor=property(_image_format_getter, _image_format_setter),
         doc="The image_format of this shot. Set it to None to re-sync with "
         "Project.image_format.",
     )
 
-    def _validate_image_format(self, imf):
+    def _validate_image_format(
+        self, imf: Union[None, ImageFormat]
+    ) -> Union[None, ImageFormat]:
         """Validate the given imf value.
 
         Args:
@@ -750,7 +764,7 @@ class Shot(Task, CodeMixin):
         return imf
 
     @validates("code")
-    def _validate_code(self, key, code):
+    def _validate_code(self, key: str, code: str) -> str:
         """Validate the given code value.
 
         Args:

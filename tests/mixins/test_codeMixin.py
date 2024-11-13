@@ -2,7 +2,8 @@
 """CodeMixin related tests."""
 import pytest
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import CodeMixin, SimpleEntity
 
@@ -12,8 +13,8 @@ class CodeMixFooMixedInClass(SimpleEntity, CodeMixin):
 
     __tablename__ = "CodeMixFooMixedInClasses"
     __mapper_args__ = {"polymorphic_identity": "CodeMixFooMixedInClass"}
-    codeMixFooMixedInClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    codeMixFooMixedInClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):

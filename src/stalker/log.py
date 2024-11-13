@@ -13,7 +13,7 @@ logging_level = logging.INFO
 loggers = []
 
 
-def get_logger(name):
+def get_logger(name: str) -> logging.Logger:
     """Get a logger.
 
     Args:
@@ -27,7 +27,7 @@ def get_logger(name):
     return logger
 
 
-def register_logger(logger):
+def register_logger(logger: logging.Logger) -> None:
     """Register logger.
 
     Args:
@@ -49,7 +49,7 @@ def register_logger(logger):
     logger.setLevel(logging_level)
 
 
-def set_level(level):
+def set_level(level: int) -> None:
     """Update all registered loggers to the given level.
 
     Args:

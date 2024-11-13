@@ -11,7 +11,7 @@ import tzlocal
 
 import stalker
 import stalker.db.setup
-from stalker import db, defaults, log
+from stalker import defaults, log
 from stalker import (
     Asset,
     AuthenticationLog,
@@ -2386,7 +2386,9 @@ def test_persistence_of_entity_group(setup_postgresql_db):
     assert sorted(entities, key=lambda x: x.name) == sorted(
         entity_group1_db.entities, key=lambda x: x.name
     )
-    assert sorted(entities, key=lambda x: x.id) == sorted([task1, child_task2, task2], key=lambda x: x.id)
+    assert sorted(entities, key=lambda x: x.id) == sorted(
+        [task1, child_task2, task2], key=lambda x: x.id
+    )
     assert type_ == entity_group1_db.type
     assert updated_by == entity_group1_db.updated_by
 
@@ -4486,6 +4488,7 @@ def test_persistence_of_version(setup_postgresql_db):
     # now save it to the database
     DBSession.add(test_version)
     DBSession.commit()
+    assert test_version.version_number == 1
 
     # create a new version
     test_version_2 = Version(
@@ -4493,12 +4496,13 @@ def test_persistence_of_version(setup_postgresql_db):
         task=test_task,
         variant_name="MAIN",
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
-        "/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma",
+        "/Proj1_Seq1_Sh001_MAIN_Lighting_v002.ma",
         inputs=[test_version],
     )
     assert test_version_2.inputs == [test_version]
     DBSession.add(test_version_2)
     DBSession.commit()
+    assert test_version_2.version_number == 2
 
     created_by = test_version.created_by
     date_created = test_version.date_created
@@ -4520,7 +4524,7 @@ def test_persistence_of_version(setup_postgresql_db):
     del test_version
 
     # get it back from the db
-    test_version_db = Version.query.filter_by(name=name).first()
+    test_version_db = Version.query.filter_by(version_number=1).first()
 
     assert isinstance(test_version_db, Version)
 

@@ -3,6 +3,7 @@
 import pytest
 
 from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import (
     Project,
@@ -20,7 +21,9 @@ class DeclProjMixA(SimpleEntity, ProjectMixin):
 
     __tablename__ = "DeclProjMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclProjMixA"}
-    a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    a_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(DeclProjMixA, self).__init__(**kwargs)
@@ -32,7 +35,9 @@ class DeclProjMixB(SimpleEntity, ProjectMixin):
 
     __tablename__ = "DeclProjMixBs"
     __mapper_args__ = {"polymorphic_identity": "DeclProjMixB"}
-    b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    b_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(DeclProjMixB, self).__init__(**kwargs)

@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """Scene related classes and functions are situated here."""
 
-from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import relationship, validates
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.log import get_logger
 from stalker.models.entity import Entity
 from stalker.models.mixins import CodeMixin, ProjectMixin
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.shot import Shot
 
 logger = get_logger(__name__)
 
@@ -28,10 +33,13 @@ class Scene(Entity, ProjectMixin, CodeMixin):
     __auto_name__ = False
     __tablename__ = "Scenes"
     __mapper_args__ = {"polymorphic_identity": "Scene"}
-    scene_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    scene_id: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
 
-    shots = relationship(
-        "Shot",
+    shots: Mapped[Optional[List["Shot"]]] = relationship(
         secondary="Shot_Scenes",
         back_populates="scenes",
         doc="""The :class:`.Shot` s that is related with this Scene.
@@ -40,7 +48,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         """,
     )
 
-    def __init__(self, shots=None, **kwargs):
+    def __init__(self, shots: Optional[List["Shot"]] = None, **kwargs: Dict[str, Any]):
         super(Scene, self).__init__(**kwargs)
 
         # call the mixin __init__ methods
@@ -53,7 +61,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         self.shots = shots
 
     @validates("shots")
-    def _validate_shots(self, key, shot):
+    def _validate_shots(self, key: str, shot: "Shot") -> "Shot":
         """Validate the given shot value.
 
         Args:
@@ -76,7 +84,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
             )
         return shot
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality with the other object.
 
         Args:
@@ -87,7 +95,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
         """
         return isinstance(other, Scene) and super(Scene, self).__eq__(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.

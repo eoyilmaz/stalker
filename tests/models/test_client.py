@@ -419,7 +419,7 @@ def test_to_tjp_method_is_working_as_expected(setup_client_tests):
     """to_tjp method is working as expected."""
     data = setup_client_tests
     client1 = Client(**data["kwargs"])
-    assert client1.to_tjp() == ""
+    assert client1.to_tjp == ""
 
 
 def test_hash_is_correctly_calculated(setup_client_tests):

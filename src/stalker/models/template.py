@@ -1,11 +1,9 @@
 # -*- coding: utf-8 -*-
 """FilenameTemplate related functions and classes are situated here."""
-from typing import Union
+from typing import Any, Dict, Optional, Union
 
-from six import string_types
-
-from sqlalchemy import Column, ForeignKey, Integer, Text
-from sqlalchemy.orm import validates
+from sqlalchemy import ForeignKey, Text
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from stalker.log import get_logger
 from stalker.models.entity import Entity
@@ -81,19 +79,25 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
     __strictly_typed__ = False
     __tablename__ = "FilenameTemplates"
     __mapper_args__ = {"polymorphic_identity": "FilenameTemplate"}
-    filenameTemplate_id = Column(
-        "id", Integer, ForeignKey("Entities.id"), primary_key=True
+    filenameTemplate_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
     )
 
-    path = Column(
+    path: Mapped[Optional[str]] = mapped_column(
         Text, doc="""The template code for the path of this FilenameTemplate."""
     )
 
-    filename = Column(
+    filename: Mapped[Optional[str]] = mapped_column(
         Text, doc="""The template code for the file part of the FilenameTemplate."""
     )
 
-    def __init__(self, target_entity_type=None, path=None, filename=None, **kwargs):
+    def __init__(
+        self,
+        target_entity_type: Optional[str] = None,
+        path: Optional[str] = None,
+        filename: Optional[str] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         super(FilenameTemplate, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, target_entity_type, **kwargs)
         self.path = path
@@ -117,7 +121,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         if path is None:
             path = ""
 
-        if not isinstance(path, string_types):
+        if not isinstance(path, str):
             raise TypeError(
                 "{}.path attribute should be string, not {}: '{}'".format(
                     self.__class__.__name__, path.__class__.__name__, path
@@ -144,7 +148,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
         if filename is None:
             filename = ""
 
-        if not isinstance(filename, string_types):
+        if not isinstance(filename, str):
             raise TypeError(
                 "{}.filename attribute should be string, not {}: '{}'".format(
                     self.__class__.__name__, filename.__class__.__name__, filename
@@ -153,11 +157,11 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
 
         return filename
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a FilenameTemplate instance and has the
@@ -171,7 +175,7 @@ class FilenameTemplate(Entity, TargetEntityTypeMixin):
             and self.filename == other.filename
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.

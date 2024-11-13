@@ -3,6 +3,7 @@
 import pytest
 
 from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import SimpleEntity, Status, StatusList, StatusMixin
 
@@ -12,8 +13,8 @@ class DeclStatMixA(SimpleEntity, StatusMixin):
 
     __tablename__ = "DeclStatMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclStatMixA"}
-    declStatMixAs_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    declStatMixAs_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):
@@ -26,7 +27,9 @@ class DeclStatMixB(SimpleEntity, StatusMixin):
 
     __tablename__ = "DeclStatMixBs"
     __mapper_args__ = {"polymorphic_identity": "DeclStatMixB"}
-    b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    b_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(DeclStatMixB, self).__init__(**kwargs)

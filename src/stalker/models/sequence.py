@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
 """Sequence related function and classes are situated here."""
 
-from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import relationship, validates
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.log import get_logger
 from stalker.models.mixins import CodeMixin, ReferenceMixin
 from stalker.models.task import Task
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.shot import Shot
 
 logger = get_logger(__name__)
 
@@ -30,10 +35,13 @@ class Sequence(Task, CodeMixin):
     __auto_name__ = False
     __tablename__ = "Sequences"
     __mapper_args__ = {"polymorphic_identity": "Sequence"}
-    sequence_id = Column("id", Integer, ForeignKey("Tasks.id"), primary_key=True)
+    sequence_id: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("Tasks.id"),
+        primary_key=True,
+    )
 
-    shots = relationship(
-        "Shot",
+    shots: Mapped[Optional[List["Shot"]]] = relationship(
         secondary="Shot_Sequences",
         back_populates="sequences",
         doc="""The :class:`.Shot` s assigned to this Sequence.
@@ -42,7 +50,7 @@ class Sequence(Task, CodeMixin):
         """,
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]) -> None:
         super(Sequence, self).__init__(**kwargs)
 
         # call the mixin __init__ methods
@@ -51,7 +59,7 @@ class Sequence(Task, CodeMixin):
         self.shots = []
 
     @validates("shots")
-    def _validate_shots(self, key, shot):
+    def _validate_shots(self, key: str, shot: "Shot") -> "Shot":
         """Validate the given shot value.
 
         Args:
@@ -74,11 +82,11 @@ class Sequence(Task, CodeMixin):
             )
         return shot
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Sequence instance and has the same
@@ -86,7 +94,7 @@ class Sequence(Task, CodeMixin):
         """
         return isinstance(other, Sequence) and super(Sequence, self).__eq__(other)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.

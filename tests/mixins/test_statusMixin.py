@@ -3,7 +3,8 @@
 
 import pytest
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import SimpleEntity, Status, StatusList, StatusMixin
 from stalker.db.session import DBSession
@@ -14,8 +15,8 @@ class StatMixClass(SimpleEntity, StatusMixin):
 
     __tablename__ = "StatMixClasses"
     __mapper_args__ = {"polymorphic_identity": "StatMixClass"}
-    StatMixClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    StatMixClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):
@@ -300,8 +301,8 @@ class StatusListAutoAddClass(SimpleEntity, StatusMixin):
 
     __tablename__ = "StatusListAutoAddClass"
     __mapper_args__ = {"polymorphic_identity": "StatusListAutoAddClass"}
-    statusListAutoAddClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    statusListAutoAddClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):
@@ -314,8 +315,8 @@ class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
 
     __tablename__ = "StatusListNoAutoAddClass"
     __mapper_args__ = {"polymorphic_identity": "StatusListNoAutoAddClass"}
-    statusListNoAutoAddClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    statusListNoAutoAddClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):

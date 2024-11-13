@@ -3,6 +3,7 @@
 import pytest
 
 from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import Project, ProjectMixin, Repository, SimpleEntity, Type
 
@@ -12,8 +13,8 @@ class ProjMixClass(SimpleEntity, ProjectMixin):
 
     __tablename__ = "ProjMixClasses"
     __mapper_args__ = {"polymorphic_identity": "ProjMixClass"}
-    projMixClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    projMixClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):

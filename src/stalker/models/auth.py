@@ -1,22 +1,18 @@
 # -*- coding: utf-8 -*-
 """Authentication related classes and functions situated here."""
 import base64
-import calendar
 import copy
-import datetime
 import json
 import os
 import re
-
-from jinja2 import Template
+from datetime import datetime, timedelta
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
 
 import pytz
 
-from six import string_types
-
-from sqlalchemy import Column, Enum, Float, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, Enum, ForeignKey, Integer, String, Table
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, synonym, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym, validates
 from sqlalchemy.schema import UniqueConstraint
 
 from stalker import defaults, log
@@ -25,6 +21,15 @@ from stalker.db.types import GenericDateTime
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import ACLMixin
 from stalker.models.status import Status
+from stalker.utils import datetime_to_millis, millis_to_datetime
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.client import Client, ClientUser
+    from stalker.models.department import Department, DepartmentUser
+    from stalker.models.project import Project, ProjectUser
+    from stalker.models.task import Task, TimeLog
+    from stalker.models.ticket import Ticket
+    from stalker.models.studio import Vacation
 
 logger = log.get_logger(__name__)
 
@@ -114,18 +119,22 @@ class Permission(Base):
         {"extend_existing": True},
     )
 
-    id = Column(Integer, primary_key=True)
-    _access = Column("access", Enum("Allow", "Deny", name="AccessNames"))
-    _action = Column("action", Enum(*defaults.actions, name="AuthenticationActions"))
-    _class_name = Column("class_name", String(32))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    _access: Mapped[Optional[str]] = mapped_column(
+        "access", Enum("Allow", "Deny", name="AccessNames")
+    )
+    _action: Mapped[Optional[str]] = mapped_column(
+        "action", Enum(*defaults.actions, name="AuthenticationActions")
+    )
+    _class_name: Mapped[Optional[str]] = mapped_column("class_name", String(32))
 
-    def __init__(self, access, action, class_name):
+    def __init__(self, access: str, action: str, class_name: str) -> None:
         super(Permission, self).__init__()
         self._access = self._validate_access(access)
         self._action = self._validate_action(action)
         self._class_name = self._validate_class_name(class_name)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -135,7 +144,7 @@ class Permission(Base):
         """
         return hash(self.access + self.action + self.class_name)
 
-    def _validate_access(self, access):
+    def _validate_access(self, access: str) -> str:
         """Validate the given access value.
 
         Args:
@@ -148,7 +157,7 @@ class Permission(Base):
         Returns:
             str: The access value.
         """
-        if not isinstance(access, string_types):
+        if not isinstance(access, str):
             raise TypeError(
                 f"{self.__class__.__name__}.access should be an instance of str, "
                 f"not {access.__class__.__name__}: '{access}'"
@@ -162,7 +171,7 @@ class Permission(Base):
 
         return access
 
-    def _access_getter(self):
+    def _access_getter(self) -> str:
         """Return the _access value.
 
         Returns:
@@ -170,9 +179,11 @@ class Permission(Base):
         """
         return self._access
 
-    access = synonym("_access", descriptor=property(_access_getter))
+    access: Mapped[Optional[str]] = synonym(
+        "_access", descriptor=property(_access_getter)
+    )
 
-    def _validate_class_name(self, class_name):
+    def _validate_class_name(self, class_name: str) -> str:
         """Validate the given class_name value.
 
         Args:
@@ -184,7 +195,7 @@ class Permission(Base):
         Returns:
             str: The validated class_name.
         """
-        if not isinstance(class_name, string_types):
+        if not isinstance(class_name, str):
             raise TypeError(
                 f"{self.__class__.__name__}.class_name should be an instance of str, "
                 f"not {class_name.__class__.__name__}: '{class_name}'"
@@ -192,7 +203,7 @@ class Permission(Base):
 
         return class_name
 
-    def _class_name_getter(self):
+    def _class_name_getter(self) -> str:
         """Return the _class_name attribute value.
 
         Returns:
@@ -200,9 +211,11 @@ class Permission(Base):
         """
         return self._class_name
 
-    class_name = synonym("_class_name", descriptor=property(_class_name_getter))
+    class_name: Mapped[str] = synonym(
+        "_class_name", descriptor=property(_class_name_getter)
+    )
 
-    def _validate_action(self, action):
+    def _validate_action(self, action: str) -> str:
         """Validate the given action value.
 
         Args:
@@ -215,7 +228,7 @@ class Permission(Base):
         Returns:
             str: The validated action value.
         """
-        if not isinstance(action, string_types):
+        if not isinstance(action, str):
             raise TypeError(
                 f"{self.__class__.__name__}.action should be an instance of str, "
                 f"not {action.__class__.__name__}: '{action}'"
@@ -229,7 +242,7 @@ class Permission(Base):
 
         return action
 
-    def _action_getter(self):
+    def _action_getter(self) -> str:
         """Return the _action value.
 
         Returns:
@@ -237,13 +250,15 @@ class Permission(Base):
         """
         return self._action
 
-    action = synonym("_action", descriptor=property(_action_getter))
+    action: Mapped[Optional[str]] = synonym(
+        "_action", descriptor=property(_action_getter)
+    )
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check if the other Permission is equal to this one.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Permission instance and has the same
@@ -277,9 +292,9 @@ class Group(Entity, ACLMixin):
     __tablename__ = "Groups"
     __mapper_args__ = {"polymorphic_identity": "Group"}
 
-    gid = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    gid: Mapped[int] = mapped_column("id", ForeignKey("Entities.id"), primary_key=True)
 
-    users = relationship(
+    users: Mapped[Optional[List["User"]]] = relationship(
         "User",
         secondary="Group_Users",
         back_populates="groups",
@@ -289,7 +304,7 @@ class Group(Entity, ACLMixin):
         """,
     )
 
-    def __init__(self, name="", users=None, permissions=None, **kwargs):
+    def __init__(self, name="", users=None, permissions=None, **kwargs) -> None:
         if users is None:
             users = []
 
@@ -303,7 +318,7 @@ class Group(Entity, ACLMixin):
         self.permissions = permissions
 
     @validates("users")
-    def _validate_users(self, key, user):
+    def _validate_users(self, key: str, user: "User") -> "User":
         """Validate the given user value.
 
         Args:
@@ -325,7 +340,7 @@ class Group(Entity, ACLMixin):
 
         return user
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -406,22 +421,23 @@ class User(Entity, ACLMixin):
             user belongs to.
         tasks (List[Task]): it is a list of Task objects which holds the tasks
             that this user has been assigned to.
-        last_login (datetime.datetime): it is a datetime.datetime object holds
-            the last login date of the user (not implemented yet).
+        last_login (datetime): it is a datetime object holds the last login
+            date of the user (not implemented yet).
     """
 
     __auto_name__ = False
     __tablename__ = "Users"
     __mapper_args__ = {"polymorphic_identity": "User"}
 
-    user_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    user_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
     departments = association_proxy(
         "department_role", "department", creator=lambda d: create_department_user(d)
     )
 
-    department_role = relationship(
-        "DepartmentUser",
+    department_role: Mapped[Optional[List["DepartmentUser"]]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         primaryjoin="Users.c.id==Department_Users.c.uid",
@@ -433,22 +449,21 @@ class User(Entity, ACLMixin):
         "company_role", "client", creator=lambda n: create_client_user(n)
     )
 
-    company_role = relationship(
-        "ClientUser",
+    company_role: Mapped[Optional[List["ClientUser"]]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         primaryjoin="Users.c.id==Client_Users.c.uid",
         doc="""A list of :class:`.Client` s that this user is a part of.""",
     )
 
-    email = Column(
+    email: Mapped[str] = mapped_column(
         String(256),
         unique=True,
         nullable=False,
         doc="email of the user, accepts string",
     )
 
-    password = Column(
+    password: Mapped[str] = mapped_column(
         String(256),
         nullable=False,
         doc="""The password of the user.
@@ -457,7 +472,7 @@ class User(Entity, ACLMixin):
         """,
     )
 
-    login = Column(
+    login: Mapped[str] = mapped_column(
         String(256),
         nullable=False,
         unique=True,
@@ -467,8 +482,7 @@ class User(Entity, ACLMixin):
         """,
     )
 
-    authentication_logs = relationship(
-        "AuthenticationLog",
+    authentication_logs: Mapped[Optional[List["AuthenticationLog"]]] = relationship(
         primaryjoin="AuthenticationLogs.c.uid==Users.c.id",
         back_populates="user",
         cascade="all, delete-orphan",
@@ -477,8 +491,7 @@ class User(Entity, ACLMixin):
         """,
     )
 
-    groups = relationship(
-        "Group",
+    groups: Mapped[Optional[List["Group"]]] = relationship(
         secondary="Group_Users",
         back_populates="users",
         doc="""Permission groups that this users is a member of.
@@ -491,15 +504,13 @@ class User(Entity, ACLMixin):
         "project_role", "project", creator=lambda p: create_project_user(p)
     )
 
-    project_role = relationship(
-        "ProjectUser",
+    project_role: Mapped[Optional[List["ProjectUser"]]] = relationship(
         back_populates="user",
         cascade="all, delete-orphan",
         primaryjoin="Users.c.id==Project_Users.c.user_id",
     )
 
-    tasks = relationship(
-        "Task",
+    tasks: Mapped[Optional[List["Task"]]] = relationship(
         secondary="Task_Resources",
         back_populates="resources",
         doc=""":class:`.Task` s assigned to this user.
@@ -508,8 +519,7 @@ class User(Entity, ACLMixin):
         """,
     )
 
-    watching = relationship(
-        "Task",
+    watching: Mapped[Optional[List["Task"]]] = relationship(
         secondary="Task_Watchers",
         back_populates="watchers",
         doc=""":class:`.Tasks` s that this user is
@@ -519,19 +529,16 @@ class User(Entity, ACLMixin):
         """,
     )
 
-    responsible_of = relationship(
-        "Task",
+    responsible_of: Mapped[Optional[List["Task"]]] = relationship(
         secondary="Task_Responsible",
         primaryjoin="Users.c.id==Task_Responsible.c.responsible_id",
         secondaryjoin="Task_Responsible.c.task_id==Tasks.c.id",
         back_populates="_responsible",
-        uselist=True,
         doc="""A list of :class:`.Task` instances that this user is responsible
         of.""",
     )
 
-    time_logs = relationship(
-        "TimeLog",
+    time_logs: Mapped[Optional[List["TimeLog"]]] = relationship(
         primaryjoin="TimeLogs.c.resource_id==Users.c.id",
         back_populates="resource",
         cascade="all, delete-orphan",
@@ -540,8 +547,7 @@ class User(Entity, ACLMixin):
         """,
     )
 
-    vacations = relationship(
-        "Vacation",
+    vacations: Mapped[Optional[List["Vacation"]]] = relationship(
         primaryjoin="Vacations.c.user_id==Users.c.id",
         back_populates="user",
         cascade="all, delete-orphan",
@@ -550,23 +556,23 @@ class User(Entity, ACLMixin):
         """,
     )
 
-    efficiency = Column(Float, default=1.0)
+    efficiency: Mapped[Optional[float]] = mapped_column(default=1.0)
 
-    rate = Column(Float, default=0.0)
+    rate: Mapped[Optional[float]] = mapped_column(default=0.0)
 
     def __init__(
         self,
-        name=None,
-        login=None,
-        email=None,
-        password=None,
-        departments=None,
-        companies=None,
-        groups=None,
-        efficiency=1.0,
-        rate=0.0,
-        **kwargs,
-    ):
+        name: Optional[str] = None,
+        login: Optional[str] = None,
+        email: Optional[str] = None,
+        password: Optional[str] = None,
+        departments: Optional["Department"] = None,
+        companies: Optional["Client"] = None,
+        groups: Optional["Group"] = None,
+        efficiency: float = 1.0,
+        rate: float = 0.0,
+        **kwargs: Optional[Dict[str, Any]],
+    ) -> None:
         kwargs["name"] = name
 
         super(User, self).__init__(**kwargs)
@@ -596,7 +602,7 @@ class User(Entity, ACLMixin):
         self.efficiency = efficiency
         self.rate = rate
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """Return the representation of the current User.
 
         Returns:
@@ -604,11 +610,11 @@ class User(Entity, ACLMixin):
         """
         return f"<{self.name} ('{self.login}') (User)>"
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check if the other User is equal to this one.
 
         Args:
-            other (User): The other user instance.
+            other (Any): The other user instance.
 
         Returns:
             bool: If the other object is equal to this one, meaning that it is a User
@@ -622,7 +628,7 @@ class User(Entity, ACLMixin):
             and self.name == other.name
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -633,7 +639,7 @@ class User(Entity, ACLMixin):
         return super(User, self).__hash__()
 
     @validates("login")
-    def _validate_login(self, key, login):
+    def _validate_login(self, key: str, login: str) -> str:
         """Validate and format the given login value.
 
         Args:
@@ -663,7 +669,7 @@ class User(Entity, ACLMixin):
         return login
 
     @validates("email")
-    def _validate_email(self, key, email):
+    def _validate_email(self, key: str, email: str) -> str:
         """Validate the given email value.
 
         Args:
@@ -677,14 +683,14 @@ class User(Entity, ACLMixin):
             str: The validated email value.
         """
         # check if email is an instance of string
-        if not isinstance(email, string_types):
+        if not isinstance(email, str):
             raise TypeError(
                 f"{self.__class__.__name__}.email should be an instance of str, not "
                 f"{email.__class__.__name__}: '{email}'"
             )
         return self._validate_email_format(email)
 
-    def _validate_email_format(self, email):
+    def _validate_email_format(self, email: str) -> str:
         """Validate the email format.
 
         Args:
@@ -730,7 +736,7 @@ class User(Entity, ACLMixin):
         return email
 
     @classmethod
-    def _format_login(cls, login):
+    def _format_login(cls, login: str) -> str:
         """Format the given login value.
 
         Args:
@@ -757,7 +763,7 @@ class User(Entity, ACLMixin):
         return login
 
     @validates("password")
-    def _validate_password(self, key, password):
+    def _validate_password(self, key: str, password: str) -> str:
         """Validate the given password value.
 
         Note:
@@ -788,7 +794,7 @@ class User(Entity, ACLMixin):
         mangled_password_str = str(mangled_password_bytes.decode("utf-8"))
         return mangled_password_str
 
-    def check_password(self, raw_password):
+    def check_password(self, raw_password: str) -> bool:
         """Check the given raw_password.
 
         Check the given raw_password with the current User object's mangled password.
@@ -811,7 +817,7 @@ class User(Entity, ACLMixin):
         return mangled_password_str == raw_password_encrypted_str
 
     @validates("groups")
-    def _validate_groups(self, key, group):
+    def _validate_groups(self, key: str, group: Group) -> Group:
         """Validate the given group value.
 
         Args:
@@ -834,7 +840,7 @@ class User(Entity, ACLMixin):
         return group
 
     @validates("tasks")
-    def _validate_tasks(self, key, task):
+    def _validate_tasks(self, key: str, task: "Task") -> "Task":
         """Validate the given tasks attribute.
 
         Args:
@@ -859,7 +865,7 @@ class User(Entity, ACLMixin):
         return task
 
     @validates("watching")
-    def _validate_watching(self, key, task):
+    def _validate_watching(self, key: str, task: "Task") -> "Task":
         """Validate the given watching attribute.
 
         Args:
@@ -885,7 +891,7 @@ class User(Entity, ACLMixin):
         return task
 
     @validates("vacations")
-    def _validate_vacations(self, key, vacation):
+    def _validate_vacations(self, key: str, vacation: "Vacation") -> "Vacation":
         """Validate the given vacation value.
 
         Args:
@@ -911,12 +917,14 @@ class User(Entity, ACLMixin):
         return vacation
 
     @validates("efficiency")
-    def _validate_efficiency(self, key, efficiency):
+    def _validate_efficiency(
+        self, key: str, efficiency: Union[None, int, float]
+    ) -> float:
         """Validate the given efficiency value.
 
         Args:
             key (str): The name of the validated column.
-            efficiency (Union[int, float, None]): The efficiency of this User instance.
+            efficiency (Union[None, int, float]): The efficiency of this User instance.
                 This shows how efficient the user works. It is a number between 0-1. If
                 None given, a default value of 1.0 will be used.
 
@@ -943,10 +951,10 @@ class User(Entity, ACLMixin):
                 f"greater or equal to 0.0, not {efficiency}"
             )
 
-        return efficiency
+        return float(efficiency)
 
     @validates("rate")
-    def _validate_rate(self, key, rate):
+    def _validate_rate(self, key: str, rate: Union[int, float]) -> float:
         """Validate the given rate value.
 
         Args:
@@ -959,7 +967,7 @@ class User(Entity, ACLMixin):
             ValueError: If the given rate is a negative number.
 
         Returns:
-            Union[int, float]: The validated rate value.
+            float: The validated rate value.
         """
         if rate is None:
             rate = 0.0
@@ -976,10 +984,10 @@ class User(Entity, ACLMixin):
                 f"equal to 0.0, not {rate}"
             )
 
-        return rate
+        return float(rate)
 
     @property
-    def tickets(self):
+    def tickets(self) -> List["Ticket"]:
         """Return the list of :class:`.Ticket` s that this user has.
 
         Returns:
@@ -987,12 +995,12 @@ class User(Entity, ACLMixin):
                 owner of.
         """
         # do it with sqlalchemy
-        from stalker import Ticket
+        from stalker.models.ticket import Ticket
 
         return Ticket.query.filter(Ticket.owner == self).all()
 
     @property
-    def open_tickets(self):
+    def open_tickets(self) -> List["Ticket"]:
         """Return the list of open :class:`.Ticket` s that this user has.
 
         Returns:
@@ -1009,7 +1017,7 @@ class User(Entity, ACLMixin):
         )
 
     @property
-    def to_tjp(self):
+    def to_tjp(self) -> str:
         """Return a TaskJuggler compatible str representation of this User instance.
 
         Returns:
@@ -1021,8 +1029,8 @@ class User(Entity, ACLMixin):
         tjp += f"\n{indent}efficiency {self.efficiency}"
         for vacation in self.vacations:
             tjp += "\n"
-            tjp += "\n".join(f"{indent}{l}" for l in vacation.to_tjp.split("\n"))
-        tjp += f"\n}}"
+            tjp += "\n".join(f"{indent}{line}" for line in vacation.to_tjp.split("\n"))
+        tjp += "\n}"
         return tjp
 
 
@@ -1035,55 +1043,20 @@ class LocalSession(object):
     On initialize it will load the SessionData from the users .strc folder
     """
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.logged_in_user_id = None
         self.valid_to = None
         self.session_data = None
         self.load()
 
-    @classmethod
-    def datetime_to_millis(cls, dt):
-        """Calculate the milliseconds since epoch for the given datetime value.
-
-        This is used as the default JSON serializer for datetime objects.
-
-        Code is based on the answer of Jay Taylor in
-        http://stackoverflow.com/questions/11875770/how-to-overcome-datetime-datetime-not-json-serializable-in-python
-
-        Args:
-            dt (datetime.datetime): The ``datetime.datetime`` instance.
-
-        Returns:
-            int: The int value of milliseconds since epoch.
-        """
-        if isinstance(dt, datetime.datetime):
-            if dt.utcoffset() is not None:
-                dt = dt - dt.utcoffset()
-        millis = int(calendar.timegm(dt.timetuple()) * 1000 + dt.microsecond / 1000)
-        return millis
-
-    @classmethod
-    def millis_to_datetime(cls, millis):
-        """Calculate the datetime from the given milliseconds value.
-
-        Args:
-            millis (int): An int value showing the millis from unix EPOCH
-
-        Returns:
-            datetime.datetime: The corresponding ``datetime.datetime`` instance to the
-                given milliseconds.
-        """
-        epoch = datetime.datetime(1970, 1, 1, tzinfo=pytz.utc)
-        return epoch + datetime.timedelta(milliseconds=millis)
-
-    def load(self):
+    def load(self) -> None:
         """Load the data from the saved local session."""
         try:
             with open(LocalSession.session_file_full_path(), "r") as s:
                 # try:
                 json_object = json.load(s)
-                valid_to = self.millis_to_datetime(json_object.get("valid_to"))
-                if valid_to > datetime.datetime.now(pytz.utc):
+                valid_to = millis_to_datetime(json_object.get("valid_to"))
+                if valid_to > datetime.now(pytz.utc):
                     # fill __dict__ with the loaded one
                     self.valid_to = valid_to
                     self.logged_in_user_id = json_object.get("logged_in_user_id")
@@ -1091,7 +1064,7 @@ class LocalSession(object):
             pass
 
     @property
-    def logged_in_user(self):
+    def logged_in_user(self) -> "User":
         """Return the logged-in user.
 
         Returns:
@@ -1099,7 +1072,7 @@ class LocalSession(object):
         """
         return User.query.filter_by(id=self.logged_in_user_id).first()
 
-    def store_user(self, user):
+    def store_user(self, user: "User") -> None:
         """Store the given user instance.
 
         Args:
@@ -1108,20 +1081,20 @@ class LocalSession(object):
         if user:
             self.logged_in_user_id = user.id
 
-    def save(self):
+    def save(self) -> None:
         """Remember the data in user local file system."""
-        self.valid_to = datetime.datetime.now(pytz.utc) + datetime.timedelta(days=10)
+        self.valid_to = datetime.now(pytz.utc) + timedelta(days=10)
         # serialize self
         dumped_data = json.dumps(
             {
-                "valid_to": self.datetime_to_millis(self.valid_to),
+                "valid_to": datetime_to_millis(self.valid_to),
                 "logged_in_user_id": self.logged_in_user_id,
             },
         )
         logger.debug(f"dumped session data : {dumped_data}")
         self._write_data(dumped_data)
 
-    def delete(self):
+    def delete(self) -> None:
         """Remove the cache file."""
         try:
             os.remove(self.session_file_full_path())
@@ -1129,7 +1102,7 @@ class LocalSession(object):
             pass
 
     @classmethod
-    def session_file_full_path(cls):
+    def session_file_full_path(cls) -> str:
         """Return the session file full path.
 
         Returns:
@@ -1141,7 +1114,7 @@ class LocalSession(object):
             )
         )
 
-    def _write_data(self, data):
+    def _write_data(self, data: str) -> None:
         """Write the given data to the local session file.
 
         Args:
@@ -1184,13 +1157,15 @@ class Role(Entity):
     __tablename__ = "Roles"
     __mapper_args__ = {"polymorphic_identity": "Role"}
 
-    role_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    role_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs) -> None:
         super(Role, self).__init__(**kwargs)
 
 
-def create_department_user(department):
+def create_department_user(department: "Department") -> "DepartmentUser":
     """Create DepartmentUser instance on association proxy.
 
     Args:
@@ -1206,7 +1181,7 @@ def create_department_user(department):
     return DepartmentUser(department=department)
 
 
-def create_client_user(client):
+def create_client_user(client: "Client") -> "ClientUser":
     """Create ClientUser instance on association proxy.
 
     Args:
@@ -1222,7 +1197,7 @@ def create_client_user(client):
     return ClientUser(client=client)
 
 
-def create_project_user(project):
+def create_project_user(project: "Project") -> "ProjectUser":
     """Create ProjectUser instance on association proxy.
 
     Args:
@@ -1254,44 +1229,39 @@ class AuthenticationLog(SimpleEntity):
     __tablename__ = "AuthenticationLogs"
     __mapper_args__ = {"polymorphic_identity": "AuthenticationLog"}
 
-    log_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
-
-    user_id = Column("uid", Integer, ForeignKey("Users.id"), nullable=False)
-
-    user = relationship(
-        "User",
+    log_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
+    user_id: Mapped[int] = mapped_column("uid", Integer, ForeignKey("Users.id"))
+    user: Mapped[User] = relationship(
         primaryjoin="AuthenticationLogs.c.uid==Users.c.id",
         uselist=False,
         back_populates="authentication_logs",
-        doc="The :class:`.User` instance that this AuthenticationLog is " "created for",
+        doc="The :class:`.User` instance that this AuthenticationLog is created for",
     )
+    action: Mapped[str] = mapped_column(Enum(LOGIN, LOGOUT, name="ActionNames"))
+    date: Mapped[datetime] = mapped_column(GenericDateTime)
 
-    action = Column("action", Enum(LOGIN, LOGOUT, name="ActionNames"), nullable=False)
-
-    date = Column(GenericDateTime, nullable=False)
-
-    def __init__(self, user=None, date=None, action=LOGIN, **kwargs):
+    def __init__(self, user=None, date=None, action=LOGIN, **kwargs) -> None:
         super(AuthenticationLog, self).__init__(**kwargs)
         self.user = user
         self.date = date
         self.action = action
 
-    def __lt__(self, other):
+    def __lt__(self, other: "AuthenticationLog") -> bool:
         """Make this object order-able.
 
         Args:
-            other (.AuthenticationLog): The other :class:`.AuthenticationLog` instance.
+            other (.AuthenticationLog): The other :class:`.AuthenticationLog`
+                instance.
 
         Returns:
             Tuple(str, str): The str key to be used for ordering.
         """
-        return (
-            f"{self.date} {self.action} {self.user.name}",
-            f"{other.date} {other.action} {other.user.name}",
-        )
+        return self.date < other.date
 
     @validates("user")
-    def __validate_user__(self, key, user):
+    def __validate_user__(self, key: str, user: "User") -> "User":
         """Validate the given user argument value.
 
         Args:
@@ -1313,7 +1283,7 @@ class AuthenticationLog(SimpleEntity):
         return user
 
     @validates("action")
-    def __validate_action__(self, key, action):
+    def __validate_action__(self, key: str, action: str) -> str:
         """Validate the given action argument value.
 
         Args:
@@ -1338,23 +1308,23 @@ class AuthenticationLog(SimpleEntity):
         return action
 
     @validates("date")
-    def __validate_date__(self, key, date):
+    def __validate_date__(self, key: str, date: datetime) -> datetime:
         """Validate the given date value.
 
         Args:
             key (str): The name of the validated column.
-            date (datetime.datetime): The datetime.datetime instance.
+            date (datetime): The datetime instance.
 
         Raises:
-            TypeError: If the given date is not a datetime.datetime instance.
+            TypeError: If the given date is not a datetime instance.
 
         Returns:
-            datetime.datetime: Returns the validated datetime.datetime instance.
+            datetime: Returns the validated datetime instance.
         """
         if date is None:
-            date = datetime.datetime.now(pytz.utc)
+            date = datetime.now(pytz.utc)
 
-        if not isinstance(date, datetime.datetime):
+        if not isinstance(date, datetime):
             raise TypeError(
                 f"{self.__class__.__name__}.date should be a datetime.datetime "
                 f"instance, not {date.__class__.__name__}: '{date}'"

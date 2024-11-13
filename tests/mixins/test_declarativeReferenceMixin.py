@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """ReferenceMixin related tests."""
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import Link, SimpleEntity
 from stalker.models.mixins import ReferenceMixin
@@ -11,7 +12,9 @@ class DeclRefMixA(SimpleEntity, ReferenceMixin):
 
     __tablename__ = "DeclRefMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclRefMixA"}
-    a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    a_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(DeclRefMixA, self).__init__(**kwargs)
@@ -23,7 +26,9 @@ class DeclRefMixB(SimpleEntity, ReferenceMixin):
 
     __tablename__ = "RefMixBs"
     __mapper_args__ = {"polymorphic_identity": "DeclRefMixB"}
-    b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    b_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(DeclRefMixB, self).__init__(**kwargs)

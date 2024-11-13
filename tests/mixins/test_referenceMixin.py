@@ -4,6 +4,7 @@
 import pytest
 
 from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import Entity, Link, ReferenceMixin, SimpleEntity, Type
 
@@ -13,7 +14,7 @@ class RefMixFooClass(SimpleEntity, ReferenceMixin):
 
     __tablename__ = "RefMixFooClasses"
     __mapper_args__ = {"polymorphic_identity": "RefMixFooClass"}
-    refMixFooClass_id = Column(
+    refMixFooClass_id: Mapped[int] = mapped_column(
         "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
@@ -148,7 +149,9 @@ def test_references_application_test(setup_reference_mixin_tester):
     class GreatEntity(SimpleEntity, ReferenceMixin):
         __tablename__ = "GreatEntities"
         __mapper_args__ = {"polymorphic_identity": "GreatEntity"}
-        ge_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+        ge_id: Mapped[int] = mapped_column(
+            "id", ForeignKey("SimpleEntities.id"), primary_key=True
+        )
 
     my_ge = GreatEntity(name="Test")
     # we should have a references attribute right now

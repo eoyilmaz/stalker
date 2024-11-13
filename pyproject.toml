@@ -61,7 +61,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-stalker = ["VERSION"]
+stalker = ["VERSION", "py.typed"]
 
 [tool.setuptools.exclude-package-data]
 stalker = ["alembic", "docs", "tests"]
@@ -106,7 +106,7 @@ env_list = ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13"]
 description = "run the tests with pytest"
 package = "wheel"
 wheel_build_env = ".pkg"
-set_env = { SQLALCHEMY_WARN_20 = "1"}
+set_env = { SQLALCHEMY_WARN_20 = "1" }
 deps = [
     "pytest>=6",
     "pytest-cov",
@@ -115,3 +115,5 @@ deps = [
 commands = [
     ["pytest"],
 ]
+
+[tool.mypy]

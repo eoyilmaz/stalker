@@ -1,9 +1,11 @@
 # -*- coding: utf-8 -*-
 """Review related classes and functions are situated here."""
 
-from sqlalchemy import Column, ForeignKey, Integer
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+
+from sqlalchemy import ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, synonym, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym, validates
 
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
@@ -13,6 +15,11 @@ from stalker.models.link import Link
 from stalker.models.mixins import ProjectMixin, ScheduleMixin, StatusMixin
 from stalker.models.status import Status
 from stalker.utils import walk_hierarchy
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.auth import User
+    from stalker.models.task import Task
+    from stalker.models.version import Version
 
 logger = get_logger(__name__)
 
@@ -65,37 +72,43 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
     __mapper_args__ = {"polymorphic_identity": "Review"}
 
-    review_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    review_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
-    task_id = Column(
-        Integer,
+    task_id: Mapped[int] = mapped_column(
         ForeignKey("Tasks.id"),
         nullable=False,
         doc="The id of the related task.",
     )
 
-    task = relationship(
-        "Task",
+    task: Mapped["Task"] = relationship(
         primaryjoin="Reviews.c.task_id==Tasks.c.id",
         uselist=False,
         back_populates="reviews",
         doc="The :class:`.Task` instance that this Review is created for",
     )
 
-    reviewer_id = Column(
-        Integer,
+    reviewer_id: Mapped[int] = mapped_column(
         ForeignKey("Users.id"),
         nullable=False,
         doc="The User which does the review, also on of the responsible of "
         "the related Task",
     )
 
-    reviewer = relationship("User", primaryjoin="Reviews.c.reviewer_id==Users.c.id")
+    reviewer: Mapped["User"] = relationship(
+        primaryjoin="Reviews.c.reviewer_id==Users.c.id"
+    )
 
-    _review_number = Column("review_number", Integer, default=1)
+    _review_number: Mapped[Optional[int]] = mapped_column("review_number", default=1)
 
-    def __init__(self, task=None, reviewer=None, description="", **kwargs):
-
+    def __init__(
+        self,
+        task: Optional["Task"] = None,
+        reviewer: Optional["User"] = None,
+        description: str = "",
+        **kwargs: Dict[str, Any],
+    ) -> None:
         kwargs["description"] = description
         SimpleEntity.__init__(self, **kwargs)
         ScheduleMixin.__init__(self, **kwargs)
@@ -113,7 +126,9 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         self._review_number = self.task.review_number + 1
 
     @validates("task")
-    def _validate_task(self, key, task):
+    def _validate_task(
+        self, key: str, task: Union[None, "Task"]
+    ) -> Union[None, "Task"]:
         """Validate the given task value.
 
         Args:
@@ -127,29 +142,31 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         Returns:
             Task: The validated Task instance.
         """
-        if task is not None:
-            from stalker.models.task import Task
+        if task is None:
+            return task
 
-            if not isinstance(task, Task):
-                raise TypeError(
-                    f"{self.__class__.__name__}.task should be an instance of "
-                    f"stalker.models.task.Task, not {task.__class__.__name__}: '{task}'"
-                )
+        from stalker.models.task import Task
 
-            # is it a leaf task
-            if not task.is_leaf:
-                raise ValueError(
-                    "It is only possible to create a review for a leaf tasks, "
-                    f"and {task} is not a leaf task."
-                )
+        if not isinstance(task, Task):
+            raise TypeError(
+                f"{self.__class__.__name__}.task should be an instance of "
+                f"stalker.models.task.Task, not {task.__class__.__name__}: '{task}'"
+            )
 
-            # set the review_number of this review instance
-            self._review_number = task.review_number + 1
+        # is it a leaf task
+        if not task.is_leaf:
+            raise ValueError(
+                "It is only possible to create a review for a leaf tasks, "
+                f"and {task} is not a leaf task."
+            )
+
+        # set the review_number of this review instance
+        self._review_number = task.review_number + 1
 
         return task
 
     @validates("reviewer")
-    def _validate_reviewer(self, key, reviewer):
+    def _validate_reviewer(self, key: str, reviewer: "User") -> "User":
         """Validate the given reviewer value.
 
         Args:
@@ -172,7 +189,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             )
         return reviewer
 
-    def _review_number_getter(self):
+    def _review_number_getter(self) -> int:
         """Return the review number value.
 
         Returns:
@@ -180,14 +197,14 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         """
         return self._review_number
 
-    review_number = synonym(
+    review_number: Mapped[Optional[int]] = synonym(
         "_review_number",
         descriptor=property(_review_number_getter),
         doc="returns the _review_number attribute value",
     )
 
     @property
-    def review_set(self):
+    def review_set(self) -> List["Review"]:
         """Return all the reviews in the same review set with this one.
 
         Returns:
@@ -206,7 +223,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
 
         return reviews
 
-    def is_finalized(self):
+    def is_finalized(self) -> bool:
         """Check if all reviews in the same set with this one are finalized.
 
         Returns:
@@ -215,12 +232,19 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         """
         return all([review.status.code != "NEW" for review in self.review_set])
 
-    def request_revision(self, schedule_timing=1, schedule_unit="h", description=""):
+    def request_revision(
+        self,
+        schedule_timing: Union[float, int] = 1,
+        schedule_unit: str = "h",
+        description: str = "",
+    ) -> None:
         """Finalize the review by requesting a revision.
 
         Args:
-            schedule_timing (float): The schedule timing value for this Review instance.
-            schedule_unit (str): The schedule unit value for this Review instance.
+            schedule_timing (Union[float, int]): The schedule timing value for
+                this Review instance.
+            schedule_unit (str): The schedule unit value for this Review
+                instance.
             description (str): The description for this Review instance.
         """
         # set self timing values
@@ -248,71 +272,69 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         # call finalize review_set
         self.finalize_review_set()
 
-    def finalize_review_set(self):
+    def finalize_review_set(self) -> None:
         """Finalize the current review set Review decisions."""
         with DBSession.no_autoflush:
             hrev = Status.query.filter_by(code="HREV").first()
             cmpl = Status.query.filter_by(code="CMPL").first()
 
         # check if all the reviews are finalized
-        if self.is_finalized():
-            logger.debug("all reviews are finalized")
+        if not self.is_finalized():
+            logger.debug("not all reviews are finalized yet!")
+            return
 
-            # check if there are any RREV reviews
-            revise_task = False
+        logger.debug("all reviews are finalized")
 
-            # now we can extend the timing of the task
-            total_seconds = self.task.total_logged_seconds
-            for review in self.review_set:
-                if review.status.code == "RREV":
-                    total_seconds += review.schedule_seconds
-                    revise_task = True
+        # check if there are any RREV reviews
+        revise_task = False
 
-            timing, unit = self.least_meaningful_time_unit(total_seconds)
-            self.task._review_number += 1
-            if revise_task:
-                # revise the task timing if the task needs more time
-                if total_seconds > self.task.schedule_seconds:
-                    logger.debug(f"total_seconds including reviews: {total_seconds}")
+        # now we can extend the timing of the task
+        total_seconds = self.task.total_logged_seconds
+        for review in self.review_set:
+            if review.status.code == "RREV":
+                total_seconds += review.schedule_seconds
+                revise_task = True
 
-                    self.task.schedule_timing = timing
-                    self.task.schedule_unit = unit
-                self.task.status = hrev
-            else:
-                # approve the task
-                self.task.status = cmpl
+        timing, unit = self.least_meaningful_time_unit(total_seconds)
+        self.task._review_number += 1
+        if revise_task:
+            # revise the task timing if the task needs more time
+            if total_seconds > self.task.schedule_seconds:
+                logger.debug(f"total_seconds including reviews: {total_seconds}")
 
-                # also clamp the schedule timing
                 self.task.schedule_timing = timing
                 self.task.schedule_unit = unit
-
-            # update task parent statuses
-            self.task.update_parent_statuses()
-
-            from stalker import TaskDependency
-
-            # update dependent task statuses
-
-            for dependency in walk_hierarchy(self.task, "dependent_of", method=1):
-                logger.debug(f"current TaskDependency object: {dependency}")
-                dependency.update_status_with_dependent_statuses()
-                if dependency.status.code in ["HREV", "PREV", "DREV", "OH", "STOP"]:
-                    # for tasks that are still be able to continue to work,
-                    # change the dependency_target to "onstart" to allow
-                    # the two of the tasks to work together and still let the
-                    # TJ to be able to schedule the tasks correctly
-                    with DBSession.no_autoflush:
-                        tdeps = TaskDependency.query.filter_by(
-                            depends_on=dependency
-                        ).all()
-                    for tdep in tdeps:
-                        tdep.dependency_target = "onstart"
-
-                # also update the status of parents of dependencies
-                dependency.update_parent_statuses()
-
+            self.task.status = hrev
         else:
-            logger.debug("not all reviews are finalized yet!")
+            # approve the task
+            self.task.status = cmpl
+
+            # also clamp the schedule timing
+            self.task.schedule_timing = timing
+            self.task.schedule_unit = unit
+
+        # update task parent statuses
+        self.task.update_parent_statuses()
+
+        from stalker import TaskDependency
+
+        # update dependent task statuses
+
+        for dependency in walk_hierarchy(self.task, "dependent_of", method=1):
+            logger.debug(f"current TaskDependency object: {dependency}")
+            dependency.update_status_with_dependent_statuses()
+            if dependency.status.code in ["HREV", "PREV", "DREV", "OH", "STOP"]:
+                # for tasks that are still be able to continue to work,
+                # change the dependency_target to "onstart" to allow
+                # the two of the tasks to work together and still let the
+                # TJ to be able to schedule the tasks correctly
+                with DBSession.no_autoflush:
+                    tdeps = TaskDependency.query.filter_by(depends_on=dependency).all()
+                for tdep in tdeps:
+                    tdep.dependency_target = "onstart"
+
+            # also update the status of parents of dependencies
+            dependency.update_parent_statuses()
 
 
 class Daily(Entity, StatusMixin, ProjectMixin):
@@ -333,25 +355,27 @@ class Daily(Entity, StatusMixin, ProjectMixin):
     __tablename__ = "Dailies"
     __mapper_args__ = {"polymorphic_identity": "Daily"}
 
-    daily_id = Column(
+    daily_id: Mapped[int] = mapped_column(
         "id",
-        Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
     )
 
-    links = association_proxy(
+    links: Mapped[Optional[List[Link]]] = association_proxy(
         "link_relations", "link", creator=lambda n: DailyLink(link=n)
     )
 
-    link_relations = relationship(
-        "DailyLink",
+    link_relations: Mapped[Optional[List["DailyLink"]]] = relationship(
         back_populates="daily",
         cascade="all, delete-orphan",
         primaryjoin="Dailies.c.id==Daily_Links.c.daily_id",
     )
 
-    def __init__(self, links=None, **kwargs):
+    def __init__(
+        self,
+        links: Optional[List[Link]] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         super(Daily, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
         ProjectMixin.__init__(self, **kwargs)
@@ -362,14 +386,14 @@ class Daily(Entity, StatusMixin, ProjectMixin):
         self.links = links
 
     @property
-    def versions(self):
+    def versions(self) -> List["Version"]:
         """Return the Version instances related to this Daily.
 
         Returns:
              List[Task]: A list of :class:`.Version` instances that this Daily is
                 related to (through the outputs of the versions).
         """
-        from stalker import Version
+        from stalker.models.version import Version
 
         return (
             Version.query.join(Version.outputs)
@@ -380,14 +404,15 @@ class Daily(Entity, StatusMixin, ProjectMixin):
         )
 
     @property
-    def tasks(self):
+    def tasks(self) -> List["Task"]:
         """Return the Task's related this Daily instance.
 
         Returns:
              List[Task]: A list of :class:`.Task` instances that this Daily is
                 related to (through the outputs of the versions)
         """
-        from stalker import Task, Version
+        from stalker.models.version import Version
+        from stalker.models.task import Task
 
         return (
             Task.query.join(Task.versions)
@@ -404,16 +429,20 @@ class DailyLink(Base):
 
     __tablename__ = "Daily_Links"
 
-    daily_id = Column(Integer, ForeignKey("Dailies.id"), primary_key=True)
-    daily = relationship(
-        Daily,
+    daily_id: Mapped[int] = mapped_column(
+        ForeignKey("Dailies.id"),
+        primary_key=True,
+    )
+    daily: Mapped[Daily] = relationship(
         back_populates="link_relations",
         primaryjoin="DailyLink.daily_id==Daily.daily_id",
     )
 
-    link_id = Column(Integer, ForeignKey("Links.id"), primary_key=True)
-    link = relationship(
-        Link,
+    link_id: Mapped[int] = mapped_column(
+        ForeignKey("Links.id"),
+        primary_key=True,
+    )
+    link: Mapped[Link] = relationship(
         primaryjoin="DailyLink.link_id==Link.link_id",
         doc="""stalker.models.link.Link instances related to the Daily
         instance.
@@ -434,9 +463,11 @@ class DailyLink(Base):
     )
 
     # may used for sorting
-    rank = Column(Integer, default=0)
+    rank: Mapped[Optional[int]] = mapped_column(default=0)
 
-    def __init__(self, daily=None, link=None, rank=0):
+    def __init__(
+        self, daily: Optional[Daily] = None, link: Optional[Link] = None, rank: int = 0
+    ) -> None:
         super(DailyLink, self).__init__()
 
         self.daily = daily
@@ -444,18 +475,18 @@ class DailyLink(Base):
         self.rank = rank
 
     @validates("link")
-    def _validate_link(self, key, link):
+    def _validate_link(self, key: str, link: Union[None, Link]) -> Union[None, Link]:
         """Validate the given link instance.
 
         Args:
             key (str): The name of the validated column.
-            link (Link): The like value to be validated.
+            link (Union[None, Link]): The like value to be validated.
 
         Raises:
             TypeError: When the given like value is not a Link instance.
 
         Returns:
-            Like: The validated Link instance.
+            Union[None, Link]: The validated Link instance.
         """
         from stalker import Link
 
@@ -469,18 +500,20 @@ class DailyLink(Base):
         return link
 
     @validates("daily")
-    def _validate_daily(self, key, daily):
+    def _validate_daily(
+        self, key: str, daily: Union[None, Daily]
+    ) -> Union[None, Daily]:
         """Validate the given daily instance.
 
         Args:
             key (str): The name of the validated column.
-            daily (Daily): The daily value to be validated.
+            daily (Union[None, Daily]): The daily value to be validated.
 
         Raises:
             TypeError: If the given daily value is not a Daily instance.
 
         Returns:
-            Daily: The validated daily instance.
+            Union[None, Daily]: The validated daily instance.
         """
         if daily is not None:
             if not isinstance(daily, Daily):

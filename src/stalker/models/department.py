@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 """Department related classes and functions are situated here."""
 
-from jinja2 import Template
+from typing import Any, Dict, List, Optional, Union
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
-from stalker import defaults
 from stalker.db.declarative import Base
 from stalker.log import get_logger
-from stalker.models.auth import User
+from stalker.models.auth import Role, User
 from stalker.models.entity import Entity
 
 logger = get_logger(__name__)
@@ -40,37 +39,36 @@ class Department(Entity):
     __auto_name__ = False
     __tablename__ = "Departments"
     __mapper_args__ = {"polymorphic_identity": "Department"}
-    department_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    department_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
     users = association_proxy(
         "user_role", "user", creator=lambda u: DepartmentUser(user=u)
     )
 
-    user_role = relationship(
-        "DepartmentUser",
+    user_role: Mapped[Optional[List["DepartmentUser"]]] = relationship(
         back_populates="department",
         cascade="all, delete-orphan",
         primaryjoin="Departments.c.id==Department_Users.c.did",
         doc="""List of users representing the members of this department.""",
     )
 
-    def __init__(self, users=None, **kwargs):
+    def __init__(
+        self, users: Optional[List[User]] = None, **kwargs: Optional[Dict[str, Any]]
+    ) -> None:
         super(Department, self).__init__(**kwargs)
 
         if users is None:
             users = []
 
-        # for user in users:
-        #     self.user_role.append(
-        #         DepartmentUser(department=self, user=user)
-        #     )
         self.users = users
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check if the other is equal to this one.
 
         Args:
-            other (Department): The other Department instance.
+            other (Any): The other Department instance.
 
         Returns:
             bool: True if the other object is also a Department and all the attributes
@@ -78,7 +76,7 @@ class Department(Entity):
         """
         return super(Department, self).__eq__(other) and isinstance(other, Department)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -89,7 +87,9 @@ class Department(Entity):
         return super(Department, self).__hash__()
 
     @validates("user_role")
-    def _validate_user_role(self, key, user_role):
+    def _validate_user_role(
+        self, key: str, user_role: "DepartmentUser"
+    ) -> "DepartmentUser":
         """Validate the given user_role value.
 
         Args:
@@ -102,7 +102,7 @@ class Department(Entity):
         return user_role
 
     @property
-    def to_tjp(self):
+    def to_tjp(self) -> str:
         """Output a TaskJuggler compatible representation.
 
         Returns:
@@ -113,7 +113,7 @@ class Department(Entity):
         tjp = f'resource {self.tjp_id} "{self.tjp_id}" {{'
         for resource in self.users:
             tjp += "\n"
-            tjp += "\n".join(f"{indent}{l}" for l in resource.to_tjp.split("\n"))
+            tjp += "\n".join(f"{indent}{line}" for line in resource.to_tjp.split("\n"))
         tjp += "\n}"
         return tjp
 
@@ -124,27 +124,26 @@ class DepartmentUser(Base):
 
     __tablename__ = "Department_Users"
 
-    user_id = Column("uid", Integer, ForeignKey("Users.id"), primary_key=True)
-
-    user = relationship(
-        "User",
+    user_id: Mapped[int] = mapped_column(
+        "uid", ForeignKey("Users.id"), primary_key=True
+    )
+    user: Mapped["User"] = relationship(
         back_populates="department_role",
         primaryjoin="DepartmentUser.user_id==User.user_id",
+        uselist=False,
     )
-
-    department_id = Column(
-        "did", Integer, ForeignKey("Departments.id"), primary_key=True
+    department_id: Mapped[int] = mapped_column(
+        "did", ForeignKey("Departments.id"), primary_key=True
     )
-
-    department = relationship(
-        "Department",
+    department: Mapped[Department] = relationship(
         back_populates="user_role",
         primaryjoin="DepartmentUser.department_id==Department.department_id",
+        uselist=False,
     )
-
-    role_id = Column("rid", Integer, ForeignKey("Roles.id"), nullable=True)
-
-    role = relationship("Role", primaryjoin="DepartmentUser.role_id==Role.role_id")
+    role_id: Mapped[Optional[int]] = mapped_column("rid", ForeignKey("Roles.id"))
+    role: Mapped[Role] = relationship(
+        primaryjoin="DepartmentUser.role_id==Role.role_id"
+    )
 
     def __init__(self, department=None, user=None, role=None):
         self.department = department
@@ -152,7 +151,9 @@ class DepartmentUser(Base):
         self.role = role
 
     @validates("department")
-    def _validate_department(self, key, department):
+    def _validate_department(
+        self, key: str, department: Union[None, Department]
+    ) -> Union[None, Department]:
         """Validate the given department value.
 
         Args:
@@ -176,7 +177,9 @@ class DepartmentUser(Base):
         return department
 
     @validates("user")
-    def _validate_user(self, key, user):
+    def _validate_user(
+        self, key: str, user: Union[None, "User"]
+    ) -> Union[None, "User"]:
         """Validate the given user value.
 
         Args:
@@ -200,23 +203,21 @@ class DepartmentUser(Base):
         return user
 
     @validates("role")
-    def _validate_role(self, key, role):
+    def _validate_role(self, key: str, role: Union[None, Role]) -> Union[None, Role]:
         """Validate the given role instance.
 
         Args:
             key (str): The name of the validated column.
-            role (Role): The role value to be validated.
+            role (Union[None, Role]): The role value to be validated.
 
         Raises:
             TypeError: If the given role value is not a
                 :class:`stalker.models.auth.Role` instance.
 
         Returns:
-            Role: The validated role value.
+            Union[None, Role]: The validated role value.
         """
         if role is not None:
-            from stalker import Role
-
             if not isinstance(role, Role):
                 raise TypeError(
                     f"{self.__class__.__name__}.role should be a "

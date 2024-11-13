@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Status and StatusList related functions and classes are situated here."""
-from six import string_types
+from typing import Any, Dict, List, Optional, Type, Union
 
 from sqlalchemy import Column, ForeignKey, Integer, Table
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
@@ -46,38 +46,42 @@ class Status(Entity, CodeMixin):
     __auto_name__ = False
     __tablename__ = "Statuses"
     __mapper_args__ = {"polymorphic_identity": "Status"}
-    status_id = Column(
+    status_id: Mapped[int] = mapped_column(
         "id",
-        Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
     )
 
-    def __init__(self, name=None, code=None, **kwargs):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        code: Optional[str] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         kwargs["name"] = name
         kwargs["code"] = code
 
         super(Status, self).__init__(**kwargs)
         self.code = code
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Status instance and has the same
                 attributes.
         """
-        if isinstance(other, string_types):
+        if isinstance(other, str):
             return (
                 self.name.lower() == other.lower() or self.code.lower() == other.lower()
             )
         else:
             return super(Status, self).__eq__(other) and isinstance(other, Status)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -169,15 +173,23 @@ class StatusList(Entity, TargetEntityTypeMixin):
 
     __unique_target__ = True
 
-    status_list_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    status_list_id: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
 
-    statuses = relationship(
-        "Status",
+    statuses: Mapped[Optional[List[Status]]] = relationship(
         secondary="StatusList_Statuses",
         doc="List of :class:`.Status` objects, showing the possible statuses",
     )
 
-    def __init__(self, statuses=None, target_entity_type=None, **kwargs):
+    def __init__(
+        self,
+        statuses: Optional[List[Status]] = None,
+        target_entity_type: Optional[Union[Type, str]] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         super(StatusList, self).__init__(**kwargs)
         TargetEntityTypeMixin.__init__(self, target_entity_type, **kwargs)
 
@@ -186,7 +198,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         self.statuses = statuses
 
     @validates("statuses")
-    def _validate_statuses(self, key, status):
+    def _validate_statuses(self, key: str, status: Status) -> Status:
         """Validate the given status value.
 
         Args:
@@ -207,11 +219,11 @@ class StatusList(Entity, TargetEntityTypeMixin):
             )
         return status
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a StatusList instance and has the same
@@ -224,7 +236,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
             and self.target_entity_type == other.target_entity_type
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -234,7 +246,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         """
         return super(StatusList, self).__hash__()
 
-    def __getitem__(self, key):
+    def __getitem__(self, key: int) -> Status:
         """Return the Status at the given key.
 
         Args:
@@ -245,7 +257,7 @@ class StatusList(Entity, TargetEntityTypeMixin):
         """
         return_item = None
         with DBSession.no_autoflush:
-            if isinstance(key, string_types):
+            if isinstance(key, str):
                 for item in self.statuses:
                     if item == key:
                         return_item = item

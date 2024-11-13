@@ -2,16 +2,19 @@
 """Repository related functionality is situated here."""
 import os
 import platform
+from typing import Any, Dict, Optional, TYPE_CHECKING
 
-from six import string_types
-
-from sqlalchemy import Column, ForeignKey, Integer, String, event
-from sqlalchemy.orm import validates
+from sqlalchemy import ForeignKey, String, event
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from stalker import defaults
 from stalker.log import get_logger
 from stalker.models.entity import Entity
 from stalker.models.mixins import CodeMixin
+
+if TYPE_CHECKING:  # pragma: no cover
+    from sqlalchemy.orm import Mapper
+    from sqlalchemy.engine import Connection
 
 logger = get_logger(__name__)
 
@@ -79,19 +82,23 @@ class Repository(Entity, CodeMixin):
     __auto_name__ = False
     __tablename__ = "Repositories"
     __mapper_args__ = {"polymorphic_identity": "Repository"}
-    repository_id = Column(
+    repository_id: Mapped[int] = mapped_column(
         "id",
-        Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
     )
-    linux_path = Column(String(256))
-    windows_path = Column(String(256))
-    macos_path = Column(String(256))
+    linux_path: Mapped[Optional[str]] = mapped_column(String(256))
+    windows_path: Mapped[Optional[str]] = mapped_column(String(256))
+    macos_path: Mapped[Optional[str]] = mapped_column(String(256))
 
     def __init__(
-        self, code="", linux_path="", windows_path="", macos_path="", **kwargs
-    ):
+        self,
+        code: str = "",
+        linux_path: str = "",
+        windows_path: str = "",
+        macos_path: str = "",
+        **kwargs: Dict[str, Any],
+    ) -> None:
         kwargs["code"] = code
         super(Repository, self).__init__(**kwargs)
         CodeMixin.__init__(self, **kwargs)
@@ -101,7 +108,7 @@ class Repository(Entity, CodeMixin):
         self.macos_path = macos_path
 
     @validates("linux_path")
-    def _validate_linux_path(self, key, linux_path):
+    def _validate_linux_path(self, key: str, linux_path: str) -> str:
         """Validate the given Linux path.
 
         Args:
@@ -114,10 +121,10 @@ class Repository(Entity, CodeMixin):
         Returns:
             str: The validated Linux path.
         """
-        if not isinstance(linux_path, string_types):
+        if not isinstance(linux_path, str):
             raise TypeError(
-                f"{self.__class__.__name__}.linux_path should be an instance of string, "
-                f"not {linux_path.__class__.__name__}: '{linux_path}'"
+                f"{self.__class__.__name__}.linux_path should be an instance of "
+                f"string, not {linux_path.__class__.__name__}: '{linux_path}'"
             )
 
         linux_path = os.path.normpath(linux_path) + "/"
@@ -133,7 +140,7 @@ class Repository(Entity, CodeMixin):
         return linux_path
 
     @validates("macos_path")
-    def _validate_macos_path(self, key, macos_path):
+    def _validate_macos_path(self, key: str, macos_path: str) -> str:
         """Validate the given macOS path.
 
         Args:
@@ -146,10 +153,10 @@ class Repository(Entity, CodeMixin):
         Returns:
             str: The validated macOS path.
         """
-        if not isinstance(macos_path, string_types):
+        if not isinstance(macos_path, str):
             raise TypeError(
-                f"{self.__class__.__name__}.macos_path should be an instance of string, "
-                f"not {macos_path.__class__.__name__}: '{macos_path}'"
+                f"{self.__class__.__name__}.macos_path should be an instance of "
+                f"string, not {macos_path.__class__.__name__}: '{macos_path}'"
             )
 
         macos_path = os.path.normpath(macos_path) + "/"
@@ -162,7 +169,7 @@ class Repository(Entity, CodeMixin):
         return macos_path
 
     @validates("windows_path")
-    def _validate_windows_path(self, key, windows_path):
+    def _validate_windows_path(self, key: str, windows_path: str) -> str:
         """Validate the given Windows path.
 
         Args:
@@ -175,7 +182,7 @@ class Repository(Entity, CodeMixin):
         Returns:
             str: The validated Windows path.
         """
-        if not isinstance(windows_path, string_types):
+        if not isinstance(windows_path, str):
             raise TypeError(
                 f"{self.__class__.__name__}.windows_path should be an instance of "
                 f"string, not {windows_path.__class__.__name__}: '{windows_path}'"
@@ -196,7 +203,7 @@ class Repository(Entity, CodeMixin):
         return windows_path
 
     @property
-    def path(self):
+    def path(self) -> str:
         """Return the repository path for the current OS.
 
         Returns:
@@ -213,7 +220,7 @@ class Repository(Entity, CodeMixin):
             return self.macos_path
 
     @path.setter
-    def path(self, path):
+    def path(self, path: str) -> None:
         """Set the path for the current OS.
 
         Args:
@@ -229,7 +236,7 @@ class Repository(Entity, CodeMixin):
         elif platform_system == "Darwin":
             self.macos_path = path
 
-    def is_in_repo(self, path):
+    def is_in_repo(self, path: str) -> bool:
         """Return True or False depending on the given is in this repo or not.
 
         Args:
@@ -245,7 +252,7 @@ class Repository(Entity, CodeMixin):
             or path.startswith(self.macos_path)
         )
 
-    def _to_path(self, path, replace_with):
+    def _to_path(self, path: str, replace_with: str) -> str:
         """Return the path replacing the OS related part with the given str.
 
         Args:
@@ -258,13 +265,13 @@ class Repository(Entity, CodeMixin):
         Returns:
             str: The converted path.
         """
-        if not isinstance(path, string_types):
+        if not isinstance(path, str):
             raise TypeError(
                 "path should be a string containing a file path, "
                 f"not {path.__class__.__name__}: '{path}'"
             )
 
-        if not isinstance(replace_with, string_types):
+        if not isinstance(replace_with, str):
             raise TypeError(
                 "replace_with should be a string containing a file path, "
                 f"not {replace_with.__class__.__name__}: '{replace_with}'"
@@ -284,7 +291,7 @@ class Repository(Entity, CodeMixin):
 
         return path
 
-    def to_linux_path(self, path):
+    def to_linux_path(self, path: str) -> str:
         """Return the Linux version of the given path.
 
         Args:
@@ -295,7 +302,7 @@ class Repository(Entity, CodeMixin):
         """
         return self._to_path(path, self.linux_path)
 
-    def to_windows_path(self, path):
+    def to_windows_path(self, path: str) -> str:
         """Return the Windows version of the given path.
 
         Args:
@@ -306,7 +313,7 @@ class Repository(Entity, CodeMixin):
         """
         return self._to_path(path, self.windows_path)
 
-    def to_macos_path(self, path):
+    def to_macos_path(self, path: str) -> str:
         """Return the macOS version of the given path.
 
         Args:
@@ -317,7 +324,7 @@ class Repository(Entity, CodeMixin):
         """
         return self._to_path(path, self.macos_path)
 
-    def to_native_path(self, path):
+    def to_native_path(self, path: str) -> str:
         """Return the native version of the given path.
 
         Args:
@@ -328,7 +335,7 @@ class Repository(Entity, CodeMixin):
         """
         return self._to_path(path, self.path)
 
-    def make_relative(self, path):
+    def make_relative(self, path: str) -> str:
         """Make the given path relative to the repository root.
 
         Args:
@@ -341,7 +348,7 @@ class Repository(Entity, CodeMixin):
         return os.path.relpath(path, self.path).replace("\\", "/")
 
     @classmethod
-    def find_repo(cls, path):
+    def find_repo(cls, path: str) -> "Repository":
         """Return the repository from the given path.
 
         Args:
@@ -374,7 +381,7 @@ class Repository(Entity, CodeMixin):
         return found_repo
 
     @classmethod
-    def to_os_independent_path(cls, path):
+    def to_os_independent_path(cls, path: str) -> str:
         """Replace the part of the given path with repository environment var.
 
          This makes the given path OS independent.
@@ -396,7 +403,7 @@ class Repository(Entity, CodeMixin):
             return path
 
     @property
-    def env_var(self):
+    def env_var(self) -> str:
         """Return the env var of this repo.
 
         Returns:
@@ -404,11 +411,11 @@ class Repository(Entity, CodeMixin):
         """
         return defaults.repo_env_var_template.format(code=self.code)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is equal to this one as an Entity, is a
@@ -423,7 +430,7 @@ class Repository(Entity, CodeMixin):
             and self.windows_path == other.windows_path
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -435,7 +442,11 @@ class Repository(Entity, CodeMixin):
 
 
 @event.listens_for(Repository, "after_insert")
-def receive_after_insert(mapper, connection, repo):
+def receive_after_insert(
+    mapper: "Mapper",
+    connection: "Connection",
+    repo: "Repository",
+) -> None:
     """Listen for the 'after_insert' event and update environment variables.
 
     This is a mapper event to update the environment variables with the newly inserted
