@@ -8,12 +8,12 @@ from typing import (
     Generator,
     List,
     Optional,
-    Self,
     TYPE_CHECKING,
     Tuple,
     Type,
     Union,
 )
+from typing_extensions import Self
 
 import pytz
 
