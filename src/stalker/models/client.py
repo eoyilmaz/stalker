@@ -1,14 +1,21 @@
 # -*- coding: utf-8 -*-
 """Client related classes and functions are situated here."""
 
-from sqlalchemy import Column, ForeignKey, Integer
+from typing import Any, Dict, List, Optional, TYPE_CHECKING
+
+from sqlalchemy import ForeignKey
 from sqlalchemy.ext.associationproxy import association_proxy
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker import log
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
 from stalker.models.project import create_project_client
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.auth import Role, User
+    from stalker.models.budget import Good
+    from stalker.models.project import Project, ProjectClient
 
 logger = log.get_logger(__name__)
 
@@ -54,12 +61,13 @@ class Client(Entity):
     __auto_name__ = False
     __tablename__ = "Clients"
     __mapper_args__ = {"polymorphic_identity": "Client"}
-    client_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    client_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
     users = association_proxy("user_role", "user", creator=lambda n: ClientUser(user=n))
 
-    user_role = relationship(
-        "ClientUser",
+    user_role: Mapped[Optional[List["ClientUser"]]] = relationship(
         back_populates="client",
         cascade="all, delete-orphan",
         primaryjoin="Clients.c.id==Client_Users.c.cid",
@@ -70,14 +78,13 @@ class Client(Entity):
         "project_role", "project", creator=lambda p: create_project_client(p)
     )
 
-    project_role = relationship(
-        "ProjectClient",
+    project_role: Mapped[Optional[List["ProjectClient"]]] = relationship(
         back_populates="client",
         cascade="all, delete-orphan",
         primaryjoin="Clients.c.id==Project_Clients.c.client_id",
     )
 
-    goods = relationship(
+    goods: Mapped[Optional[List["Good"]]] = relationship(
         "Good",
         back_populates="client",
         cascade="all",  # do not include "delete-orphan" we want to keep goods
@@ -85,7 +92,12 @@ class Client(Entity):
         primaryjoin="Clients.c.id==Goods.c.client_id",
     )
 
-    def __init__(self, users=None, projects=None, **kwargs):
+    def __init__(
+        self,
+        users: Optional[List["User"]] = None,
+        projects: Optional[List["Project"]] = None,
+        **kwargs: Optional[Dict[str, Any]],
+    ) -> None:
         super(Client, self).__init__(**kwargs)
 
         if users is None:
@@ -97,11 +109,11 @@ class Client(Entity):
         self.users = users
         self.projects = projects
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check if the other Client is equal to this once.
 
         Args:
-            other (Client): The other Client instance.
+            other (Any): The other Client instance.
 
         Returns:
             bool: Returns True, if other object is a Client instance and equal to this
@@ -109,7 +121,7 @@ class Client(Entity):
         """
         return super(Client, self).__eq__(other) and isinstance(other, Client)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -119,7 +131,8 @@ class Client(Entity):
         """
         return super(Client, self).__hash__()
 
-    def to_tjp(self):
+    @property
+    def to_tjp(self) -> str:
         """Return a TaskJuggler compatible str representation of this Client instance.
 
         Returns:
@@ -128,7 +141,7 @@ class Client(Entity):
         return ""
 
     @validates("goods")
-    def _validate_good(self, key, good):
+    def _validate_good(self, key: str, good: "Good") -> "Good":
         """Validate the given good value.
 
         Args:
@@ -163,20 +176,24 @@ class ClientUser(Base):
     """
 
     __tablename__ = "Client_Users"
-    user_id = Column("uid", Integer, ForeignKey("Users.id"), primary_key=True)
-    user = relationship(
-        "User",
+    user_id: Mapped[int] = mapped_column(
+        "uid", ForeignKey("Users.id"), primary_key=True
+    )
+    user: Mapped["User"] = relationship(
         back_populates="company_role",
         primaryjoin="ClientUser.user_id==User.user_id",
     )
-    client_id = Column("cid", Integer, ForeignKey("Clients.id"), primary_key=True)
-    client = relationship(
-        "Client",
+    client_id: Mapped[int] = mapped_column(
+        "cid", ForeignKey("Clients.id"), primary_key=True
+    )
+    client: Mapped["Client"] = relationship(
         back_populates="user_role",
         primaryjoin="ClientUser.client_id==Client.client_id",
     )
-    role_id = Column("rid", Integer, ForeignKey("Roles.id"), nullable=True)
-    role = relationship("Role", primaryjoin="ClientUser.role_id==Role.role_id")
+    role_id: Mapped[Optional[int]] = mapped_column("rid", ForeignKey("Roles.id"))
+    role: Mapped[Optional["Role"]] = relationship(
+        primaryjoin="ClientUser.role_id==Role.role_id"
+    )
 
     def __init__(self, client=None, user=None, role=None):
         self.user = user
@@ -184,7 +201,7 @@ class ClientUser(Base):
         self.role = role
 
     @validates("client")
-    def _validate_client(self, key, client):
+    def _validate_client(self, key: str, client: "Client") -> "Client":
         """Validate the given client value.
 
         Args:
@@ -207,7 +224,7 @@ class ClientUser(Base):
         return client
 
     @validates("user")
-    def _validate_user(self, key, user):
+    def _validate_user(self, key: str, user: "User") -> "User":
         """Validate the given user value.
 
         Args:
@@ -233,7 +250,7 @@ class ClientUser(Base):
         return user
 
     @validates("role")
-    def _validate_role(self, key, role):
+    def _validate_role(self, key: str, role: "Role") -> "Role":
         """Validate the given role instance.
 
         Args:
@@ -248,7 +265,7 @@ class ClientUser(Base):
             Role: The validated :class:`stalker.models.auth.Role` instance.
         """
         if role is not None:
-            from stalker import Role
+            from stalker.models.auth import Role
 
             if not isinstance(role, Role):
                 raise TypeError(

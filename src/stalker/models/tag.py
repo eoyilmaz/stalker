@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tag related functions and classes are situated here."""
+from typing import Any, Dict
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker.log import get_logger
 from stalker.models.entity import SimpleEntity
@@ -19,16 +21,18 @@ class Tag(SimpleEntity):
     __auto_name__ = False
     __tablename__ = "Tags"
     __mapper_args__ = {"polymorphic_identity": "Tag"}
-    tag_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    tag_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]) -> None:
         super(Tag, self).__init__(**kwargs)
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Tag instance and has the same

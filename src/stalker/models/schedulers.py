@@ -9,6 +9,7 @@ import subprocess
 import sys
 import tempfile
 import time
+from typing import List, Optional, TYPE_CHECKING, Union
 
 from jinja2 import Template
 
@@ -22,6 +23,8 @@ from stalker.log import get_logger
 from stalker.models.project import Project
 from stalker.models.task import Task, Task_Computed_Resources
 
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.studio import Studio
 
 logger = get_logger(__name__)
 
@@ -32,24 +35,25 @@ class SchedulerBase(object):
     All the schedulers should be derived from this class.
     """
 
-    def __init__(self, studio=None):
+    def __init__(self, studio: Optional["Studio"] = None) -> None:
         self._studio = None
         self.studio = studio
 
-    def _validate_studio(self, studio):
+    def _validate_studio(self, studio: Union[None, "Studio"]) -> Union[None, "Studio"]:
         """Validate the given studio value.
 
         Args:
-            studio (Studio): The Studio instance to set the studio attribute to.
+            studio (Union[None, Studio]): The Studio instance to set the studio
+                attribute to.
 
         Raises:
             TypeError: If the given value is not a Studio instance.
 
         Returns:
-            Studio: The validated Studio instance.
+            Union[None, Studio]: The validated Studio instance.
         """
         if studio is not None:
-            from stalker import Studio
+            from stalker.models.studio import Studio
 
             if not isinstance(studio, Studio):
                 raise TypeError(
@@ -60,7 +64,7 @@ class SchedulerBase(object):
         return studio
 
     @property
-    def studio(self):
+    def studio(self) -> Union[None, "Studio"]:
         """Return studio attribute value.
 
         Returns:
@@ -69,7 +73,7 @@ class SchedulerBase(object):
         return self._studio
 
     @studio.setter
-    def studio(self, studio):
+    def studio(self, studio: Union[None, "Studio"]) -> None:
         """Set studio attribute.
 
         Args:
@@ -77,7 +81,7 @@ class SchedulerBase(object):
         """
         self._studio = self._validate_studio(studio)
 
-    def schedule(self):
+    def schedule(self) -> None:
         """Schedule function that needs to be implemented in the derivatives.
 
         Raises:
@@ -184,8 +188,12 @@ class TaskJugglerScheduler(SchedulerBase):
     """
 
     def __init__(
-        self, studio=None, compute_resources=False, parsing_method=0, projects=None
-    ):
+        self,
+        studio: Optional["Studio"] = None,
+        compute_resources: Optional[bool] = False,
+        parsing_method: Optional[int] = 0,
+        projects: Optional[Project] = None,
+    ) -> None:
         super(TaskJugglerScheduler, self).__init__(studio)
 
         self.tjp_content = ""
@@ -206,7 +214,7 @@ class TaskJugglerScheduler(SchedulerBase):
         self._projects = []
         self.projects = projects
 
-    def _create_tjp_file(self):
+    def _create_tjp_file(self) -> None:
         """Create the tjp file."""
         self.temp_file_full_path = tempfile.mktemp(prefix="Stalker_")
         self.temp_file_path = os.path.dirname(self.temp_file_full_path)
@@ -214,7 +222,7 @@ class TaskJugglerScheduler(SchedulerBase):
         self.tjp_file_full_path = f"{self.temp_file_full_path}.tjp"
         self.csv_file_full_path = f"{self.temp_file_full_path}.csv"
 
-    def _create_tjp_file_content(self):  # noqa: C901
+    def _create_tjp_file_content(self) -> None:  # noqa: C901
         """Create the tjp file content."""
         start = time.time()
 
@@ -514,31 +522,31 @@ order by path_as_text"""  # noqa: B950
             "rendering the whole tjp file took: {:0.3f} seconds".format(end - start)
         )
 
-    def _fill_tjp_file(self):
+    def _fill_tjp_file(self) -> None:
         """Fill the tjp file with content."""
         with open(self.tjp_file_full_path, "w+") as self.tjp_file:
             self.tjp_file.write(self.tjp_content)
 
-    def _delete_tjp_file(self):
+    def _delete_tjp_file(self) -> None:
         """Delete the temp tjp file."""
         try:
             os.remove(self.tjp_file_full_path)
         except OSError:
             pass
 
-    def _delete_csv_file(self):
+    def _delete_csv_file(self) -> None:
         """Delete the temp csv file."""
         try:
             os.remove(self.csv_file_full_path)
         except OSError:
             pass
 
-    def _clean_up(self):
+    def _clean_up(self) -> None:
         """Remove the temp files."""
         self._delete_tjp_file()
         self._delete_csv_file()
 
-    def _parse_csv_file(self):
+    def _parse_csv_file(self) -> None:
         """Parse the csv file and set the Task.computes_start and Task.computed_end."""
         parsing_start = time.time()
 
@@ -635,7 +643,7 @@ order by path_as_text"""  # noqa: B950
             )
         )
 
-    def schedule(self):
+    def schedule(self) -> str:
         """Schedule the project or all projects in the Studio.
 
         Raises:
@@ -646,7 +654,7 @@ order by path_as_text"""  # noqa: B950
             str: The tj3 command output.
         """
         # check the studio attribute
-        from stalker import Studio
+        from stalker.models.studio import Studio
 
         if not isinstance(self.studio, Studio):
             raise TypeError(
@@ -720,7 +728,7 @@ order by path_as_text"""  # noqa: B950
 
         return stderr_buffer
 
-    def _validate_projects(self, projects):
+    def _validate_projects(self, projects: List[Project]) -> List[Project]:
         """Validate the given projects value.
 
         Args:
@@ -764,7 +772,7 @@ order by path_as_text"""  # noqa: B950
         return projects
 
     @property
-    def projects(self):
+    def projects(self) -> List[Project]:
         """Return the projects attribute value.
 
         Returns:
@@ -773,7 +781,7 @@ order by path_as_text"""  # noqa: B950
         return self._projects
 
     @projects.setter
-    def projects(self, projects):
+    def projects(self, projects: List[Project]) -> None:
         """Set the projects attribute.
 
         Args:

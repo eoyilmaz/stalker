@@ -3,7 +3,8 @@
 
 import pytest
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import AmountMixin, SimpleEntity
 
@@ -13,8 +14,8 @@ class AmountMixinFooMixedInClass(SimpleEntity, AmountMixin):
 
     __tablename__ = "AmountMixinFooMixedInClasses"
     __mapper_args__ = {"polymorphic_identity": "AmountMixinFooMixedInClass"}
-    amountMixinFooMixedInClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    amountMixinFooMixedInClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
     __id_column__ = "amountMixinFooMixedInClass_id"
 

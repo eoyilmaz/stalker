@@ -22,4 +22,5 @@ sphinx-autoapi
 # sphinx-findthedocs
 tox
 twine
+types-pytz
 wheel

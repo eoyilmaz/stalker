@@ -2,11 +2,10 @@
 """Link related classes and utility functions are situated here."""
 
 import os
+from typing import Any, Dict, Optional, Union
 
-from six import string_types
-
-from sqlalchemy import Column, ForeignKey, Integer, String, Text
-from sqlalchemy.orm import validates
+from sqlalchemy import ForeignKey, String, Text
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from stalker.log import get_logger
 from stalker.models.entity import Entity
@@ -58,24 +57,31 @@ class Link(Entity):
     __tablename__ = "Links"
     __mapper_args__ = {"polymorphic_identity": "Link"}
 
-    link_id = Column(
+    link_id: Mapped[int] = mapped_column(
         "id",
-        Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
     )
 
-    original_filename = Column(String(256))  # this is a limit for most
+    # this is a limit for most
+    original_filename: Mapped[Optional[str]] = mapped_column(String(256))
     # file systems
-    full_path = Column(Text, doc="The full path of the url to the link.")
+    full_path: Mapped[Optional[str]] = mapped_column(
+        Text, doc="The full path of the url to the link."
+    )
 
-    def __init__(self, full_path="", original_filename="", **kwargs):
+    def __init__(
+        self,
+        full_path: Optional[str] = "",
+        original_filename: Optional[str] = "",
+        **kwargs: Optional[Dict[str, Any]],
+    ) -> None:
         super(Link, self).__init__(**kwargs)
         self.full_path = full_path
         self.original_filename = original_filename
 
     @validates("full_path")
-    def _validate_full_path(self, key, full_path):
+    def _validate_full_path(self, key: str, full_path: Union[None, str]) -> str:
         """Validate the given full_path value.
 
         Args:
@@ -91,7 +97,7 @@ class Link(Entity):
         if full_path is None:
             full_path = ""
 
-        if not isinstance(full_path, string_types):
+        if not isinstance(full_path, str):
             raise TypeError(
                 f"{self.__class__.__name__}.full_path should be an instance of string, "
                 f"not {full_path.__class__.__name__}: '{full_path}'"
@@ -100,7 +106,9 @@ class Link(Entity):
         return self._format_path(full_path)
 
     @validates("original_filename")
-    def _validate_original_filename(self, key, original_filename):
+    def _validate_original_filename(
+        self, key: str, original_filename: Union[None, str]
+    ) -> str:
         """Validate the given original_filename value.
 
         Args:
@@ -120,7 +128,7 @@ class Link(Entity):
         if original_filename == "":
             original_filename = filename_from_path
 
-        if not isinstance(original_filename, string_types):
+        if not isinstance(original_filename, str):
             raise TypeError(
                 f"{self.__class__.__name__}.original_filename should be an instance of "
                 "string, "
@@ -130,13 +138,13 @@ class Link(Entity):
         return original_filename
 
     @staticmethod
-    def _format_path(path):
+    def _format_path(path: Union[bytes, str]) -> str:
         """Format the path to internal format.
 
         The path is using the Linux forward slashes for path separation.
 
         Args:
-            path (str): The path value to be formatted.
+            path (Union[bytes, str]): The path value to be formatted.
 
         Returns:
             str: The formatted path value.
@@ -147,7 +155,7 @@ class Link(Entity):
         return path.replace("\\", "/")
 
     @property
-    def path(self):
+    def path(self) -> str:
         """Return the path part of the full_path.
 
         Returns:
@@ -156,7 +164,7 @@ class Link(Entity):
         return os.path.split(self.full_path)[0]
 
     @path.setter
-    def path(self, path):
+    def path(self, path: str) -> None:
         """Set the path part of the full_path attribute.
 
         Args:
@@ -169,7 +177,7 @@ class Link(Entity):
         if path is None:
             raise TypeError(f"{self.__class__.__name__}.path cannot be set to None")
 
-        if not isinstance(path, string_types):
+        if not isinstance(path, str):
             raise TypeError(
                 f"{self.__class__.__name__}.path should be an instance of str, "
                 f"not {path.__class__.__name__}: '{path}'"
@@ -183,7 +191,7 @@ class Link(Entity):
         self.full_path = self._format_path(os.path.join(path, self.filename))
 
     @property
-    def filename(self):
+    def filename(self) -> str:
         """Return the filename part of the full_path attribute.
 
         Returns:
@@ -192,11 +200,11 @@ class Link(Entity):
         return os.path.split(self.full_path)[1]
 
     @filename.setter
-    def filename(self, filename):
+    def filename(self, filename: Union[None, str]) -> None:
         """Set the filename part of the full_path attr.
 
         Args:
-            filename (str): The new filename.
+            filename (Union[None, str]): The new filename.
 
         Raises:
             TypeError: If the given filename is not a str.
@@ -204,7 +212,7 @@ class Link(Entity):
         if filename is None:
             filename = ""
 
-        if not isinstance(filename, string_types):
+        if not isinstance(filename, str):
             raise TypeError(
                 f"{self.__class__.__name__}.filename should be an instance of str, "
                 f"not {filename.__class__.__name__}: '{filename}'"
@@ -213,7 +221,7 @@ class Link(Entity):
         self.full_path = self._format_path(os.path.join(self.path, filename))
 
     @property
-    def extension(self):
+    def extension(self) -> str:
         """Return the extension value.
 
         Returns:
@@ -222,11 +230,11 @@ class Link(Entity):
         return os.path.splitext(self.full_path)[1]
 
     @extension.setter
-    def extension(self, extension):
+    def extension(self, extension: Union[None, str]) -> None:
         """Set the extension value.
 
         Args:
-            extension (str): The new extension value.
+            extension (Union[None, str]): The new extension value.
 
         Raises:
             TypeError: If the given extension value is not a str.
@@ -234,7 +242,7 @@ class Link(Entity):
         if extension is None:
             extension = ""
 
-        if not isinstance(extension, string_types):
+        if not isinstance(extension, str):
             raise TypeError(
                 f"{self.__class__.__name__}.extension should be an instance of str, "
                 f"not {extension.__class__.__name__}: '{extension}'"
@@ -246,11 +254,11 @@ class Link(Entity):
 
         self.filename = os.path.splitext(self.filename)[0] + extension
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check if the other is equal to this Link.
 
         Args:
-            other (object): The other object to be checked for equality.
+            other (Any): The other object to be checked for equality.
 
         Returns:
             bool: If the other object is a Link instance and has the same full_path and
@@ -263,7 +271,7 @@ class Link(Entity):
             and self.type == other.type
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.

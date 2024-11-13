@@ -1,13 +1,17 @@
 # -*- coding: utf-8 -*-
 """Asset related classes."""
 
-from sqlalchemy import Column, ForeignKey, Integer
+import logging
+from typing import Any
+
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import log
 from stalker.models.mixins import CodeMixin, ReferenceMixin
 from stalker.models.task import Task
 
-logger = log.get_logger(__name__)
+logger: logging.Logger = log.get_logger(__name__)
 log.set_level(log.logging_level)
 
 
@@ -44,7 +48,9 @@ class Asset(Task, CodeMixin):
     __tablename__ = "Assets"
     __mapper_args__ = {"polymorphic_identity": "Asset"}
 
-    asset_id = Column("id", Integer, ForeignKey("Tasks.id"), primary_key=True)
+    asset_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Tasks.id"), primary_key=True
+    )
 
     def __init__(self, code, **kwargs) -> None:
         kwargs["code"] = code
@@ -53,11 +59,11 @@ class Asset(Task, CodeMixin):
         CodeMixin.__init__(self, **kwargs)
         ReferenceMixin.__init__(self, **kwargs)
 
-    def __eq__(self, other) -> bool:
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object equals to this asset.

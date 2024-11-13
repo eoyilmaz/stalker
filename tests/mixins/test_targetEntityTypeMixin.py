@@ -4,7 +4,8 @@
 import sys
 import pytest
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import Project, SimpleEntity
 from stalker.models.mixins import TargetEntityTypeMixin
@@ -21,8 +22,8 @@ class TargetEntityTypeMixedClass(SimpleEntity, TargetEntityTypeMixin):
 
     __tablename__ = "TarEntMixClasses"
     __mapper_args__ = {"polymorphic_identity": "TarEntMixClass"}
-    tarMixClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    tarMixClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):

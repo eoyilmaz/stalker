@@ -2,15 +2,32 @@
 """Mixins are situated here."""
 
 import datetime
+from typing import (
+    Any,
+    Dict,
+    Generator,
+    List,
+    Optional,
+    Self,
+    TYPE_CHECKING,
+    Tuple,
+    Type,
+    Union,
+)
 
 import pytz
-
-from six import string_types
 
 from sqlalchemy import Column, Enum, Float, ForeignKey, Integer, Interval, String, Table
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
-from sqlalchemy.orm import backref, relationship, synonym, validates
+from sqlalchemy.orm import (
+    Mapped,
+    backref,
+    mapped_column,
+    relationship,
+    synonym,
+    validates,
+)
 
 from stalker import defaults
 from stalker.db.declarative import Base
@@ -19,16 +36,25 @@ from stalker.db.types import GenericDateTime
 from stalker.log import get_logger
 from stalker.utils import check_circular_dependency, make_plural, walk_hierarchy
 
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.auth import Permission
+    from stalker.models.project import Project
+    from stalker.models.status import Status, StatusList
+    from stalker.models.link import Link
+    from stalker.models.studio import WorkingHours
+
+
 logger = get_logger(__name__)
 
 
 def create_secondary_table(
-    primary_cls_name,
-    secondary_cls_name,
-    primary_cls_table_name,
-    secondary_cls_table_name,
-    secondary_table_name=None,
-):
+    primary_cls_name: str,
+    secondary_cls_name: str,
+    primary_cls_table_name: str,
+    secondary_cls_table_name: str,
+    secondary_table_name: Optional[str] = None,
+) -> Table:
     """Create any secondary table.
 
     Args:
@@ -37,6 +63,18 @@ def create_secondary_table(
         primary_cls_table_name (str): The primary class table name.
         secondary_cls_table_name (str): The secondary class table name.
         secondary_table_name (Union[None, str]): Optional secondary table name.
+
+    Raises:
+        TypeError: If primary_cls_name is not a str.
+        TypeError: If secondary_cls_name is not a str.
+        TypeError: If primary_cls_table_name is not a str.
+        TypeError: If secondary_cls_table_name is not a str.
+        TypeError: If secondary_table_name is not a str.
+        ValueError: If primary_cls_name is an empty str.
+        ValueError: If secondary_cls_name is an empty str.
+        ValueError: If primary_cls_table_name is an empty str.
+        ValueError: If secondary_cls_table_name is an empty str.
+        ValueError: If secondary_table_name is an empty str.
 
     Returns:
         Table: The secondary table.
@@ -159,7 +197,7 @@ class TargetEntityTypeMixin(object):
         The ``a_obj`` will only be accepted by :class:`.Project` instances. You cannot
         assign it to any other class which accepts a :class:`.Type` instance.
 
-        To control the mixed-in class behaviour add these class variables to the
+        To control the mixed-in class behavior add these class variables to the
         mixed in class:
 
             __nullable_target__ : controls if the target_entity_type can be
@@ -173,23 +211,23 @@ class TargetEntityTypeMixin(object):
     __unique_target__ = False
 
     @declared_attr
-    def _target_entity_type(cls):
+    def _target_entity_type(cls) -> Mapped[str]:
         """Create the _target_entity_type attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the _target_entity_type attribute.
         """
-        return Column(
+        return mapped_column(
             "target_entity_type",
             String(128),
             nullable=cls.__nullable_target__,
             unique=cls.__unique_target__,
         )
 
-    def __init__(self, target_entity_type=None, **kwargs):
+    def __init__(self, target_entity_type: Optional[str] = None, **kwargs) -> None:
         self._target_entity_type = self._validate_target_entity_type(target_entity_type)
 
-    def _validate_target_entity_type(self, target_entity_type):
+    def _validate_target_entity_type(self, target_entity_type: Union[str, Type]) -> str:
         """Validate the given target_entity_type value.
 
         Args:
@@ -220,7 +258,7 @@ class TargetEntityTypeMixin(object):
 
         return target_entity_type
 
-    def _target_entity_type_getter(self):
+    def _target_entity_type_getter(self) -> str:
         """Return the _target_entity_type attribute value.
 
         Returns:
@@ -229,7 +267,7 @@ class TargetEntityTypeMixin(object):
         return self._target_entity_type
 
     @declared_attr
-    def target_entity_type(cls):
+    def target_entity_type(cls) -> Mapped[str]:
         """Create the target_entity_type attribute as a declared attribute.
 
         Returns:
@@ -288,20 +326,24 @@ class StatusMixin(object):
                 will return a proper :class:`.Status` instance.
     """
 
-    def __init__(self, status=None, status_list=None, **kwargs):
+    def __init__(
+        self,
+        status: Union[None, "Status"] = None,
+        status_list: Union[None, "StatusList"] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         self.status_list = status_list
         self.status = status
 
     @declared_attr
-    def status_id(cls):
+    def status_id(cls) -> Mapped[int]:
         """Create the status_id attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the status_id attribute.
         """
-        return Column(
+        return mapped_column(
             "status_id",
-            Integer,
             ForeignKey("Statuses.id"),
             nullable=False,
             # This is set to nullable=True but it is impossible to set the
@@ -314,7 +356,7 @@ class StatusMixin(object):
         )
 
     @declared_attr
-    def status(cls):
+    def status(cls) -> Mapped["Status"]:
         """Create the status attribute as a declared attribute.
 
         Returns:
@@ -332,18 +374,18 @@ class StatusMixin(object):
         )
 
     @declared_attr
-    def status_list_id(cls):
+    def status_list_id(cls) -> Mapped[int]:
         """Create the status_list_id attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the status_list_id attribute.
         """
-        return Column(
-            "status_list_id", Integer, ForeignKey("StatusLists.id"), nullable=False
+        return mapped_column(
+            "status_list_id", ForeignKey("StatusLists.id"), nullable=False
         )
 
     @declared_attr
-    def status_list(cls):
+    def status_list(cls) -> Mapped["StatusList"]:
         """Create the status_list attribute as a declared attribute.
 
         Returns:
@@ -355,12 +397,15 @@ class StatusMixin(object):
         )
 
     @validates("status_list")
-    def _validate_status_list(self, key, status_list):
+    def _validate_status_list(
+        self, key: str, status_list: Union[None, "StatusList"]
+    ) -> "StatusList":
         """Validate the given status_list value.
 
         Args:
             key (str): The name of the validated column.
-            status_list (StatusList): The status_list value to be validated.
+            status_list (Union[None, StatusList]): The status_list value to be
+                validated.
 
         Raises:
             TypeError: If the given status_list value is not a StatusList instance.
@@ -419,7 +464,7 @@ class StatusMixin(object):
         return status_list
 
     @validates("status")
-    def _validate_status(self, key, status):
+    def _validate_status(self, key: str, status: "Status") -> "Status":
         """Validate the given status value.
 
         Args:
@@ -562,16 +607,22 @@ class DateRangeMixin(object):
             rules.
     """
 
-    def __init__(self, start=None, end=None, duration=None, **kwargs):
+    def __init__(
+        self,
+        start: Optional[datetime.datetime] = None,
+        end: Optional[datetime.datetime] = None,
+        duration: Optional[datetime.timedelta] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         self._start, self._end, self._duration = self._validate_dates(
             start, end, duration
         )
 
     @declared_attr
-    def _end(cls):
-        return Column("end", GenericDateTime)
+    def _end(cls) -> Mapped[Optional[datetime.datetime]]:
+        return mapped_column("end", GenericDateTime)
 
-    def _end_getter(self):
+    def _end_getter(self) -> datetime.datetime:
         """Return the date that the entity should be delivered.
 
         The end can be set to a datetime.timedelta and in this case it will be
@@ -585,7 +636,7 @@ class DateRangeMixin(object):
         with DBSession.no_autoflush:
             return self._end
 
-    def _end_setter(self, end):
+    def _end_setter(self, end: datetime.datetime) -> None:
         """Set the end attribute value.
 
         Args:
@@ -596,7 +647,7 @@ class DateRangeMixin(object):
         )
 
     @declared_attr
-    def end(cls):
+    def end(cls) -> Mapped[Optional[datetime.datetime]]:
         """Create the end attribute as a declared attribute.
 
         Returns:
@@ -605,15 +656,15 @@ class DateRangeMixin(object):
         return synonym("_end", descriptor=property(cls._end_getter, cls._end_setter))
 
     @declared_attr
-    def _start(cls):
+    def _start(cls) -> Mapped[Optional[datetime.datetime]]:
         """Create the start attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the start attribute.
         """
-        return Column("start", GenericDateTime)
+        return mapped_column("start", GenericDateTime)
 
-    def _start_getter(self):
+    def _start_getter(self) -> datetime.datetime:
         """Return the date that this entity should start.
 
         Also effects the :attr:`.DateRangeMixin.end` attribute value in certain
@@ -629,7 +680,7 @@ class DateRangeMixin(object):
         with DBSession.no_autoflush:
             return self._start
 
-    def _start_setter(self, start):
+    def _start_setter(self, start: datetime.datetime) -> None:
         """Set the start attribute.
 
         Args:
@@ -640,7 +691,7 @@ class DateRangeMixin(object):
         )
 
     @declared_attr
-    def start(cls):
+    def start(cls) -> Mapped[Optional[datetime.datetime]]:
         """Create the start attribute as a declared attribute.
 
         Returns:
@@ -655,15 +706,15 @@ class DateRangeMixin(object):
         )
 
     @declared_attr
-    def _duration(cls):
+    def _duration(cls) -> Mapped[Optional[datetime.timedelta]]:
         """Create the duration attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the duration attribute.
         """
-        return Column("duration", Interval)
+        return mapped_column("duration", Interval)
 
-    def _duration_getter(self):
+    def _duration_getter(self) -> datetime.timedelta:
         """Return the duration value.
 
         Returns:
@@ -672,7 +723,7 @@ class DateRangeMixin(object):
         with DBSession.no_autoflush:
             return self._duration
 
-    def _duration_setter(self, duration):
+    def _duration_setter(self, duration: datetime.timedelta) -> None:
         """Set the duration value.
 
         Args:
@@ -696,7 +747,7 @@ class DateRangeMixin(object):
             )
 
     @declared_attr
-    def duration(self):
+    def duration(self) -> Mapped[Optional[datetime.timedelta]]:
         """Return the duration attr as a synonym.
 
         Returns:
@@ -715,7 +766,12 @@ class DateRangeMixin(object):
             ),
         )
 
-    def _validate_dates(self, start, end, duration):  # noqa: C901
+    def _validate_dates(
+        self,
+        start: datetime.datetime,
+        end: datetime.datetime,
+        duration: datetime.timedelta,
+    ) -> Tuple[datetime.datetime, datetime.datetime, datetime.timedelta]:  # noqa: C901
         """Update the date values.
 
         Args:
@@ -789,25 +845,25 @@ class DateRangeMixin(object):
         return rounded_start, rounded_end, rounded_duration
 
     @declared_attr
-    def computed_start(cls):
+    def computed_start(cls) -> Mapped[Optional[datetime.datetime]]:
         """Create the computed_start attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the computed_start attribute.
         """
-        return Column("computed_start", GenericDateTime)
+        return mapped_column("computed_start", GenericDateTime)
 
     @declared_attr
-    def computed_end(cls):
+    def computed_end(cls) -> Mapped[Optional[datetime.datetime]]:
         """Create the computed_end attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the computed_end attribute.
         """
-        return Column("computed_end", GenericDateTime)
+        return mapped_column("computed_end", GenericDateTime)
 
     @property
-    def computed_duration(self):
+    def computed_duration(self) -> datetime.timedelta:
         """Calculate the computed duration.
 
         The computed_duration is calculated as the difference of computed_start and
@@ -826,7 +882,7 @@ class DateRangeMixin(object):
         )
 
     @classmethod
-    def round_time(cls, dt):
+    def round_time(cls, dt: datetime.datetime) -> datetime.datetime:
         """Round the given datetime object to the defaults.timing_resolution.
 
         Use the  :class:`stalker.defaults.timing_resolution` as the closest number of
@@ -857,7 +913,7 @@ class DateRangeMixin(object):
         )
 
     @property
-    def total_seconds(self):
+    def total_seconds(self) -> float:
         """Return the duration as seconds.
 
         Returns:
@@ -866,7 +922,7 @@ class DateRangeMixin(object):
         return self.duration.days * 86400 + self.duration.seconds
 
     @property
-    def computed_total_seconds(self):
+    def computed_total_seconds(self) -> float:
         """Return the computed_total_seconds as seconds.
 
         Returns:
@@ -894,13 +950,13 @@ class ProjectMixin(object):
     #    __tablename__ = "ProjectMixins"
 
     @declared_attr
-    def project_id(cls):
+    def project_id(cls) -> Mapped[Optional[int]]:
         """Create the project_id attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the project_id attribute.
         """
-        return Column(
+        return mapped_column(
             "project_id",
             Integer,
             ForeignKey("Projects.id"),
@@ -910,16 +966,14 @@ class ProjectMixin(object):
         )
 
     @declared_attr
-    def project(cls):
+    def project(cls) -> Mapped[Optional["Project"]]:
         """Create the project attribute as a declared attribute.
 
         Returns:
             relationship: The relationship object related to the project attribute.
         """
         backref_table_name = cls.__tablename__.lower()
-        doc = """The :class:`.Project` instance that
-        this object belongs to.
-        """
+        doc = """The :class:`.Project` instance that this object belongs to."""
 
         return relationship(
             "Project",
@@ -930,11 +984,13 @@ class ProjectMixin(object):
             doc=doc,
         )
 
-    def __init__(self, project=None, **kwargs):
+    def __init__(
+        self, project: Optional["Project"] = None, **kwargs: Dict[str, Any]
+    ) -> None:
         self.project = project
 
     @validates("project")
-    def _validate_project(self, key, project):
+    def _validate_project(self, key: str, project: "Project") -> "Project":
         """Validate the given project value.
 
         Args:
@@ -979,14 +1035,16 @@ class ReferenceMixin(object):
     # add this lines for Sphinx
     #    __tablename__ = "ReferenceMixins"
 
-    def __init__(self, references=None, **kwargs):
+    def __init__(
+        self, references: Optional[List["Link"]] = None, **kwargs: Dict[str, Any]
+    ) -> None:
         if references is None:
             references = []
 
         self.references = references
 
     @declared_attr
-    def references(cls):
+    def references(cls) -> Mapped[Optional[List["Link"]]]:
         """Create the references attribute as a declared attribute.
 
         Returns:
@@ -1002,7 +1060,6 @@ class ReferenceMixin(object):
         )
         # return the relationship
         return relationship(
-            "Link",
             secondary=secondary_table,
             doc="""A list of :class:`.Link` instances given as a reference for
             this entity.
@@ -1010,7 +1067,7 @@ class ReferenceMixin(object):
         )
 
     @validates("references")
-    def _validate_references(self, key, reference):
+    def _validate_references(self, key: str, reference: "Link") -> "Link":
         """Validate the given reference.
 
         Args:
@@ -1047,7 +1104,7 @@ class ACLMixin(object):
     """
 
     @declared_attr
-    def permissions(cls):
+    def permissions(cls) -> Mapped[List["Permission"]]:
         """Create the permissions attribute as a declared attribute.
 
         Returns:
@@ -1060,7 +1117,7 @@ class ACLMixin(object):
         return relationship("Permission", secondary=secondary_table)
 
     @validates("permissions")
-    def _validate_permissions(self, key, permission):
+    def _validate_permissions(self, key: str, permission: "Permission") -> "Permission":
         """Validate the given permission value.
 
         Args:
@@ -1085,7 +1142,7 @@ class ACLMixin(object):
         return permission
 
     @property
-    def __acl__(self):
+    def __acl__(self) -> List[Tuple[str, str, str]]:
         """Return Pyramid friendly ACL list.
 
         The ACL list is composed by the:
@@ -1104,7 +1161,7 @@ class ACLMixin(object):
         'Add_Project' permission.
 
         Returns:
-            list: A list of tuples containing the ACL .
+            List[Tuple[str, str, str]]: A list of tuples containing the ACL .
         """
         return [
             (
@@ -1135,18 +1192,22 @@ class CodeMixin(object):
         code (str): The code attribute is a string, cannot be empty or cannot be None.
     """
 
-    def __init__(self, code: str = None, **kwargs):
+    def __init__(
+        self,
+        code: Optional[str] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         logger.debug(f"code: {code}")
         self.code = code
 
     @declared_attr
-    def code(cls):
+    def code(cls) -> Mapped[str]:
         """Create the code attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the code attribute.
         """
-        return Column(
+        return mapped_column(
             "code",
             String(256),
             nullable=False,
@@ -1156,7 +1217,7 @@ class CodeMixin(object):
         )
 
     @validates("code")
-    def _validate_code(self, key, code):
+    def _validate_code(self, key: str, code: str) -> str:
         """Validate the given code attribute.
 
         Args:
@@ -1174,7 +1235,7 @@ class CodeMixin(object):
         if code is None:
             raise TypeError(f"{self.__class__.__name__}.code cannot be None")
 
-        if not isinstance(code, string_types):
+        if not isinstance(code, str):
             raise TypeError(
                 f"{self.__class__.__name__}.code should be a string, "
                 f"not {code.__class__.__name__}: '{code}'"
@@ -1198,20 +1259,22 @@ class WorkingHoursMixin(object):
             working hours settings.
     """
 
-    def __init__(self, working_hours=None, **kwargs):
+    def __init__(
+        self, working_hours: Optional["WorkingHours"] = None, **kwargs: Dict[str, Any]
+    ) -> None:
         self.working_hours = working_hours
 
     @declared_attr
-    def working_hours_id(cls):
+    def working_hours_id(cls) -> Mapped[int]:
         """Create the working_hours_id attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the working_hours_id attribute.
         """
-        return Column("working_hours_id", Integer, ForeignKey("WorkingHours.id"))
+        return mapped_column("working_hours_id", Integer, ForeignKey("WorkingHours.id"))
 
     @declared_attr
-    def working_hours(cls):
+    def working_hours(cls) -> Mapped["WorkingHours"]:
         """Create the working_hours attribute as a declared attribute.
 
         Returns:
@@ -1224,7 +1287,9 @@ class WorkingHoursMixin(object):
         )
 
     @validates("working_hours")
-    def _validate_working_hours(self, key, wh):
+    def _validate_working_hours(
+        self, key, wh: Union[None, "WorkingHours"]
+    ) -> "WorkingHours":
         """Validate the given working hours value.
 
         Args:
@@ -1237,7 +1302,7 @@ class WorkingHoursMixin(object):
         Returns:
             WorkingHours: The validated WorkingHours value.
         """
-        from stalker import WorkingHours
+        from stalker.models.studio import WorkingHours
 
         if wh is None:
             wh = WorkingHours()  # without any argument this will use the
@@ -1270,25 +1335,25 @@ class ScheduleMixin(object):
 
     def __init__(
         self,
-        schedule_timing=None,
-        schedule_unit=None,
-        schedule_model=None,
-        schedule_constraint=0,
-        **kwargs,
-    ):
+        schedule_timing: Optional[float] = None,
+        schedule_unit: Optional[str] = None,
+        schedule_model: Optional[str] = None,
+        schedule_constraint: int = 0,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         self.schedule_constraint = schedule_constraint
         self.schedule_model = schedule_model
         self.schedule_timing = schedule_timing
         self.schedule_unit = schedule_unit
 
     @declared_attr
-    def schedule_timing(cls):
+    def schedule_timing(cls) -> Mapped[Optional[float]]:
         """Create the schedule_timing attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the schedule_timing attribute.
         """
-        return Column(
+        return mapped_column(
             f"{cls.__default_schedule_attr_name__}_timing",
             Float,
             nullable=True,
@@ -1306,13 +1371,13 @@ class ScheduleMixin(object):
         )
 
     @declared_attr
-    def schedule_unit(cls):
+    def schedule_unit(cls) -> Mapped[Optional[str]]:
         """Create the schedule_unit attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the schedule_unit attribute.
         """
-        return Column(
+        return mapped_column(
             f"{cls.__default_schedule_attr_name__}_unit",
             Enum(*defaults.datetime_units, name="TimeUnit"),
             nullable=True,
@@ -1323,13 +1388,13 @@ class ScheduleMixin(object):
         )
 
     @declared_attr
-    def schedule_model(cls):
+    def schedule_model(cls) -> Mapped[str]:
         """Create the schedule_model attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the schedule_model attribute.
         """
-        return Column(
+        return mapped_column(
             f"{cls.__default_schedule_attr_name__}_model",
             Enum(
                 *cls.__default_schedule_models__,
@@ -1375,13 +1440,13 @@ class ScheduleMixin(object):
         )
 
     @declared_attr
-    def schedule_constraint(cls):
+    def schedule_constraint(cls) -> Mapped[int]:
         """Create the schedule_constraint attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the schedule_constraint attribute.
         """
-        return Column(
+        return mapped_column(
             f"{cls.__default_schedule_attr_name__}_constraint",
             Integer,
             default=0,
@@ -1418,7 +1483,11 @@ class ScheduleMixin(object):
         )
 
     @validates("schedule_constraint")
-    def _validate_schedule_constraint(self, key, schedule_constraint):
+    def _validate_schedule_constraint(
+        self,
+        key: str,
+        schedule_constraint: Union[None, int],
+    ) -> int:
         """Validate the given schedule_constraint value.
 
         Args:
@@ -1451,17 +1520,20 @@ class ScheduleMixin(object):
         return schedule_constraint
 
     @validates("schedule_model")
-    def _validate_schedule_model(self, key, schedule_model):
+    def _validate_schedule_model(
+        self, key: str, schedule_model: Union[None, str]
+    ) -> str:
         """Validate the given schedule_model value.
 
         Args:
             key (str): The name of the validated column.
-            schedule_model (str): The schedule_model value to be validated.
+            schedule_model (Union[None, str]): The schedule_model value to be
+                validated.
 
         Raises:
             TypeError: If the schedule_model is not a str.
-            ValueError: If the schedule_model value is not one of the values in the
-                self.__default_schedule_models__ list.
+            ValueError: If the schedule_model value is not one of the values in
+                the self.__default_schedule_models__ list.
 
         Returns:
             str: The validated schedule_model value.
@@ -1480,7 +1552,7 @@ class ScheduleMixin(object):
             )
         )
 
-        if not isinstance(schedule_model, string_types):
+        if not isinstance(schedule_model, str):
             raise TypeError(error_message)
 
         if schedule_model not in self.__default_schedule_models__:
@@ -1489,12 +1561,12 @@ class ScheduleMixin(object):
         return schedule_model
 
     @validates("schedule_unit")
-    def _validate_schedule_unit(self, key, schedule_unit):
+    def _validate_schedule_unit(self, key: str, schedule_unit: Union[None, str]) -> str:
         """Validate the given schedule_unit.
 
         Args:
             key (str): The name of the validated column.
-            schedule_unit (str): The schedule_unit value to be validated.
+            schedule_unit (Union[None, str]): The schedule_unit value to be validated.
 
         Raises:
             TypeError: If the schedule_unit is not a str.
@@ -1507,7 +1579,7 @@ class ScheduleMixin(object):
         if schedule_unit is None:
             schedule_unit = self.__default_schedule_unit__
 
-        if not isinstance(schedule_unit, string_types):
+        if not isinstance(schedule_unit, str):
             raise TypeError(
                 "{cls}.{attr}_unit should be a string value one of "
                 "{defaults} showing the unit of the {attr} timing of this "
@@ -1535,13 +1607,17 @@ class ScheduleMixin(object):
         return schedule_unit
 
     @validates("schedule_timing")
-    def _validate_schedule_timing(self, key, schedule_timing):
+    def _validate_schedule_timing(
+        self,
+        key: str,
+        schedule_timing: Union[None, int, float],
+    ) -> float:
         """Validate the given schedule_timing.
 
         Args:
             key (str): The name of the validated column.
-            schedule_timing (Union[int, float]): The schedule_timing value to be
-                validated.
+            schedule_timing (Union[None, int, float]): The schedule_timing
+                value to be validated.
 
         Raises:
             TypeError: If the given schedule_timing is not an int or float.
@@ -1568,7 +1644,9 @@ class ScheduleMixin(object):
         return schedule_timing
 
     @classmethod
-    def least_meaningful_time_unit(cls, seconds: int, as_work_time: bool = True):
+    def least_meaningful_time_unit(
+        cls, seconds: int, as_work_time: bool = True
+    ) -> Tuple[int, str]:
         """Return the least meaningful time unit that corresponds to the given seconds.
 
         So if:
@@ -1641,7 +1719,12 @@ class ScheduleMixin(object):
         return seconds // minutes, "min"
 
     @classmethod
-    def to_seconds(cls, timing, unit, model):
+    def to_seconds(
+        cls,
+        timing: float,
+        unit: Union[None, str],
+        model: str,
+    ) -> Union[None, float]:
         """Convert the schedule values to seconds.
 
         Depending on to the schedule_model the value will differ. So if the
@@ -1656,7 +1739,7 @@ class ScheduleMixin(object):
 
 
         Returns:
-            float: The converted seconds value.
+            Union[None, float]: The converted seconds value.
         """
         if not unit:
             return None
@@ -1688,7 +1771,7 @@ class ScheduleMixin(object):
         return timing * lut[unit]
 
     @classmethod
-    def to_unit(cls, seconds, unit, model):
+    def to_unit(cls, seconds: int, unit: Union[None, str], model: str) -> float:
         """Convert the ``seconds`` value to the given ``unit``.
 
         Depending on to the ``schedule_model`` the value will differ. So if the
@@ -1735,7 +1818,7 @@ class ScheduleMixin(object):
         return seconds / lut[unit]
 
     @property
-    def schedule_seconds(self):
+    def schedule_seconds(self) -> float:
         """Return the schedule values as seconds.
 
         Depending on to the schedule_model the value will differ. So if the
@@ -1760,27 +1843,31 @@ class DAGMixin(object):
     Please set the ``__id_column__`` attribute to the id column of the mixed in
     class to be able to use this mixin::
 
-      class MixedInClass(SomeBaseClass, DAGMixin):
+    .. code-block: python
 
-          id = Column('id', Integer, primary_key=True)
-          __id_column__ = id
+        class MixedInClass(SomeBaseClass, DAGMixin):
 
-    Use the :attr:``.__dag_cascade__`` to control the cascade behaviour.
+            id : Mapped[int] = mapped_column('id', primary_key=True)
+            __id_column__ = id
+
+    Use the :attr:``.__dag_cascade__`` to control the cascade behavior.
     """
 
     __dag_cascade__ = "all, delete"
 
     @declared_attr
-    def parent_id(cls):
+    def parent_id(cls) -> Mapped[Optional[int]]:
         """Create the parent_id attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the parent_id attribute.
         """
-        return Column("parent_id", Integer, ForeignKey(f"{cls.__tablename__}.id"))
+        return mapped_column(
+            "parent_id", Integer, ForeignKey(f"{cls.__tablename__}.id")
+        )
 
     @declared_attr
-    def parent(cls):
+    def parent(cls) -> Mapped[Self]:
         """Create the parent attribute as a declared attribute.
 
         Returns:
@@ -1800,7 +1887,7 @@ class DAGMixin(object):
         )
 
     @declared_attr
-    def children(cls):
+    def children(cls) -> Mapped[List[Self]]:
         """Create the children attribute as a declared attribute.
 
         Returns:
@@ -1818,11 +1905,13 @@ class DAGMixin(object):
             """,
         )
 
-    def __init__(self, parent=None, **kwargs):
+    def __init__(self, parent: Optional[Self] = None, **kwargs: Dict[str, Any]) -> None:
         self.parent = parent
 
     @validates("parent")
-    def _validate_parent(self, key, parent):
+    def _validate_parent(
+        self, key: str, parent: Union[None, Self]
+    ) -> Union[None, Self]:
         """Validate the given parent value.
 
         Args:
@@ -1834,36 +1923,38 @@ class DAGMixin(object):
                 with this instance.
 
         Returns:
-            Union[None, object]: The validated parent value.
+            Union[None, Self]: The validated parent value.
         """
-        if parent is not None:
-            if not isinstance(parent, self.__class__):
-                raise TypeError(
-                    "{cls}.parent should be an instance of {cls} class or "
-                    "derivative, not {parent_cls}: '{parent}'".format(
-                        cls=self.__class__.__name__,
-                        parent_cls=parent.__class__.__name__,
-                        parent=parent,
-                    )
+        if parent is None:
+            return parent
+
+        if not isinstance(parent, self.__class__):
+            raise TypeError(
+                "{cls}.parent should be an instance of {cls} class or "
+                "derivative, not {parent_cls}: '{parent}'".format(
+                    cls=self.__class__.__name__,
+                    parent_cls=parent.__class__.__name__,
+                    parent=parent,
                 )
-            check_circular_dependency(self, parent, "children")
+            )
+        check_circular_dependency(self, parent, "children")
 
         return parent
 
     @validates("children")
-    def _validate_children(self, key, child):
+    def _validate_children(self, key: str, child: Self) -> Self:
         """Validate the given child.
 
         Args:
             key (str): The name of the validated column.
-            child (object): The child value to be validated.
+            child (Self): The child value to be validated.
 
         Raises:
             TypeError: If any of the child objects are not deriving from the same class
                 as this one.
 
         Returns:
-            object: The validated child instance.
+            Self: The validated child instance.
         """
         if not isinstance(child, self.__class__):
             raise TypeError(
@@ -1878,7 +1969,7 @@ class DAGMixin(object):
         return child
 
     @property
-    def is_root(self):
+    def is_root(self) -> bool:
         """Return True if the Task has no parent.
 
         Returns:
@@ -1887,7 +1978,7 @@ class DAGMixin(object):
         return not bool(self.parent)
 
     @property
-    def is_container(self):
+    def is_container(self) -> bool:
         """Return True if the Task has children Tasks.
 
         Returns:
@@ -1897,7 +1988,7 @@ class DAGMixin(object):
             return bool(len(self.children))
 
     @property
-    def is_leaf(self):
+    def is_leaf(self) -> bool:
         """Return True if the Task has no children Tasks.
 
         Returns:
@@ -1906,11 +1997,11 @@ class DAGMixin(object):
         return not self.is_container
 
     @property
-    def parents(self):
+    def parents(self) -> List[Self]:
         """Return all of the parents of this mixed in class starting from the root.
 
         Returns:
-            List[Task]: List of tasks showing the parent of this Task.
+            List[Self]: List of tasks showing the parent of this Task.
         """
         parents = []
         entity = self.parent
@@ -1921,7 +2012,7 @@ class DAGMixin(object):
         parents.reverse()
         return parents
 
-    def walk_hierarchy(self, method=0):
+    def walk_hierarchy(self, method=0) -> Generator[None, Self, None]:
         """Walk the hierarchy of this task.
 
         Args:
@@ -1941,20 +2032,20 @@ class AmountMixin(object):
         amount (Union[int, float]): The amount value.
     """
 
-    def __init__(self, amount=0, **kwargs):
+    def __init__(self, amount: Union[int, float] = 0, **kwargs: Dict[str, Any]) -> None:
         self.amount = amount
 
     @declared_attr
-    def amount(cls):
+    def amount(cls) -> Mapped[Optional[float]]:
         """Create the amount attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the amount attribute.
         """
-        return Column(Float, default=0.0)
+        return mapped_column(Float, default=0.0)
 
     @validates("amount")
-    def _validate_amount(self, key, amount):
+    def _validate_amount(self, key: str, amount: Union[int, float]) -> float:
         """Validate the given amount value.
 
         Args:
@@ -1986,20 +2077,20 @@ class UnitMixin(object):
         unit (str): The unit of this mixed in class.
     """
 
-    def __init__(self, unit="", **kwargs):
+    def __init__(self, unit: str = "", **kwargs: Dict[str, Any]) -> None:
         self.unit = unit
 
     @declared_attr
-    def unit(cls):
+    def unit(cls) -> Mapped[Optional[str]]:
         """Create the unit attribute as a declared attribute.
 
         Returns:
             Column: The Column related to the unit attribute.
         """
-        return Column(String(64))
+        return mapped_column(String(64))
 
     @validates("unit")
-    def _validate_unit(self, key, unit):
+    def _validate_unit(self, key: str, unit: Union[None, str]) -> str:
         """Validate the given unit value.
 
         Args:
@@ -2015,7 +2106,7 @@ class UnitMixin(object):
         if unit is None:
             unit = ""
 
-        if not isinstance(unit, string_types):
+        if not isinstance(unit, str):
             raise TypeError(
                 f"{self.__class__.__name__}.unit should be a string, "
                 f"not {unit.__class__.__name__}: '{unit}'"

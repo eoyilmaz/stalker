@@ -3,7 +3,7 @@
 import datetime
 import os
 import sys
-from typing import Any
+from typing import Any, Dict
 
 from stalker import log
 
@@ -16,11 +16,11 @@ class ConfigBase(object):
     This is based on Sphinx's config idiom.
     """
 
-    default_config_values = {}
+    default_config_values: Dict[str, Any] = {}
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.config_values = self.default_config_values.copy()
-        self.user_config = {}
+        self.user_config: Dict[str, Any] = {}
         self._parse_settings()
 
     def _parse_settings(self) -> None:
@@ -87,7 +87,7 @@ class ConfigBase(object):
         """
         return self.config_values[name]
 
-    def __getitem__(self, name) -> Any:
+    def __getitem__(self, name: str) -> Any:
         """Return item with the key.
 
         Args:
@@ -98,7 +98,7 @@ class ConfigBase(object):
         """
         return getattr(self, name)
 
-    def __setitem__(self, name, value) -> None:
+    def __setitem__(self, name: str, value: Any) -> None:
         """Set the item with index of name to value.
 
         Args:

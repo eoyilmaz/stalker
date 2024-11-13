@@ -6,7 +6,8 @@ import sys
 
 import pytest
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import log
 from stalker.db.session import DBSession
@@ -22,8 +23,8 @@ class DAGMixinFooMixedInClass(SimpleEntity, DAGMixin):
 
     __tablename__ = "DAGMixinFooMixedInClasses"
     __mapper_args__ = {"polymorphic_identity": "DAGMixinFooMixedInClass"}
-    dagMixinFooMixedInClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    dagMixinFooMixedInClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
     __id_column__ = "dagMixinFooMixedInClass_id"
 

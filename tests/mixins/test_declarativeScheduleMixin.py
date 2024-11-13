@@ -8,7 +8,8 @@ import pytest
 
 import pytz
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker import log
 from stalker.models.entity import SimpleEntity
@@ -24,7 +25,9 @@ class DeclSchedMixA(SimpleEntity, DateRangeMixin):
 
     __tablename__ = "DeclSchedMixAs"
     __mapper_args__ = {"polymorphic_identity": "DeclSchedMixA"}
-    a_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    a_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(DeclSchedMixA, self).__init__(**kwargs)
@@ -36,7 +39,9 @@ class DeclSchedMixB(SimpleEntity, DateRangeMixin):
 
     __tablename__ = "DeclSchedMixBs"
     __mapper_args__ = {"polymorphic_identity": "DeclSchedMixB"}
-    b_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    b_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
+    )
 
     def __init__(self, **kwargs):
         super(DeclSchedMixB, self).__init__(**kwargs)

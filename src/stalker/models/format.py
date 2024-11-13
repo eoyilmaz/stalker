@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Image format related classes and utility functions are situated here."""
-from sqlalchemy import Column, Float, ForeignKey, Integer
-from sqlalchemy.orm import validates
+from typing import Any, Optional, Union
+
+from sqlalchemy import ForeignKey, Integer
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from stalker.log import get_logger
 from stalker.models.entity import Entity
@@ -31,15 +33,14 @@ class ImageFormat(Entity):
     __tablename__ = "ImageFormats"
     __mapper_args__ = {"polymorphic_identity": "ImageFormat"}
 
-    imageFormat_id = Column(
+    imageFormat_id: Mapped[int] = mapped_column(
         "id",
         Integer,
         ForeignKey("Entities.id"),
         primary_key=True,
     )
 
-    width = Column(
-        Integer,
+    width: Mapped[Optional[int]] = mapped_column(
         doc="""The width of this format.
 
         * the width should be set to a positive non-zero integer
@@ -48,8 +49,7 @@ class ImageFormat(Entity):
         """,
     )
 
-    height = Column(
-        Integer,
+    height: Mapped[Optional[int]] = mapped_column(
         doc="""The height of this format
 
         * the height should be set to a positive non-zero integer
@@ -58,9 +58,8 @@ class ImageFormat(Entity):
         """,
     )
 
-    pixel_aspect = Column(
-        Float,
-        default="1.0",
+    pixel_aspect: Mapped[Optional[float]] = mapped_column(
+        default=1.0,
         doc="""The pixel aspect ratio of this format.
 
         * the pixel_aspect should be set to a positive non-zero float
@@ -69,9 +68,8 @@ class ImageFormat(Entity):
         """,
     )
 
-    print_resolution = Column(
-        Float,
-        default="300.0",
+    print_resolution: Mapped[Optional[float]] = mapped_column(
+        default=300.0,
         doc="""The print resolution of this format
 
         * it should be set to a positive non-zero float or integer
@@ -81,8 +79,13 @@ class ImageFormat(Entity):
     )
 
     def __init__(
-        self, width=None, height=None, pixel_aspect=1.0, print_resolution=300, **kwargs
-    ):
+        self,
+        width: Union[int, float],
+        height: Union[int, float],
+        pixel_aspect: Optional[Union[int, float]] = 1.0,
+        print_resolution: Optional[Union[int, float]] = 300,
+        **kwargs,
+    ) -> None:
         super(ImageFormat, self).__init__(**kwargs)
 
         self.width = width
@@ -92,7 +95,7 @@ class ImageFormat(Entity):
         # self._device_aspect = 1.0
 
     @validates("width")
-    def _validate_width(self, key, width):
+    def _validate_width(self, key: str, width: Union[int, float]) -> int:
         """Validate the given width.
 
         Args:
@@ -120,7 +123,7 @@ class ImageFormat(Entity):
         return int(width)
 
     @validates("height")
-    def _validate_height(self, key, height):
+    def _validate_height(self, key: str, height: Union[int, float]) -> int:
         """Validate the given height.
 
         Args:
@@ -148,7 +151,9 @@ class ImageFormat(Entity):
         return int(height)
 
     @validates("pixel_aspect")
-    def _validate_pixel_aspect(self, key, pixel_aspect):
+    def _validate_pixel_aspect(
+        self, key: str, pixel_aspect: Union[int, float]
+    ) -> float:
         """Validate the given pixel aspect.
 
         Args:
@@ -177,7 +182,9 @@ class ImageFormat(Entity):
         return float(pixel_aspect)
 
     @validates("print_resolution")
-    def _validate_print_resolution(self, key, print_resolution):
+    def _validate_print_resolution(
+        self, key: str, print_resolution: Union[int, float]
+    ) -> float:
         """Validate the print resolution value.
 
         Args:
@@ -207,7 +214,7 @@ class ImageFormat(Entity):
         return float(print_resolution)
 
     @property
-    def device_aspect(self):
+    def device_aspect(self) -> float:
         """Return the device aspect.
 
         Because the device_aspect is calculated from the width/height*pixel
@@ -218,11 +225,11 @@ class ImageFormat(Entity):
         """
         return float(self.width) / float(self.height) * self.pixel_aspect
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check if other is equal to this ImageFormat.
 
         Args:
-            other (object): The object to check the equality of.
+            other (Any): The object to check the equality of.
 
         Returns:
             bool: True if the other is an ImageFormat instance and the width, height and
@@ -236,7 +243,7 @@ class ImageFormat(Entity):
             and self.pixel_aspect == other.pixel_aspect
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.

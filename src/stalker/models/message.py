@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """The Message related classes and functions are situated here."""
+from typing import Any, Dict
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker.log import get_logger
 from stalker.models.entity import Entity
@@ -33,8 +35,10 @@ class Message(Entity, StatusMixin):
     __auto_name__ = True
     __tablename__ = "Messages"
     __mapper_args__ = {"polymorphic_identity": "Message"}
-    message_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    message_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]) -> None:
         super(Message, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)

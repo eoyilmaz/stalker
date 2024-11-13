@@ -259,3 +259,16 @@ def test_date_argument_is_working_as_expected2(setup_authentication_log_tests):
     date1 = datetime.datetime(2016, 11, 4, 6, 30, tzinfo=pytz.utc)
     uli = AuthenticationLog(user=data["test_user1"], action=LOGIN, date=date1)
     assert uli.date == date1
+
+
+def test_authentication_log_is_orderable_for_some_reason(
+    setup_authentication_log_tests,
+):
+    """AuthenticationLog instances are orderable."""
+    data = setup_authentication_log_tests
+    date1 = datetime.datetime(2024, 12, 10, 10, 0)
+    date2 = datetime.datetime(2024, 12, 10, 17, 0)
+    auth_log1 = AuthenticationLog(user=data["test_user1"], action=LOGIN, date=date1)
+    auth_log2 = AuthenticationLog(user=data["test_user1"], action=LOGOUT, date=date2)
+    assert (auth_log1 < auth_log2) is True
+    assert (auth_log1 > auth_log2) is False

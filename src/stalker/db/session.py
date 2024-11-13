@@ -4,13 +4,18 @@
 This is a runtime storage for the DB session. Greatly simplifying the usage of a
 scoped session.
 """
+from typing import Any, List, TYPE_CHECKING, Union
+
 from sqlalchemy.orm import scoped_session, sessionmaker
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.entity import SimpleEntity
 
 
 class ExtendedScopedSession(scoped_session):
     """A customized scoped_session which adds new functionality."""
 
-    def save(self, data=None):
+    def save(self, data: Union[None, List[Any], "SimpleEntity"] = None) -> None:
         """Add and commits data at once.
 
         Args:
@@ -25,7 +30,4 @@ class ExtendedScopedSession(scoped_session):
         self.commit()
 
 
-# try:
-#     DBSession = ExtendedScopedSession(sessionmaker(extension=None))
-# except TypeError:
 DBSession = ExtendedScopedSession(sessionmaker(future=True))

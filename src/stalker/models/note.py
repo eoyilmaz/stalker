@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """Note class lies here."""
+from typing import Any, Dict, Optional
 
-from sqlalchemy import Column, ForeignKey, Integer
-from sqlalchemy.orm import synonym
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, synonym
 
 from stalker.log import get_logger
 from stalker.models.entity import SimpleEntity
@@ -24,9 +25,13 @@ class Note(SimpleEntity):
     __tablename__ = "Notes"
     __mapper_args__ = {"polymorphic_identity": "Note"}
 
-    note_id = Column("id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True)
+    note_id: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("SimpleEntities.id"),
+        primary_key=True,
+    )
 
-    content = synonym(
+    content: Mapped[Optional[str]] = synonym(
         "description",
         doc="""The content of this :class:`.Note` instance.
 
@@ -35,15 +40,15 @@ class Note(SimpleEntity):
         """,
     )
 
-    def __init__(self, content="", **kwargs):
+    def __init__(self, content: str = "", **kwargs: Dict[str, Any]) -> None:
         super(Note, self).__init__(**kwargs)
         self.content = content
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Note instance and has the same content.
@@ -54,7 +59,7 @@ class Note(SimpleEntity):
             and self.content == other.content
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.

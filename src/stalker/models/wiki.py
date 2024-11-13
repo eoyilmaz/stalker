@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """Wiki related functions and classes are situated here."""
-from typing import Union
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 
-from six import string_types
-
-from sqlalchemy import Column, ForeignKey, Integer, Text
-from sqlalchemy.orm import validates
+from sqlalchemy import ForeignKey, Text
+from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from stalker import Entity, ProjectMixin
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.project import Project
 
 
 class Page(Entity, ProjectMixin):
@@ -30,12 +31,22 @@ class Page(Entity, ProjectMixin):
     __auto_name__ = True
     __tablename__ = "Pages"
     __mapper_args__ = {"polymorphic_identity": "Page"}
-    page_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    page_id: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
 
-    title = Column(Text)
-    content = Column(Text)
+    title: Mapped[Optional[str]] = mapped_column(Text)
+    content: Mapped[Optional[str]] = mapped_column(Text)
 
-    def __init__(self, title="", content="", project=None, **kwargs):
+    def __init__(
+        self,
+        title: str = "",
+        content: str = "",
+        project: Optional["Project"] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         kwargs["project"] = project
         super(Page, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
@@ -58,7 +69,7 @@ class Page(Entity, ProjectMixin):
         Returns:
             str: The validated title value.
         """
-        if not isinstance(title, string_types):
+        if not isinstance(title, str):
             raise TypeError(
                 "{}.title should be a string, not {}: '{}'".format(
                     self.__class__.__name__, title.__class__.__name__, title
@@ -85,7 +96,7 @@ class Page(Entity, ProjectMixin):
             str: The validated content value.
         """
         content = "" if content is None else content
-        if not isinstance(content, string_types):
+        if not isinstance(content, str):
             raise TypeError(
                 "{}.content should be a string, not {}: '{}'".format(
                     self.__class__.__name__, content.__class__.__name__, content

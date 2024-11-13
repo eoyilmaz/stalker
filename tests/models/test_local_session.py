@@ -13,6 +13,7 @@ import pytz
 
 from stalker import LocalSession, User, defaults
 from stalker.db.session import DBSession
+from stalker.utils import datetime_to_millis
 
 
 @pytest.fixture(scope="function")
@@ -138,7 +139,7 @@ def test_local_session_will_not_use_the_stored_data_if_it_is_invalid(
     # pickle the data
     data = json.dumps(
         {
-            "valid_to": local_session.datetime_to_millis(local_session.valid_to),
+            "valid_to": datetime_to_millis(local_session.valid_to),
             "logged_in_user_id": -1,
         },
     )

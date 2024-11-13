@@ -744,7 +744,7 @@ def test_depends_attr_is_a_list_of_other_objects_than_a_task(setup_task_tests):
     )
 
 
-def test_depends_attr_doesnt_allow_simple_cyclic_dependencies(setup_task_tests):
+def test_depends_attr_does_not_allow_simple_cyclic_dependencies(setup_task_tests):
     """CircularDependencyError raised if "depends_on" in circular dependency."""
     data = setup_task_tests
     # create two new tasks A, B
@@ -769,7 +769,7 @@ def test_depends_attr_doesnt_allow_simple_cyclic_dependencies(setup_task_tests):
     )
 
 
-def test_depends_attr_doesnt_allow_cyclic_dependencies(setup_task_tests):
+def test_depends_attr_does_not_allow_cyclic_dependencies(setup_task_tests):
     """CircularDependencyError raised if "depends_on" attr has a circular dependency."""
     data = setup_task_tests
     # create three new tasks A, B, C
@@ -801,7 +801,7 @@ def test_depends_attr_doesnt_allow_cyclic_dependencies(setup_task_tests):
     )
 
 
-def test_depends_attr_doesnt_allow_more_deeper_cyclic_dependencies(
+def test_depends_attr_does_not_allow_more_deeper_cyclic_dependencies(
     setup_task_tests,
 ):
     """CircularDependencyError raised if depends_on attr has deeper circular dependency."""
@@ -872,7 +872,7 @@ def test_depends_arg_cyclic_dependency_bug_2(setup_task_tests):
     )
 
 
-def test_depends_arg_doesnt_allow_one_of_the_parents_of_the_task(setup_task_tests):
+def test_depends_arg_does_not_allow_one_of_the_parents_of_the_task(setup_task_tests):
     """CircularDependencyError raised if "depends_on" attr has one of the parents."""
     data = setup_task_tests
     # create two new tasks A, B
@@ -2830,6 +2830,80 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task(setup_task_tests):
     assert new_task2.to_tjp == expected_tjp
 
 
+def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_timelogs(
+    setup_task_tests,
+):
+    """to_tjp attr is working as expected for a leaf task with timelogs."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    new_task = Task(**kwargs)
+
+    kwargs["parent"] = new_task
+    kwargs["depends_on"] = []
+
+    dep_task1 = Task(**kwargs)
+    dep_task2 = Task(**kwargs)
+
+    kwargs["name"] = "Modeling"
+    kwargs["schedule_timing"] = 1003
+    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_model"] = "effort"
+    kwargs["resources"] = [data["test_user1"], data["test_user2"]]
+
+    new_task2 = Task(**kwargs)
+
+    # create some random ids
+    data["test_project1"].id = 120
+    new_task.id = 121
+    new_task2.id = 122
+    dep_task1.id = 123
+    dep_task2.id = 124
+    data["test_user1"].id = 125
+    data["test_user2"].id = 126
+    data["test_user3"].id = 127
+    data["test_user4"].id = 128
+    data["test_user5"].id = 129
+
+    # add some timelogs
+    start = datetime.datetime(2024, 11, 13, 12, 0, tzinfo=pytz.utc)
+    end = start + datetime.timedelta(hours=2)
+    new_task2.create_time_log(data["test_user1"], start, end)
+
+    # data["maxDiff"] = None
+    expected_tjp = """    task Task_{new_task2_id} "Task_{new_task2_id}" {{
+        effort 1003h
+        allocate User_{user1_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}, User_{user2_id} {{
+            alternative
+            User_{user3_id}, User_{user4_id}, User_{user5_id} select minloaded
+            persistent
+        }}
+        booking User_125 2024-11-13-12:00:00 - 2024-11-13-14:00:00 {{ overtime 2 }}
+    }}""".format(
+        project1_id=data["test_project1"].id,
+        new_task_id=new_task.id,
+        new_task2_id=new_task2.id,
+        dep_task1_id=dep_task1.id,
+        dep_task2_id=dep_task2.id,
+        user1_id=data["test_user1"].id,
+        user2_id=data["test_user2"].id,
+        user3_id=data["test_user3"].id,
+        user4_id=data["test_user4"].id,
+        user5_id=data["test_user5"].id,
+    )
+    # print("Expected:")
+    # print("---------")
+    # print(expected_tjp)
+    # print('---------------------------------')
+    # print("Result:")
+    # print("-------")
+    # print(new_task2.to_tjp)
+    assert new_task2.to_tjp == expected_tjp
+
+
 def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_details(
     setup_task_tests,
 ):
@@ -4470,6 +4544,26 @@ def test_good_attr_is_working_as_expected(setup_task_tests):
     assert new_task.good != new_good
     new_task.good = new_good
     assert new_task.good == new_good
+
+
+def test_reschedule_on_a_container_task(setup_task_tests):
+    """_reschedule on a container task will return immediately."""
+    data = setup_task_tests
+    kwargs = copy.copy(data["kwargs"])
+    kwargs["depends_on"] = None
+
+    task_a = Task(**kwargs)
+    task_b = Task(**kwargs)
+    task_c = Task(**kwargs)
+
+    task_b.parent = task_a
+    task_a.parent = task_c
+
+    start = task_a.start
+    end = task_a.end
+    assert task_a._reschedule(10, "d") is None
+    assert task_a.start == start
+    assert task_a.end == end
 
 
 @pytest.fixture(scope="function")

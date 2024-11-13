@@ -1,12 +1,16 @@
 # -*- coding: utf-8 -*-
 """Stalker specific data types are situated here."""
 import json
+from typing import Any, Dict, TYPE_CHECKING, Union
 
 import pytz
 
+from sqlalchemy.types import DateTime, JSON, TEXT, TypeDecorator
+
 import tzlocal
 
-from sqlalchemy.types import DateTime, JSON, TEXT, TypeDecorator
+if TYPE_CHECKING:  # pragma: no cover
+    from sqlalchemy.engine.interfaces import Dialect
 
 
 class JSONEncodedDict(TypeDecorator):
@@ -14,12 +18,12 @@ class JSONEncodedDict(TypeDecorator):
 
     impl = TEXT
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value: Union[None, Any], dialect: "Dialect") -> str:
         """Process bind param.
 
         Args:
-            value (object): The object to convert to JSON.
-            dialect (str): The dialect.
+            value (Union[None, Any]): The object to convert to JSON.
+            dialect (sqlalchemy.engine.interface.Dialect): The dialect.
 
         Returns:
             str: The str representation of the JSON data.
@@ -28,19 +32,22 @@ class JSONEncodedDict(TypeDecorator):
             value = json.dumps(value)
         return value
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(
+        self, value: Union[None, str], dialect: "Dialect"
+    ) -> Union[None, Dict[str, Any]]:
         """Process result value.
 
         Args:
-            value (str): The str representation of the JSON data.
-            dialect (str): The dialect.
+            value (Union[None, Any]): The str representation of the JSON data.
+            dialect (sqlalchemy.engine.interface.Dialect): The dialect.
 
         Returns:
             dict: The dict representation of the JSON data.
         """
+        return_value: Union[None, Dict[str, Any]] = None
         if value is not None:
-            value = json.loads(value)
-        return value
+            return_value = json.loads(value)
+        return return_value
 
 
 GenericJSON = JSON().with_variant(JSONEncodedDict, "sqlite")

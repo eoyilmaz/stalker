@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
 """Budget related classes and functions are situated here."""
+from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+
 from sqlalchemy import Column, Float, ForeignKey, Integer, String, Table
-from sqlalchemy.orm import relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.db.declarative import Base
 from stalker.models.entity import Entity
@@ -12,6 +14,9 @@ from stalker.models.mixins import (
     StatusMixin,
     UnitMixin,
 )
+
+if TYPE_CHECKING:  # pragma: no cover
+    from stalker.models.client import Client
 
 
 class Good(Entity, UnitMixin):
@@ -39,10 +44,10 @@ class Good(Entity, UnitMixin):
     A Good has the following attributes
 
     Args:
-        msrp (float): The suggested retail price for this item.
-        cost (float): The cost of this item to the Studio, so generally it is better
-            to keep price of the related BudgetEntry bigger than this value to get
-            profit by selling this item.
+        cost (Union[int, float]): The cost of this item to the Studio, so
+            generally it is better to keep price of the related BudgetEntry
+            bigger than this value to get profit by selling this item.
+        msrp (Union[int, float]): The suggested retail price for this item.
         unit (str): The unit of this item.
     """
 
@@ -50,10 +55,11 @@ class Good(Entity, UnitMixin):
     __tablename__ = "Goods"
     __mapper_args__ = {"polymorphic_identity": "Good"}
 
-    good_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    good_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
-    price_lists = relationship(
-        "PriceList",
+    price_lists: Mapped["PriceList"] = relationship(
         secondary="PriceList_Goods",
         primaryjoin="Goods.c.id==PriceList_Goods.c.good_id",
         secondaryjoin="PriceList_Goods.c.price_list_id==PriceLists.c.id",
@@ -61,19 +67,27 @@ class Good(Entity, UnitMixin):
         doc="PriceLists that this good is related to.",
     )
 
-    cost = Column(Float, default=0.0)
-    msrp = Column(Float, default=0.0)
-    unit = Column(String(64))
+    cost: Mapped[Optional[float]] = mapped_column(default=0.0)
+    msrp: Mapped[Optional[float]] = mapped_column(Float, default=0.0)
+    unit: Mapped[Optional[str]] = mapped_column(String(64))
 
-    client_id = Column("client_id", Integer, ForeignKey("Clients.id"))
-    client = relationship(
-        "Client",
+    client_id: Mapped[Optional[int]] = mapped_column(
+        "client_id", ForeignKey("Clients.id")
+    )
+    client: Mapped["Client"] = relationship(
         primaryjoin="Goods.c.client_id==Clients.c.id",
         back_populates="goods",
         uselist=False,
     )
 
-    def __init__(self, cost=0.0, msrp=0.0, unit="", client=None, **kwargs):
+    def __init__(
+        self,
+        cost: Union[int, float] = 0.0,
+        msrp: Union[int, float] = 0.0,
+        unit: str = "",
+        client: Optional["Client"] = None,
+        **kwargs,
+    ) -> None:
         super(Good, self).__init__(**kwargs)
         UnitMixin.__init__(self, unit=unit)
         self.cost = cost
@@ -81,7 +95,7 @@ class Good(Entity, UnitMixin):
         self.client = client
 
     @validates("cost")
-    def _validate_cost(self, key, cost):
+    def _validate_cost(self, key: str, cost: Union[int, float]) -> Union[int, float]:
         """Validate the given cost value.
 
         Args:
@@ -112,7 +126,7 @@ class Good(Entity, UnitMixin):
         return cost
 
     @validates("msrp")
-    def _validate_msrp(self, key, msrp):
+    def _validate_msrp(self, key: str, msrp: Union[int, float]) -> Union[int, float]:
         """Validate the given msrp value.
 
         Args:
@@ -143,7 +157,7 @@ class Good(Entity, UnitMixin):
         return msrp
 
     @validates("client")
-    def _validate_client(self, key, client):
+    def _validate_client(self, key: str, client: "Client") -> "Client":
         """Validate the given client value.
 
         Args:
@@ -158,7 +172,7 @@ class Good(Entity, UnitMixin):
             Client: The validated :class:`stalker.models.client.Client` instance.
         """
         if client is not None:
-            from stalker import Client
+            from stalker.models.client import Client
 
             if not isinstance(client, Client):
                 raise TypeError(
@@ -183,10 +197,11 @@ class PriceList(Entity):
     __tablename__ = "PriceLists"
     __mapper_args__ = {"polymorphic_identity": "PriceList"}
 
-    price_list_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    price_list_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
-    goods = relationship(
-        "Good",
+    goods: Mapped[Optional[List["Good"]]] = relationship(
         secondary="PriceList_Goods",
         primaryjoin="PriceLists.c.id==PriceList_Goods.c.price_list_id",
         secondaryjoin="PriceList_Goods.c.good_id==Goods.c.id",
@@ -194,14 +209,18 @@ class PriceList(Entity):
         doc="Goods in this list.",
     )
 
-    def __init__(self, goods=None, **kwargs):
+    def __init__(
+        self,
+        goods: Optional[List["Good"]] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         super(PriceList, self).__init__(**kwargs)
         if goods is None:
             goods = []
         self.goods = goods
 
     @validates("goods")
-    def _validate_goods(self, key, good):
+    def _validate_goods(self, key: str, good: "Good") -> "Good":
         """Validate the given good value.
 
         Args:
@@ -242,32 +261,30 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
     __tablename__ = "Budgets"
     __mapper_args__ = {"polymorphic_identity": "Budget"}
 
-    budget_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    budget_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
 
     __id_column__ = "budget_id"
 
-    entries = relationship(
-        "BudgetEntry",
+    entries: Mapped[Optional[List["BudgetEntry"]]] = relationship(
         primaryjoin="BudgetEntries.c.budget_id==Budgets.c.id",
-        uselist=True,
         cascade="all, delete-orphan",
     )
 
-    invoices = relationship(
-        "Invoice",
+    invoices: Mapped[Optional[List["Invoice"]]] = relationship(
         primaryjoin="Invoices.c.budget_id==Budgets.c.id",
-        uselist=True,
         cascade="all, delete-orphan",
     )
 
-    def __init__(self, **kwargs):
+    def __init__(self, **kwargs: Dict[str, Any]) -> None:
         super(Budget, self).__init__(**kwargs)
         ProjectMixin.__init__(self, **kwargs)
         DAGMixin.__init__(self, **kwargs)
         StatusMixin.__init__(self, **kwargs)
 
     @validates("entries")
-    def _validate_entry(self, key, entry):
+    def _validate_entry(self, key: str, entry: "BudgetEntry") -> "BudgetEntry":
         """Validate the given entry value.
 
         Args:
@@ -318,32 +335,37 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
     __tablename__ = "BudgetEntries"
     __mapper_args__ = {"polymorphic_identity": "BudgetEntry"}
 
-    entry_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
-
-    budget_id = Column(Integer, ForeignKey("Budgets.id"))
-
-    budget = relationship(
-        "Budget",
+    entry_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
+    budget_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Budgets.id"))
+    budget: Mapped["Budget"] = relationship(
         primaryjoin="BudgetEntries.c.budget_id==Budgets.c.id",
         back_populates="entries",
         uselist=False,
     )
 
-    good_id = Column(Integer, ForeignKey("Goods.id"))
+    good_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Goods.id"))
 
-    good = relationship(
-        "Good", primaryjoin="BudgetEntries.c.good_id==Goods.c.id", uselist=False
+    good: Mapped["Good"] = relationship(
+        primaryjoin="BudgetEntries.c.good_id==Goods.c.id", uselist=False
     )
 
-    cost = Column(Float, default=0.0)
-    msrp = Column(Float, default=0.0)
+    cost: Mapped[Optional[float]] = mapped_column(default=0.0)
+    msrp: Mapped[Optional[float]] = mapped_column(default=0.0)
 
-    price = Column(Float, default=0.0)
-    realized_total = Column(Float, default=0.0)
+    price: Mapped[Optional[float]] = mapped_column(default=0.0)
+    realized_total: Mapped[Optional[float]] = mapped_column(default=0.0)
 
     def __init__(
-        self, budget=None, good=None, price=0, realized_total=0, amount=0.0, **kwargs
-    ):
+        self,
+        budget: Optional[Budget] = None,
+        good: Optional[Good] = None,
+        price: Union[float, int] = 0,
+        realized_total: Union[float, int] = 0,
+        amount: Union[float, int] = 0.0,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         super(BudgetEntry, self).__init__(**kwargs)
 
         self.budget = budget
@@ -361,7 +383,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         self.realized_total = realized_total
 
     @validates("budget")
-    def _validate_budget(self, key, budget):
+    def _validate_budget(self, key: str, budget: "Budget") -> "Budget":
         """Validate the given budget value.
 
         Args:
@@ -382,7 +404,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         return budget
 
     @validates("cost")
-    def _validate_cost(self, key, cost):
+    def _validate_cost(self, key: str, cost: Union[float, int]) -> float:
         """Validate the given cost value.
 
         Args:
@@ -407,7 +429,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         return float(cost)
 
     @validates("msrp")
-    def _validate_msrp(self, key, msrp):
+    def _validate_msrp(self, key: str, msrp: Union[float, int]) -> float:
         """Validate the given msrp value.
 
         Args:
@@ -432,7 +454,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         return float(msrp)
 
     @validates("price")
-    def _validate_price(self, key, price):
+    def _validate_price(self, key: str, price: Union[float, int]) -> float:
         """Validate the given price value.
 
         Args:
@@ -457,7 +479,9 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         return float(price)
 
     @validates("realized_total")
-    def _validate_realized_total(self, key, realized_total):
+    def _validate_realized_total(
+        self, key: str, realized_total: Union[float, int]
+    ) -> float:
         """Validate  the given realized_total value.
 
         Args:
@@ -483,7 +507,7 @@ class BudgetEntry(Entity, AmountMixin, UnitMixin):
         return float(realized_total)
 
     @validates("good")
-    def _validate_good(self, key, good):
+    def _validate_good(self, key: str, good: "Good") -> "Good":
         """Validate the given good value.
 
         Args:
@@ -526,31 +550,36 @@ class Invoice(Entity, AmountMixin, UnitMixin):
     __tablename__ = "Invoices"
     __mapper_args__ = {"polymorphic_identity": "Invoice"}
 
-    invoice_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    invoice_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
+    budget_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Budgets.id"))
 
-    budget_id = Column(Integer, ForeignKey("Budgets.id"))
-
-    budget = relationship(
-        "Budget",
+    budget: Mapped[Optional["Budget"]] = relationship(
         primaryjoin="Invoices.c.budget_id==Budgets.c.id",
         back_populates="invoices",
         uselist=False,
     )
 
-    client_id = Column(Integer, ForeignKey("Clients.id"))
+    client_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Clients.id"))
 
-    client = relationship(
-        "Client", primaryjoin="Invoices.c.client_id==Clients.c.id", uselist=False
+    client: Mapped[Optional["Client"]] = relationship(
+        primaryjoin="Invoices.c.client_id==Clients.c.id", uselist=False
     )
 
-    payments = relationship(
-        "Payment",
+    payments: Mapped[Optional[List["Payment"]]] = relationship(
         primaryjoin="Payments.c.invoice_id==Invoices.c.id",
-        uselist=True,
         cascade="all, delete-orphan",
     )
 
-    def __init__(self, budget=None, client=None, amount=0, unit=None, **kwargs):
+    def __init__(
+        self,
+        budget: Optional["Budget"] = None,
+        client: Optional["Client"] = None,
+        amount: Union[float, int] = 0,
+        unit: Optional[str] = None,
+        **kwargs,
+    ) -> None:
         super(Invoice, self).__init__(**kwargs)
         AmountMixin.__init__(self, amount=amount)
         UnitMixin.__init__(self, unit=unit)
@@ -558,7 +587,7 @@ class Invoice(Entity, AmountMixin, UnitMixin):
         self.client = client
 
     @validates("budget")
-    def _validate_budget(self, key, budget):
+    def _validate_budget(self, key: str, budget: "Budget") -> "Budget":
         """Validate the given budget value.
 
         Args:
@@ -579,7 +608,7 @@ class Invoice(Entity, AmountMixin, UnitMixin):
         return budget
 
     @validates("client")
-    def _validate_client(self, key, client):
+    def _validate_client(self, key: str, client: "Client") -> "Client":
         """Validate the given client value.
 
         Args:
@@ -594,7 +623,7 @@ class Invoice(Entity, AmountMixin, UnitMixin):
         Returns:
             Client: The validated :class:`stalker.models.client.Client` instance.
         """
-        from stalker import Client
+        from stalker.models.client import Client
 
         if not isinstance(client, Client):
             raise TypeError(
@@ -613,31 +642,38 @@ class Payment(Entity, AmountMixin, UnitMixin):
     Args:
         invoice (Invoice): The :class:`.Invoice` instance that this payment is related
             to. This cannot be skipped.
+        amount (Union[int, float]): The amount value.
+        unit (Optional[str]): The unit of this mixed in class.
     """
 
     __auto_name__ = True
     __tablename__ = "Payments"
     __mapper_args__ = {"polymorphic_identity": "Payment"}
 
-    payment_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
-
-    invoice_id = Column(Integer, ForeignKey("Invoices.id"))
-
-    invoice = relationship(
-        "Invoice",
+    payment_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
+    )
+    invoice_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Invoices.id"))
+    invoice: Mapped[Optional["Invoice"]] = relationship(
         primaryjoin="Payments.c.invoice_id==Invoices.c.id",
         back_populates="payments",
         uselist=False,
     )
 
-    def __init__(self, invoice=None, amount=0, unit=None, **kwargs):
+    def __init__(
+        self,
+        invoice: Optional["Invoice"] = None,
+        amount: Union[int, float] = 0,
+        unit: Optional[str] = None,
+        **kwargs,
+    ) -> None:
         super(Payment, self).__init__(**kwargs)
         AmountMixin.__init__(self, amount=amount)
         UnitMixin.__init__(self, unit=unit)
         self.invoice = invoice
 
     @validates("invoice")
-    def _validate_invoice(self, key, invoice):
+    def _validate_invoice(self, key: str, invoice: "Invoice") -> "Invoice":
         """Validate the invoice value.
 
         Args:

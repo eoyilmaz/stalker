@@ -1,13 +1,11 @@
 # -*- coding: utf-8 -*-
 """Ticket related functions and classes are situated here."""
 import uuid
-from typing import Union
-
-from six import string_types
+from typing import Any, Dict, List, Optional, Union
 
 from sqlalchemy import Column, Integer, String, Text
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
-from sqlalchemy.orm import relationship, synonym
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym
 from sqlalchemy.orm.mapper import validates
 from sqlalchemy.schema import ForeignKey, Table
 from sqlalchemy.types import Enum
@@ -19,7 +17,9 @@ from stalker.log import get_logger
 from stalker.models.auth import User
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import StatusMixin
+from stalker.models.note import Note
 from stalker.models.project import Project
+from stalker.models.status import Status
 
 logger = get_logger(__name__)
 
@@ -130,30 +130,27 @@ class Ticket(Entity, StatusMixin):
     # )
     __mapper_args__ = {"polymorphic_identity": "Ticket"}
 
-    ticket_id = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
-
-    # TODO: use ProjectMixin
-    project_id = Column(
-        "project_id", Integer, ForeignKey("Projects.id"), nullable=False
+    ticket_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("Entities.id"), primary_key=True
     )
 
-    _project = relationship(
-        "Project",
+    # TODO: use ProjectMixin
+    project_id: Mapped[int] = mapped_column("project_id", ForeignKey("Projects.id"))
+
+    _project: Mapped[Project] = relationship(
         primaryjoin="Tickets.c.project_id==Projects.c.id",
         back_populates="tickets",
     )
 
-    _number = Column(
+    _number: Mapped[int] = mapped_column(
         "number",
-        Integer,
         autoincrement=True,
         default=1,
         nullable=False,
         unique=True,
     )
 
-    related_tickets = relationship(
-        "Ticket",
+    related_tickets: Mapped[Optional[List["Ticket"]]] = relationship(
         secondary="Ticket_Related_Tickets",
         primaryjoin="Tickets.c.id==Ticket_Related_Tickets.c.ticket_id",
         secondaryjoin="Ticket_Related_Tickets.c.related_ticket_id==" "Tickets.c.id",
@@ -163,18 +160,19 @@ class Ticket(Entity, StatusMixin):
         """,
     )
 
-    summary = Column(Text)
+    summary: Mapped[Optional[str]] = mapped_column(Text)
 
-    logs = relationship(
-        "TicketLog",
+    logs: Mapped[Optional[List["TicketLog"]]] = relationship(
         primaryjoin="Tickets.c.id==TicketLogs.c.ticket_id",
         back_populates="ticket",
         cascade="all, delete-orphan",
     )
 
-    links = relationship("SimpleEntity", secondary="Ticket_SimpleEntities")
+    links: Mapped[Optional[List["SimpleEntity"]]] = relationship(
+        secondary="Ticket_SimpleEntities"
+    )
 
-    comments = synonym(
+    comments: Mapped[Optional[List["Note"]]] = synonym(
         "notes",
         doc="""A list of :class:`.Note` instances showing the comments made for
         this Ticket instance. It is a synonym for the :attr:`.Ticket.notes`
@@ -182,14 +180,16 @@ class Ticket(Entity, StatusMixin):
         """,
     )
 
-    reported_by = synonym("created_by", doc="Shows who created this Ticket")
+    reported_by: Mapped[Optional["User"]] = synonym(
+        "created_by", doc="Shows who created this Ticket"
+    )
 
-    owner_id = Column("owner_id", Integer, ForeignKey("Users.id"))
-    owner = relationship("User", primaryjoin="Tickets.c.owner_id==Users.c.id")
+    owner_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Users.id"))
+    owner: Mapped["User"] = relationship(primaryjoin="Tickets.c.owner_id==Users.c.id")
 
-    resolution = Column(String(128))
+    resolution: Mapped[Optional[str]] = mapped_column(String(128))
 
-    priority = Column(
+    priority: Mapped[Optional[str]] = mapped_column(
         Enum("TRIVIAL", "MINOR", "MAJOR", "CRITICAL", "BLOCKER", name="PriorityType"),
         default="TRIVIAL",
         doc="""The priority of the Ticket which is an enum value.
@@ -213,8 +213,13 @@ class Ticket(Entity, StatusMixin):
     )
 
     def __init__(
-        self, project=None, links=None, priority="TRIVIAL", summary=None, **kwargs
-    ):
+        self,
+        project: Optional[Project] = None,
+        links: Optional[List[SimpleEntity]] = None,
+        priority: str = "TRIVIAL",
+        summary: Optional[str] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         # just force auto name generation
         self._number = self._generate_ticket_number()
         from stalker import defaults
@@ -247,7 +252,7 @@ class Ticket(Entity, StatusMixin):
         """,
     )
 
-    def _project_getter(self):
+    def _project_getter(self) -> Project:
         """Return the project attribute value.
 
         Returns:
@@ -283,7 +288,7 @@ class Ticket(Entity, StatusMixin):
         return self._maximum_number() + 1
 
     @validates("related_tickets")
-    def _validate_related_tickets(self, key, related_ticket):
+    def _validate_related_tickets(self, key: str, related_ticket: "Ticket") -> "Ticket":
         """Validate the given related_ticket value.
 
         Args:
@@ -360,7 +365,7 @@ class Ticket(Entity, StatusMixin):
         if summary is None:
             summary = ""
 
-        if not isinstance(summary, string_types):
+        if not isinstance(summary, str):
             raise TypeError(
                 "{}.summary should be an instance of str, not {}: '{}'".format(
                     self.__class__.__name__, summary.__class__.__name__, summary
@@ -368,7 +373,9 @@ class Ticket(Entity, StatusMixin):
             )
         return summary
 
-    def __action__(self, action, created_by, action_arg=None) -> "TicketLog":
+    def __action__(
+        self, action: str, created_by: User, action_arg: Any = None
+    ) -> "TicketLog":
         """Update the ticket status and create a ticket log.
 
         The log is created according to the Ticket.__available_actions__ dictionary.
@@ -461,15 +468,15 @@ class Ticket(Entity, StatusMixin):
         return self.__action__("reopen", created_by)
 
     # actions
-    def set_owner(self, *args):
+    def set_owner(self, *args) -> None:
         """Set the owner.
 
         Args:
-            args (Any): Set the owrner.
+            args (Any): Set the owner.
         """
         self.owner = args[0]
 
-    def set_resolution(self, *args):
+    def set_resolution(self, *args) -> None:
         """Set the timing_resolution.
 
         Args:
@@ -485,11 +492,11 @@ class Ticket(Entity, StatusMixin):
         """
         self.resolution = ""
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is a Ticket instance and has the same name,
@@ -505,7 +512,7 @@ class Ticket(Entity, StatusMixin):
             and other.priority == self.priority
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -549,31 +556,39 @@ class TicketLog(SimpleEntity):
     __tablename__ = "TicketLogs"
     __mapper_args__ = {"polymorphic_identity": "TicketLog"}
 
-    ticket_log_id = Column("id", ForeignKey("SimpleEntities.id"), primary_key=True)
-
-    from_status_id = Column(Integer, ForeignKey("Statuses.id"))
-    to_status_id = Column(Integer, ForeignKey("Statuses.id"))
-
-    from_status = relationship(
-        "Status", primaryjoin="TicketLogs.c.from_status_id==Statuses.c.id"
+    ticket_log_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
-    to_status = relationship(
-        "Status", primaryjoin="TicketLogs.c.to_status_id==Statuses.c.id"
+    from_status_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Statuses.id"))
+    to_status_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Statuses.id"))
+
+    from_status: Mapped[Status] = relationship(
+        primaryjoin="TicketLogs.c.from_status_id==Statuses.c.id"
     )
 
-    action = Column(Enum(*defaults.ticket_workflow.keys(), name="TicketActions"))
+    to_status: Mapped[Status] = relationship(
+        primaryjoin="TicketLogs.c.to_status_id==Statuses.c.id"
+    )
 
-    ticket_id = Column(Integer, ForeignKey("Tickets.id"))
-    ticket = relationship(
-        "Ticket",
+    action: Mapped[Optional[str]] = mapped_column(
+        Enum(*defaults.ticket_workflow.keys(), name="TicketActions")
+    )
+
+    ticket_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Tickets.id"))
+    ticket: Mapped[Optional[Ticket]] = relationship(
         primaryjoin="TicketLogs.c.ticket_id==Tickets.c.id",
         back_populates="logs",
     )
 
     def __init__(
-        self, ticket=None, from_status=None, to_status=None, action=None, **kwargs
-    ):
+        self,
+        ticket: Optional[Ticket] = None,
+        from_status: Optional[Status] = None,
+        to_status: Optional[Status] = None,
+        action: Optional[str] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         kwargs["name"] = "TicketLog_" + uuid.uuid4().hex
         super(TicketLog, self).__init__(**kwargs)
         self.ticket = ticket

@@ -4,7 +4,8 @@ import datetime
 
 import pytest
 
-from sqlalchemy import Column, ForeignKey, Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column
 
 import stalker
 from stalker import ScheduleMixin, SimpleEntity, defaults
@@ -15,8 +16,8 @@ class MixedInClass(SimpleEntity, ScheduleMixin):
 
     __tablename__ = "ScheduleMixFooMixedInClasses"
     __mapper_args__ = {"polymorphic_identity": "ScheduleMixFooMixedInClass"}
-    schedMixFooMixedInClass_id = Column(
-        "id", Integer, ForeignKey("SimpleEntities.id"), primary_key=True
+    schedMixFooMixedInClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("SimpleEntities.id"), primary_key=True
     )
 
     def __init__(self, **kwargs):

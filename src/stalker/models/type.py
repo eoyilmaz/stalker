@@ -1,7 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Type realted functions and classes are situated here."""
+"""Type related functions and classes are situated here."""
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
+from typing import Any, Dict, Optional
+
+from sqlalchemy import ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column
 
 from stalker.db.declarative import Base
 from stalker.log import get_logger
@@ -24,39 +27,56 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     specific :class:`.Entity`. For example, you can have a ``Character``
     :class:`.Asset` or you can have a ``Commercial`` :class:`.Project` or you
     can define a :class:`.Link` as an ``Image`` etc., to create a new
-    :class:`.Type` for various classes::
+    :class:`.Type` for various classes:
 
-      Type(name="Character", target_entity_type="Asset")
-      Type(name="Commercial", target_entity_type="Project")
-      Type(name="Image", target_entity_type="Link")
+    ..code-block: Python
 
-    or::
+        Type(name="Character", target_entity_type="Asset")
+        Type(name="Commercial", target_entity_type="Project")
+        Type(name="Image", target_entity_type="Link")
 
-      Type(name="Character", target_entity_type=Asset.entity_type)
-      Type(name="Commercial", target_entity_type=Project.entity_type)
-      Type(name="Image", target_entity_type=Link.entity_type)
+    or:
+
+    ..code-block: Python
+
+        Type(name="Character", target_entity_type=Asset.entity_type)
+        Type(name="Commercial", target_entity_type=Project.entity_type)
+        Type(name="Image", target_entity_type=Link.entity_type)
 
     or even better:
 
-      Type(name="Character", target_entity_type=Asset)
-      Type(name="Commercial", target_entity_type=Project)
-      Type(name="Image", target_entity_type=Link)
+    ..code-block: Python
+
+        Type(name="Character", target_entity_type=Asset)
+        Type(name="Commercial", target_entity_type=Project)
+        Type(name="Image", target_entity_type=Link)
 
     By using :class:`.Type` s, one can able to sort and group same type of
     entities.
 
     :class:`.Type` s are generally used in :class:`.Structure` s.
 
-      target_entity_type (str): The string defining the target type of this
-        :class:`.Type`.
+    Args:
+        target_entity_type (str): The string defining the target type of this
+            :class:`.Type`.
     """
 
     __auto_name__ = False
     __tablename__ = "Types"
     __mapper_args__ = {"polymorphic_identity": "Type"}
-    type_id_local = Column("id", Integer, ForeignKey("Entities.id"), primary_key=True)
+    type_id_local: Mapped[int] = mapped_column(
+        "id",
+        ForeignKey("Entities.id"),
+        primary_key=True,
+    )
 
-    def __init__(self, name=None, code=None, target_entity_type=None, **kwargs):
+    def __init__(
+        self,
+        name: Optional[str] = None,
+        code: Optional[str] = None,
+        target_entity_type: Optional[str] = None,
+        **kwargs: Dict[str, Any],
+    ) -> None:
         kwargs["name"] = name
         kwargs["target_entity_type"] = target_entity_type
         super(Type, self).__init__(**kwargs)
@@ -64,11 +84,11 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
         # CodeMixin.__init__(self, **kwargs)
         self.code = code
 
-    def __eq__(self, other):
+    def __eq__(self, other: Any) -> bool:
         """Check the equality.
 
         Args:
-            other (object): The other object.
+            other (Any): The other object.
 
         Returns:
             bool: True if the other object is equal to this Type instance as an Entity
@@ -80,7 +100,7 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
             and self.target_entity_type == other.target_entity_type
         )
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         """Return the hash value of this instance.
 
         Because the __eq__ is overridden the __hash__ also needs to be overridden.
@@ -97,16 +117,24 @@ class EntityType(Base):
     __tablename__ = "EntityTypes"
     __table_args__ = {"extend_existing": True}
 
-    id = Column("id", Integer, primary_key=True)
-    name = Column(String(128), nullable=False, unique=True)
-    statusable = Column(Boolean, default=False)
-    dateable = Column(Boolean, default=False)
-    schedulable = Column(Boolean, default=False)
-    accepts_references = Column(Boolean, default=False)
+    id: Mapped[int] = mapped_column("id", primary_key=True)
+    name: Mapped[str] = mapped_column(
+        String(128),
+        nullable=False,
+        unique=True,
+    )
+    statusable: Mapped[Optional[bool]] = mapped_column(default=False)
+    dateable: Mapped[Optional[bool]] = mapped_column(default=False)
+    schedulable: Mapped[Optional[bool]] = mapped_column(default=False)
+    accepts_references: Mapped[Optional[bool]] = mapped_column(default=False)
 
     def __init__(
-        self, name, statusable=False, schedulable=False, accepts_references=False
-    ):
+        self,
+        name: str,
+        statusable: bool = False,
+        schedulable: bool = False,
+        accepts_references: bool = False,
+    ) -> None:
         self.name = name
         self.statusable = statusable
         self.schedulable = schedulable
