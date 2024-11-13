@@ -39,6 +39,7 @@ clean: FORCE
 	@printf "\n\033[36m--- $@: Clean ---\033[0m\n"
 	-rm -rf .pytest_cache
 	-rm -f .coverage*
+	-rm -rf .mypy_cache
 	-rm -rf .tox
 	-rm -rf dist
 	-rm -rf build
