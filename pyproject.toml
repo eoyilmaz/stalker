@@ -61,7 +61,7 @@ include-package-data = true
 where = ["src"]
 
 [tool.setuptools.package-data]
-stalker = ["VERSION"]
+stalker = ["VERSION", "py.typed"]
 
 [tool.setuptools.exclude-package-data]
 stalker = ["alembic", "docs", "tests"]
