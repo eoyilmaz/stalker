@@ -87,9 +87,5 @@ tests:
 docs:
 	cd docs && $(MAKE) html
 
-.PHONY: docs
-docs:
-	cd docs && $(MAKE) html
-
 # https://www.gnu.org/software/make/manual/html_node/Force-Targets.html
 FORCE:
