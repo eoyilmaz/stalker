@@ -348,16 +348,14 @@ def test_user_role_attribute(setup_department_db_tests):
 def test_tjp_id_is_working_as_expected(setup_department_db_tests):
     """tjp_is working as expected."""
     data = setup_department_db_tests
-    assert data["test_department"].tjp_id == "Department_36"
+    dep = data["test_department"]
+    assert dep.tjp_id == f"Department_{dep.id}"
 
 
 def test_to_tjp_is_working_as_expected(setup_department_db_tests):
     """to_tjp property is working as expected."""
     data = setup_department_db_tests
-    expected_tjp = """resource Department_36 "Department_36" {
-    resource User_31 "User_31" {
-        efficiency 1.0
-    }
+    expected_tjp = """resource Department_37 "Department_37" {
     resource User_32 "User_32" {
         efficiency 1.0
     }
@@ -365,6 +363,9 @@ def test_to_tjp_is_working_as_expected(setup_department_db_tests):
         efficiency 1.0
     }
     resource User_34 "User_34" {
+        efficiency 1.0
+    }
+    resource User_35 "User_35" {
         efficiency 1.0
     }
 }"""

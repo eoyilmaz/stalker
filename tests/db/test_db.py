@@ -183,7 +183,7 @@ def test_non_unique_names_on_different_entity_type(setup_postgresql_db):
     DBSession.commit()
 
 
-def test_ticket_status_initialization(setup_postgresql_db):
+def test_ticket_status_list_initialization(setup_postgresql_db):
     """Ticket statuses are correctly created."""
     ticket_status_list = StatusList.query.filter(
         StatusList.name == "Ticket Statuses"
@@ -199,7 +199,7 @@ def test_ticket_status_initialization(setup_postgresql_db):
     )
 
 
-def test_daily_status_initialization(setup_postgresql_db):
+def test_daily_status_list_initialization(setup_postgresql_db):
     """Daily statuses are correctly created."""
     daily_status_list = StatusList.query.filter(
         StatusList.name == "Daily Statuses"
@@ -404,7 +404,7 @@ def test_project_status_list_initialization(setup_postgresql_db):
     assert all(status.updated_by == admin for status in project_status_list.statuses)
 
 
-def test_task_status_initialization(setup_postgresql_db):
+def test_task_status_list_initialization(setup_postgresql_db):
     """Task statuses are correctly created."""
     task_status_list = (
         StatusList.query.filter(StatusList.name == "Task Statuses")
@@ -446,7 +446,7 @@ def test_task_status_initialization(setup_postgresql_db):
     assert all(status.updated_by == admin for status in task_status_list.statuses)
 
 
-def test_asset_status_initialization(setup_postgresql_db):
+def test_asset_status_list_initialization(setup_postgresql_db):
     """Asset statuses are correctly created."""
     asset_status_list = (
         StatusList.query.filter(StatusList.name == "Asset Statuses")
@@ -483,7 +483,7 @@ def test_asset_status_initialization(setup_postgresql_db):
     assert sorted(expected_status_codes) == sorted(db_status_codes)
 
 
-def test_shot_status_initialization(setup_postgresql_db):
+def test_shot_status_list_initialization(setup_postgresql_db):
     """Shot statuses are correctly created."""
     shot_status_list = (
         StatusList.query.filter(StatusList.name == "Shot Statuses")
@@ -520,7 +520,7 @@ def test_shot_status_initialization(setup_postgresql_db):
     assert sorted(expected_status_codes) == sorted(db_status_codes)
 
 
-def test_sequence_status_initialization(setup_postgresql_db):
+def test_sequence_status_list_initialization(setup_postgresql_db):
     """Sequence statuses are correctly created."""
     sequence_status_list = (
         StatusList.query.filter(StatusList.name == "Sequence Statuses")
@@ -562,7 +562,49 @@ def test_sequence_status_initialization(setup_postgresql_db):
     assert all(status.updated_by == admin for status in sequence_status_list.statuses)
 
 
-def test_asset_status_initialization_when_there_is_an_asset_status_list(
+def test_scene_status_list_initialization(setup_postgresql_db):
+    """Scene statuses are correctly created."""
+    scene_status_list = (
+        StatusList.query.filter(StatusList.name == "Scene Statuses")
+        .filter(StatusList.target_entity_type == "Scene")
+        .first()
+    )
+    assert isinstance(scene_status_list, StatusList)
+    expected_status_names = [
+        "Waiting For Dependency",
+        "Ready To Start",
+        "Work In Progress",
+        "Pending Review",
+        "Has Revision",
+        "Dependency Has Revision",
+        "On Hold",
+        "Stopped",
+        "Completed",
+    ]
+    expected_status_codes = [
+        "WFD",
+        "RTS",
+        "WIP",
+        "PREV",
+        "HREV",
+        "DREV",
+        "OH",
+        "STOP",
+        "CMPL",
+    ]
+    assert len(scene_status_list.statuses) == len(expected_status_names)
+    db_status_names = map(lambda x: x.name, scene_status_list.statuses)
+    db_status_codes = map(lambda x: x.code, scene_status_list.statuses)
+    assert sorted(expected_status_names) == sorted(db_status_names)
+    assert sorted(expected_status_codes) == sorted(db_status_codes)
+    # check if the created_by and updated_by attributes are correctly set
+    # to admin
+    admin = get_admin_user()
+    assert all(status.created_by == admin for status in scene_status_list.statuses)
+    assert all(status.updated_by == admin for status in scene_status_list.statuses)
+
+
+def test_asset_status_list_initialization_when_there_is_an_asset_status_list(
     setup_postgresql_db,
 ):
     """Asset statuses created if a StatusList for Sequence exists."""
@@ -605,7 +647,7 @@ def test_asset_status_initialization_when_there_is_an_asset_status_list(
         assert status.updated_by == admin
 
 
-def test_shot_status_initialization_when_there_is_a_shot_status_list(
+def test_shot_status_list_initialization_when_there_is_a_shot_status_list(
     setup_postgresql_db,
 ):
     """Shot statuses created if there is a StatusList for Shot exist."""
@@ -648,7 +690,7 @@ def test_shot_status_initialization_when_there_is_a_shot_status_list(
         assert status.updated_by == admin
 
 
-def test_sequence_status_initialization_when_there_is_a_sequence_status_list(
+def test_sequence_status_list_initialization_when_there_is_a_sequence_status_list(
     setup_postgresql_db,
 ):
     """Sequence statuses correctly created if a StatusList for Sequence exists."""
@@ -693,7 +735,7 @@ def test_sequence_status_initialization_when_there_is_a_sequence_status_list(
         assert status.updated_by == admin
 
 
-def test_review_status_initialization(setup_postgresql_db):
+def test_review_status_list_initialization(setup_postgresql_db):
     """Review statuses are correctly created."""
     review_status_list = StatusList.query.filter(
         StatusList.name == "Review Statuses"
@@ -2753,7 +2795,9 @@ def test_persistence_of_price_list(setup_postgresql_db):
     p_db = PriceList.query.first()
 
     assert p_db.name == "Test Price List"
-    assert p_db.goods == [g1, g2, g3]
+    assert sorted(p_db.goods, key=lambda x: x.id) == sorted(
+        [g1, g2, g3], key=lambda x: x.id
+    )
 
     DBSession.delete(p_db)
     DBSession.commit()

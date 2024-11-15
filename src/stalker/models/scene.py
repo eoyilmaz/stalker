@@ -7,8 +7,8 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.log import get_logger
-from stalker.models.entity import Entity
-from stalker.models.mixins import CodeMixin, ProjectMixin
+from stalker.models.task import Task
+from stalker.models.mixins import CodeMixin
 
 if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.shot import Shot
@@ -16,7 +16,7 @@ if TYPE_CHECKING:  # pragma: no cover
 logger = get_logger(__name__)
 
 
-class Scene(Entity, ProjectMixin, CodeMixin):
+class Scene(Task, CodeMixin):
     """Stores data about Scenes.
 
     Scenes are grouping the Shots according to their view to the world, that is
@@ -35,7 +35,7 @@ class Scene(Entity, ProjectMixin, CodeMixin):
     __mapper_args__ = {"polymorphic_identity": "Scene"}
     scene_id: Mapped[int] = mapped_column(
         "id",
-        ForeignKey("Entities.id"),
+        ForeignKey("Tasks.id"),
         primary_key=True,
     )
 
@@ -53,7 +53,6 @@ class Scene(Entity, ProjectMixin, CodeMixin):
 
         # call the mixin __init__ methods
         CodeMixin.__init__(self, **kwargs)
-        ProjectMixin.__init__(self, **kwargs)
 
         if shots is None:
             shots = []

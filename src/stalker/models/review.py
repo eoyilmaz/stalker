@@ -319,7 +319,6 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         from stalker import TaskDependency
 
         # update dependent task statuses
-
         for dependency in walk_hierarchy(self.task, "dependent_of", method=1):
             logger.debug(f"current TaskDependency object: {dependency}")
             dependency.update_status_with_dependent_statuses()
