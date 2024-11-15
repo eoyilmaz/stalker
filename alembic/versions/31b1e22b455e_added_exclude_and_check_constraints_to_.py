@@ -70,7 +70,7 @@ where "TimeLogs".id in (select id from cte);"""
     logger.info("Trimming residual overlapping TimeLog.end values")
     op.execute(
         """
--- then trim the end dates of the TimeLogs that are stil overlapping with others
+-- then trim the end dates of the TimeLogs that are still overlapping with others
 update "TimeLogs"
 set "end" = (
     select
@@ -93,7 +93,7 @@ where "TimeLogs".end - "TimeLogs".start > interval '10 min'
     logger.info("Trimming residual overlapping TimeLog.start values")
     op.execute(
         """
--- then trim the start dates of the TimeLogs that are stil overlapping with
+-- then trim the start dates of the TimeLogs that are still overlapping with
 -- others (there may be 10 min TimeLogs left in the previous query)
 update "TimeLogs"
 set start = (
