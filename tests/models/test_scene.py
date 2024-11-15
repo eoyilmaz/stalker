@@ -3,7 +3,7 @@
 
 import pytest
 
-from stalker import Entity, Project, Repository, Scene, Type
+from stalker import Entity, Project, Repository, Scene, Task, Type
 from stalker.db.session import DBSession
 
 
@@ -59,6 +59,11 @@ def setup_scene_db_tests(setup_postgresql_db):
     return data
 
 
+def test_scene_is_deriving_from_task():
+    """Scene is deriving from Task class."""
+    assert Task in Scene.__mro__
+
+
 def test___auto_name__class_attribute_is_set_to_false():
     """__auto_name__ class attribute is set to False for Scene class."""
     assert Scene.__auto_name__ is False
@@ -71,7 +76,7 @@ def test_shots_attribute_defaults_to_empty_list(setup_scene_db_tests):
     assert new_scene.shots == []
 
 
-def test_shots_attribute_is_set_none(setup_scene_db_tests):
+def test_shots_attribute_is_set_to_none(setup_scene_db_tests):
     """TypeError is raised if the shots attribute is set to None."""
     data = setup_scene_db_tests
     with pytest.raises(TypeError) as cm:
@@ -172,3 +177,13 @@ def test__hash__is_working_as_expected(setup_scene_db_tests):
     result = hash(data["test_scene"])
     assert isinstance(result, int)
     assert result == data["test_scene"].__hash__()
+
+
+def test_can_be_used_in_a_task_hierarchy(setup_scene_db_tests):
+    """Scene can be used in a Task hierarchy."""
+    data = setup_scene_db_tests
+
+    task1 = Task(name="Parent Task", project=data["test_project"])
+    data["test_scene"].parent = task1
+
+    assert data["test_scene"] in task1.children

@@ -3,9 +3,8 @@
 
 import datetime
 import logging
+import re
 import sys
-
-from jinja2 import Template
 
 import pytest
 
@@ -35,6 +34,38 @@ from stalker.models.ticket import FIXED, CANTFIX, INVALID
 
 logger = logging.getLogger("stalker.models.project")
 log.register_logger(logger)
+
+
+def condition_tjp_output(data: str) -> str:
+    """Conditions the tjp output.
+
+    Args:
+        data (str): The data.
+
+    Returns:
+        str: The formatted data.
+    """
+    assert isinstance(data, str)
+    data_out = re.subn("[\s]+", " ", data)[0]
+    return data_out
+
+
+@pytest.mark.parametrize(
+    "get_data_file",
+    [["project_to_tjp_output_rendered", "project_to_tjp_output_formatted"]],
+    indirect=True,
+)
+def test_condition_tjp_output_is_working_as_expected(get_data_file):
+    """condition_tjp_output_is_working_as_expected."""
+    test_data = get_data_file
+    rendered_path = test_data[0]
+    formatted_path = test_data[1]
+    with open(rendered_path, "r") as f:
+        rendered_data = f.read()
+    with open(formatted_path, "r") as f:
+        formatted_data = f.read()
+
+    assert condition_tjp_output(rendered_data) == formatted_data
 
 
 @pytest.fixture(scope="function")
@@ -1325,85 +1356,69 @@ def test_tjp_id_is_working_as_expected(setup_project_db_test):
     assert data["test_project"].tjp_id == "Project_654654"
 
 
-@pytest.mark.parametrize(
-    "get_data_file", ["project_to_tjp_output.jinja2"], indirect=True
-)
-def test_to_tjp_is_working_as_expected(get_data_file, setup_project_db_test):
+def test_to_tjp_is_working_as_expected(setup_project_db_test):
     """to_tjp attribute is working as expected."""
     data = setup_project_db_test
-    data_file_path = get_data_file
-    with open(data_file_path, "r") as f:
-        template_content = f.read()
-
-    expected_tjp_temp = Template(template_content)
-    expected_tjp = expected_tjp_temp.render(
-        {
-            "project": data["test_project"],
-            "task1": data["test_task1"],
-            "task2": data["test_task2"],
-            "task3": data["test_task3"],
-            "task4": data["test_task4"],
-            "task5": data["test_task5"],
-            "task6": data["test_task6"],
-            "task7": data["test_task7"],
-            "task8": data["test_task8"],
-            "task9": data["test_task9"],
-            "task10": data["test_task10"],
-            "task11": data["test_task11"],
-            "task12": data["test_task12"],
-            "task13": data["test_task13"],
-            "task14": data["test_task14"],
-            "task15": data["test_task15"],
-            "task16": data["test_task16"],
-            "task17": data["test_task17"],
-            "task18": data["test_task18"],
-            "task19": data["test_task19"],
-            "task20": data["test_task20"],
-            "task21": data["test_task21"],
-            "task22": data["test_task22"],
-            "task23": data["test_task23"],
-            "task24": data["test_task24"],
-            "task25": data["test_task25"],
-            "task26": data["test_task26"],
-            "task27": data["test_task27"],
-            "asset1": data["test_asset1"],
-            "asset2": data["test_asset2"],
-            "asset3": data["test_asset3"],
-            "asset4": data["test_asset4"],
-            "asset5": data["test_asset5"],
-            "shot1": data["test_shot1"],
-            "shot2": data["test_shot2"],
-            "shot3": data["test_shot3"],
-            "shot4": data["test_shot4"],
-            "sequence1": data["test_seq1"],
-            "sequence2": data["test_seq2"],
-            "sequence3": data["test_seq3"],
-            "sequence4": data["test_seq4"],
-            "sequence5": data["test_seq5"],
-            "sequence6": data["test_seq6"],
-            "sequence7": data["test_seq7"],
-            "user1": data["test_user1"],
-            "user2": data["test_user2"],
-            "user3": data["test_user3"],
-            "user4": data["test_user4"],
-            "user5": data["test_user5"],
-            "user6": data["test_user6"],
-            "user7": data["test_user7"],
-            "user8": data["test_user8"],
-            "user9": data["test_user9"],
-            "user10": data["test_user10"],
-        }
+    # because of the randomness in the order of the test data being created,
+    # we can't exactly know the output, so it might be better to check if the
+    # tjp output starts with the correct line and every single child is
+    # represented in the tjp output.
+    result = data["test_project"].to_tjp
+    # format the output so that it is more predictable
+    result = condition_tjp_output(result)
+    assert result.startswith(
+        'task Project_{id} "Project_{id}" {{'.format(id=data["test_project"].id)
     )
 
-    # print("Expected:")
-    # print("---------")
-    # print(expected_tjp)
-    # print("-----------------")
-    # print("Result:")
-    # print("-------")
-    # print(data["test_project"].to_tjp)
-
-    assert data["test_project"].to_tjp == expected_tjp
+    entities_to_test = [
+        data["test_project"],
+        data["test_task1"],
+        data["test_task2"],
+        data["test_task3"],
+        data["test_task4"],
+        data["test_task5"],
+        data["test_task6"],
+        data["test_task7"],
+        data["test_task8"],
+        data["test_task9"],
+        data["test_task10"],
+        data["test_task11"],
+        data["test_task12"],
+        data["test_task13"],
+        data["test_task14"],
+        data["test_task15"],
+        data["test_task16"],
+        data["test_task17"],
+        data["test_task18"],
+        data["test_task19"],
+        data["test_task20"],
+        data["test_task21"],
+        data["test_task22"],
+        data["test_task23"],
+        data["test_task24"],
+        data["test_task25"],
+        data["test_task26"],
+        data["test_task27"],
+        data["test_asset1"],
+        data["test_asset2"],
+        data["test_asset3"],
+        data["test_asset4"],
+        data["test_asset5"],
+        data["test_shot1"],
+        data["test_shot2"],
+        data["test_shot3"],
+        data["test_shot4"],
+        data["test_seq1"],
+        data["test_seq2"],
+        data["test_seq3"],
+        data["test_seq4"],
+        data["test_seq5"],
+        data["test_seq6"],
+        data["test_seq7"],
+    ]
+    assert all(
+        condition_tjp_output(entity.to_tjp) in result for entity in entities_to_test
+    )
 
 
 def test_active_attribute_is_true_by_default(setup_project_db_test):

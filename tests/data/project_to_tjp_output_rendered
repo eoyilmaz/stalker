@@ -1,0 +1,146 @@
+task Project_1 "Project_1" {
+    task Sequence_2 "Sequence_2" {
+        effort 1.0h
+        allocate User_3
+    }
+    task Sequence_4 "Sequence_4" {
+        effort 1.0h
+        allocate User_5
+    }
+    task Sequence_6 "Sequence_6" {
+        effort 1.0h
+        allocate User_7
+    }
+    task Sequence_8 "Sequence_8" {
+        task Task_9 "Task_9" {
+            effort 1.0h
+            allocate User_10
+        }
+        task Task_11 "Task_11" {
+            effort 1.0h
+            allocate User_12
+        }
+        task Task_13 "Task_13" {
+            effort 1.0h
+            allocate User_14
+        }
+    }
+    task Sequence_15 "Sequence_15" {
+        task Task_16 "Task_16" {
+            effort 1.0h
+            allocate User_17
+        }
+        task Task_18 "Task_18" {
+            effort 1.0h
+            allocate User_19
+        }
+        task Task_20 "Task_20" {
+            effort 1.0h
+            allocate User_21
+        }
+    }
+    task Sequence_22 "Sequence_22" {}
+    task Shot_23 "Shot_23" {
+        task Task_24 "Task_24" {
+            effort 10.0h
+            allocate User_25
+        }
+        task Task_26 "Task_26" {
+            effort 1.0h
+            allocate User_3, User_5
+        }
+        task Task_27 "Task_27" {
+            effort 1.0h
+            allocate User_7, User_10
+        }
+    }
+    task Shot_28 "Shot_28" {
+        task Task_29 "Task_29" {
+            effort 1.0h
+            allocate User_12, User_14
+        }
+        task Task_30 "Task_30" {
+            effort 1.0h
+            allocate User_17, User_19
+        }
+        task Task_31 "Task_31" {
+            effort 1.0h
+            allocate User_21, User_25
+        }
+    }
+    task Sequence_32 "Sequence_32" {}
+    task Shot_33 "Shot_33" {
+        task Task_34 "Task_34" {
+            effort 1.0h
+            allocate User_3, User_5, User_7
+        }
+        task Task_35 "Task_35" {
+            effort 1.0h
+            allocate User_10, User_12, User_14
+        }
+        task Task_36 "Task_36" {
+            effort 1.0h
+            allocate User_17, User_19, User_21
+        }
+    }
+    task Shot_37 "Shot_37" {
+        task Task_38 "Task_38" {
+            effort 1.0h
+            allocate User_3, User_5, User_25
+        }
+        task Task_39 "Task_39" {
+            effort 1.0h
+            allocate User_7, User_10, User_12
+        }
+        task Task_40 "Task_40" {
+            effort 1.0h
+            allocate User_14, User_17, User_19
+        }
+    }
+    task Asset_41 "Asset_41" {
+        effort 1.0h
+        allocate User_5
+    }
+    task Asset_42 "Asset_42" {}
+    task Asset_43 "Asset_43" {}
+    task Asset_44 "Asset_44" {
+        task Task_45 "Task_45" {
+            effort 1.0h
+            allocate User_3, User_21, User_25
+        }
+        task Task_46 "Task_46" {
+            effort 1.0h
+            allocate User_5, User_7
+        }
+        task Task_47 "Task_47" {
+            effort 1.0h
+            allocate User_10, User_12
+        }
+    }
+    task Asset_48 "Asset_48" {
+        task Task_49 "Task_49" {
+            effort 1.0h
+            allocate User_14, User_17
+        }
+        task Task_50 "Task_50" {
+            effort 1.0h
+            allocate User_19, User_21
+        }
+        task Task_51 "Task_51" {
+            effort 1.0h
+            allocate User_3, User_25
+        }
+    }
+    task Task_52 "Task_52" {
+        effort 1.0h
+        allocate User_3
+    }
+    task Task_53 "Task_53" {
+        effort 1.0h
+        allocate User_5
+    }
+    task Task_54 "Task_54" {
+        effort 1.0h
+        allocate User_7
+    }
+}

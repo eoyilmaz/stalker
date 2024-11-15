@@ -53,7 +53,13 @@ def get_data_file(request):
     Returns:
         str: Desired data file path.
     """
-    return os.path.join(HERE, "data", request.param)
+    if isinstance(request.param, str):
+        return os.path.join(HERE, "data", request.param)
+    elif isinstance(request.param, list):
+        output = []
+        for path in request.param:
+            output.append(os.path.join(HERE, "data", path))
+        return output
 
 
 @pytest.fixture(scope="function")
