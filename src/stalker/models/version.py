@@ -410,32 +410,12 @@ class Version(Link, DAGMixin):
         Returns:
             dict: The template variables.
         """
-        from stalker import Shot
-
-        sequences = []
-        scenes = []
-        if isinstance(self.task, Shot):
-            sequences = self.task.sequences
-            scenes = self.task.scenes
-
-        # get the parent tasks
-        task = self.task
-        parent_tasks = task.parents
-        parent_tasks.append(task)
-
-        return {
-            "project": self.task.project,
-            "sequences": sequences,
-            "scenes": scenes,
-            "sequence": self.task,
-            "shot": self.task,
-            "asset": self.task,
-            "task": self.task,
-            "parent_tasks": parent_tasks,
+        version_template_vars = {
             "version": self,
-            "type": self.type,
             "extension": self.extension,
         }
+        version_template_vars.update(self.task._template_variables())
+        return version_template_vars
 
     def update_paths(self) -> None:
         """Update the path variables.

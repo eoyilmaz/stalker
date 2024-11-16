@@ -67,18 +67,30 @@ class Shot(Task, CodeMixin):
 
     .. note::
 
+       .. versionadded:: 1.0.0
+
+       Shot instances can only be connected to a single Sequence instance via
+       the `Shot.sequence` attribute. Previously, Shots could have multiple
+       Sequences, the initial purpose of that was to allow the very very rare
+       case of having the same shot appear in two different sequences which
+       proved itself being very useless and making things unnecessarily
+       complicated. So, it has been removed and Shots can only be connected to
+       a single Sequence (Shot <-> Scene relation will follow this in later
+       versions/commits).
+
+    .. note::
+
        .. versionadded:: 0.2.0
 
        Shots now have a new attribute called ``scenes``, holding
        :class:`.Scene` instances which is another grouping attribute like
-       ``sequences``. Where Sequences are grouping the Shots according to their
+       ``sequence``. Where Sequence is grouping the Shots according to their
        temporal position to each other, Scenes are grouping the Shots according
        to their view to the world, that is shots taking place in the same set
        configuration can be grouped together by using Scenes.
 
     Two shots with the same :attr:`.code` cannot be assigned to the same
     :class:`.Sequence`.
-
 
     .. note::
 
@@ -120,12 +132,13 @@ class Shot(Task, CodeMixin):
        :class:`.Project` .
 
     Args:
-        project (Project): This is the :class:`.Project` instance that this shot
-            belongs to. A Shot cannot be created without a Project instance.
+        project (Project): This is the :class:`.Project` instance that this
+            shot belongs to. A Shot cannot be created without a Project
+            instance.
 
-        sequences (List[Sequence]): This is a list of :class:`.Sequence` s that
-            this shot is assigned to. A Shot can be created without having a
-            Sequence instance.
+        sequence (Sequence): This is a :class:`.Sequence` that this shot is
+            assigned to. A Shot can be created without having a Sequence
+            instance.
 
         cut_in (int): The in frame number that this shot starts. The default
             value is 1. When the ``cut_in`` is bigger then ``cut_out``, the
@@ -136,10 +149,10 @@ class Shot(Task, CodeMixin):
             value is None.
 
         cut_out (int): The out frame number that this shot ends. If it is given
-            as a value lower then the ``cut_in`` parameter, then the :attr:`.cut_out`
-            will be recalculated from the existent :attr:`.cut_in`
-            :attr:`.cut_duration` attributes. Can be skipped. The default value
-            is None.
+            as a value lower then the ``cut_in`` parameter, then the
+            :attr:`.cut_out` will be recalculated from the existent
+            :attr:`.cut_in` :attr:`.cut_duration` attributes. Can be skipped.
+            The default value is None.
 
         image_format (ImageFormat): The image format of this shot. This is an
             optional variable to differentiate the image format per shot. The
@@ -160,10 +173,10 @@ class Shot(Task, CodeMixin):
         primary_key=True,
     )
 
-    sequences: Mapped[Optional[List["Sequence"]]] = relationship(
-        secondary="Shot_Sequences",
-        primaryjoin="Shots.c.id==Shot_Sequences.c.shot_id",
-        secondaryjoin="Shot_Sequences.c.sequence_id==Sequences.c.id",
+    sequence_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Sequences.id"))
+
+    sequence: Mapped[Optional["Sequence"]] = relationship(
+        primaryjoin="Shots.c.sequence_id==Sequences.c.id",
         back_populates="shots",
     )
 
@@ -227,7 +240,7 @@ class Shot(Task, CodeMixin):
         self,
         code: Optional[str] = None,
         project: Optional["Project"] = None,
-        sequences: Optional[List["Sequence"]] = None,
+        sequence: Optional["Sequence"] = None,
         scenes: Optional[List["Scene"]] = None,
         cut_in: Optional[int] = None,
         cut_out: Optional[int] = None,
@@ -248,9 +261,7 @@ class Shot(Task, CodeMixin):
         StatusMixin.__init__(self, **kwargs)
         CodeMixin.__init__(self, **kwargs)
 
-        if sequences is None:
-            sequences = []
-        self.sequences = sequences
+        self.sequence = sequence
 
         if scenes is None:
             scenes = []
@@ -659,7 +670,7 @@ class Shot(Task, CodeMixin):
         # always extend or contract the shot from end
         self.cut_out = self.cut_in + cut_duration - 1
 
-    @validates("sequences")
+    @validates("sequence")
     def _validate_sequence(self, key: str, sequence: "Sequence") -> "Sequence":
         """Validate the given sequence value.
 
@@ -675,10 +686,10 @@ class Shot(Task, CodeMixin):
         """
         from stalker.models.sequence import Sequence
 
-        if not isinstance(sequence, Sequence):
+        if sequence is not None and not isinstance(sequence, Sequence):
             raise TypeError(
-                f"{self.__class__.__name__}.sequences should all be "
-                "stalker.models.sequence.Sequence instances, "
+                f"{self.__class__.__name__}.sequence should be a "
+                "stalker.models.sequence.Sequence instance, "
                 f"not {sequence.__class__.__name__}: '{sequence}'"
             )
         return sequence
@@ -785,13 +796,6 @@ class Shot(Task, CodeMixin):
 
         return code
 
-
-Shot_Sequences = Table(
-    "Shot_Sequences",
-    Base.metadata,
-    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
-    Column("sequence_id", Integer, ForeignKey("Sequences.id"), primary_key=True),
-)
 
 Shot_Scenes = Table(
     "Shot_Scenes",

@@ -166,7 +166,7 @@ def setup_shot_db_tests(setup_postgresql_db):
         code="SH123",
         description="This is a test Shot",
         project=data["test_project1"],
-        sequences=[data["test_sequence1"], data["test_sequence2"]],
+        sequence=data["test_sequence1"],
         scenes=[data["test_scene1"], data["test_scene2"]],
         cut_in=112,
         cut_out=149,
@@ -300,79 +300,57 @@ def test_project_argument_is_working_as_expected(setup_shot_db_tests):
     assert data["test_shot"].project == data["kwargs"]["project"]
 
 
-def test_sequences_argument_is_skipped(setup_shot_db_tests):
-    """sequences attribute an empty list if the sequences argument is skipped."""
+def test_sequence_argument_is_skipped(setup_shot_db_tests):
+    """sequence attribute a None if the sequence argument is skipped."""
     data = setup_shot_db_tests
-    data["kwargs"].pop("sequences")
+    data["kwargs"].pop("sequence")
     data["kwargs"]["code"] = "DifferentCode"
     new_shot = Shot(**data["kwargs"])
-    assert new_shot.sequences == []
+    assert new_shot.sequence == None
 
 
-def test_sequences_argument_is_none(setup_shot_db_tests):
-    """sequences attribute an empty list if the sequences argument is set to None."""
+def test_sequence_argument_is_none(setup_shot_db_tests):
+    """sequence attribute is None if the sequence argument is set to None."""
     data = setup_shot_db_tests
-    data["kwargs"]["sequences"] = None
+    data["kwargs"]["sequence"] = None
     data["kwargs"]["code"] = "NewCode"
     new_shot = Shot(**data["kwargs"])
-    assert new_shot.sequences == []
+    assert new_shot.sequence is None
 
 
-def test_sequences_attribute_is_set_to_none(setup_shot_db_tests):
-    """TypeError raised if the sequences attribute is set to None."""
+def test_sequence_attribute_is_set_to_none(setup_shot_db_tests):
+    """No TypeError raised if the sequence attribute is set to None."""
     data = setup_shot_db_tests
-    with pytest.raises(TypeError) as cm:
-        data["test_shot"].sequences = None
-    assert str(cm.value) == "Incompatible collection type: None is not list-like"
+    data["test_shot"].sequence = None
 
 
-def test_sequences_argument_is_not_a_list(setup_shot_db_tests):
-    """TypeError raised if the sequences argument is not a list."""
+def test_sequence_argument_is_not_a_list(setup_shot_db_tests):
+    """TypeError raised if the sequence argument is not a Sequence."""
     data = setup_shot_db_tests
-    data["kwargs"]["sequences"] = "not a list"
+    data["kwargs"]["sequence"] = "not a sequence"
     data["kwargs"]["code"] = "NewCode"
     with pytest.raises(TypeError) as cm:
         Shot(**data["kwargs"])
-    assert str(cm.value) == "Incompatible collection type: str is not list-like"
-
-
-def test_sequences_attribute_is_not_a_list(setup_shot_db_tests):
-    """TypeError raised if the sequences attribute is not a list."""
-    data = setup_shot_db_tests
-    with pytest.raises(TypeError) as cm:
-        data["test_shot"].sequences = "not a list"
-
-    assert str(cm.value) == "Incompatible collection type: str is not list-like"
-
-
-def test_sequences_argument_is_not_a_list_of_Sequence_instances(setup_shot_db_tests):
-    """TypeError raised if the sequences argument is not a list of Sequences."""
-    data = setup_shot_db_tests
-    data["kwargs"]["sequences"] = ["not", 1, "list", "of", "sequences"]
-    data["kwargs"]["code"] = "NewShot"
-    with pytest.raises(TypeError) as cm:
-        Shot(**data["kwargs"])
-
     assert str(cm.value) == (
-        "Shot.sequences should all be stalker.models.sequence.Sequence instances, "
-        "not str: 'not'"
+        "Shot.sequence should be a stalker.models.sequence.Sequence instance, "
+        "not str: 'not a sequence'"
     )
 
 
-def test_sequences_attribute_is_not_a_list_of_Sequence_instances(setup_shot_db_tests):
-    """TypeError raised if the sequences attr is not a list of Sequence instances."""
+def test_sequence_attribute_is_not_a_sequence(setup_shot_db_tests):
+    """TypeError raised if the sequence attribute is not a Sequence."""
     data = setup_shot_db_tests
     with pytest.raises(TypeError) as cm:
-        data["test_shot"].sequences = ["not", 1, "list", "of", "sequences"]
+        data["test_shot"].sequence = "not a sequence"
 
     assert str(cm.value) == (
-        "Shot.sequences should all be stalker.models.sequence.Sequence instances, "
-        "not str: 'not'"
+        "Shot.sequence should be a stalker.models.sequence.Sequence instance, "
+        "not str: 'not a sequence'"
     )
 
 
-def test_sequences_argument_is_working_as_expected(setup_shot_db_tests):
-    """sequences attribute is working as expected."""
+def test_sequence_argument_is_a_list_of_sequence_instances(setup_shot_db_tests):
+    """TypeError raised if the sequence argument is a list of Sequences."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     seq1 = Sequence(
@@ -392,16 +370,18 @@ def test_sequences_argument_is_working_as_expected(setup_shot_db_tests):
     )
 
     seqs = [seq1, seq2, seq3]
-    data["kwargs"]["sequences"] = seqs
-    new_shot = Shot(**data["kwargs"])
+    data["kwargs"]["sequence"] = seqs
+    with pytest.raises(TypeError) as cm:
+        _ = Shot(**data["kwargs"])
 
-    assert sorted(new_shot.sequences, key=lambda x: x.name) == sorted(
-        seqs, key=lambda x: x.name
+    assert str(cm.value) == (
+        "Shot.sequence should be a stalker.models.sequence.Sequence instance, "
+        "not list: '[<seq1 (Sequence)>, <seq2 (Sequence)>, <seq3 (Sequence)>]'"
     )
 
 
-def test_sequences_attribute_is_working_as_expected(setup_shot_db_tests):
-    """sequences attribute is working as expected."""
+def test_sequence_attribute_is_a_list_of_Sequence_instances(setup_shot_db_tests):
+    """TypeError raised if the sequence attr is a list of Sequence instances."""
     data = setup_shot_db_tests
     data["kwargs"]["code"] = "NewShot"
     seq1 = Sequence(
@@ -422,14 +402,65 @@ def test_sequences_attribute_is_working_as_expected(setup_shot_db_tests):
 
     new_shot = Shot(**data["kwargs"])
 
-    new_shot.sequences = [seq1]
-    new_shot.sequences.append(seq2)
-    new_shot.sequences.append(seq3)
+    with pytest.raises(TypeError) as cm:
+        new_shot.sequence = [seq1, seq2, seq3]
 
-    seqs = [seq1, seq2, seq3]
-    assert sorted(new_shot.sequences, key=lambda x: x.name) == sorted(
-        seqs, key=lambda x: x.name
+    assert str(cm.value) == (
+        "Shot.sequence should be a stalker.models.sequence.Sequence instance, "
+        "not list: '[<seq1 (Sequence)>, <seq2 (Sequence)>, <seq3 (Sequence)>]'"
     )
+
+
+def test_sequence_argument_is_working_as_expected(setup_shot_db_tests):
+    """sequence attribute is working as expected."""
+    data = setup_shot_db_tests
+    data["kwargs"]["code"] = "NewShot"
+    seq1 = Sequence(
+        name="seq1",
+        code="seq1",
+        project=data["test_project1"],
+    )
+    seq2 = Sequence(
+        name="seq2",
+        code="seq2",
+        project=data["test_project1"],
+    )
+    seq3 = Sequence(
+        name="seq3",
+        code="seq3",
+        project=data["test_project1"],
+    )
+
+    data["kwargs"]["sequence"] = seq2
+    new_shot = Shot(**data["kwargs"])
+
+    assert new_shot.sequence == seq2
+
+
+def test_sequence_attribute_is_working_as_expected(setup_shot_db_tests):
+    """sequence attribute is working as expected."""
+    data = setup_shot_db_tests
+    data["kwargs"]["code"] = "NewShot"
+    seq1 = Sequence(
+        name="seq1",
+        code="seq1",
+        project=data["test_project1"],
+    )
+    seq2 = Sequence(
+        name="seq2",
+        code="seq2",
+        project=data["test_project1"],
+    )
+    seq3 = Sequence(
+        name="seq3",
+        code="seq3",
+        project=data["test_project1"],
+    )
+
+    new_shot = Shot(**data["kwargs"])
+
+    new_shot.sequence = seq2
+    assert new_shot.sequence == seq2
 
 
 def test_scenes_argument_is_skipped(setup_shot_db_tests):
@@ -1494,11 +1525,11 @@ def test_template_variables_include_scenes_for_shots(setup_shot_db_tests):
     assert template_variables["scenes"] == data["test_shot"].scenes
 
 
-def test_template_variables_include_sequences_for_shots(setup_shot_db_tests):
-    """_template_variables include sequences for shots."""
+def test_template_variables_include_sequence_for_shots(setup_shot_db_tests):
+    """_template_variables include sequence for shots."""
     data = setup_shot_db_tests
     assert isinstance(data["test_shot"], Shot)
     template_variables = data["test_shot"]._template_variables()
-    assert "sequences" in template_variables
-    assert data["test_shot"].sequences != []
-    assert template_variables["sequences"] == data["test_shot"].sequences
+    assert "sequence" in template_variables
+    assert data["test_shot"].sequence is not None
+    assert template_variables["sequence"] == data["test_shot"].sequence

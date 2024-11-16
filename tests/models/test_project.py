@@ -281,28 +281,28 @@ def setup_project_db_test(setup_postgresql_db):
     data["test_shot1"] = Shot(
         code="SH001",
         project=data["test_project"],
-        sequences=[data["test_seq6"]],
+        sequence=data["test_seq6"],
         responsible=[data["test_lead"]],
     )
 
     data["test_shot2"] = Shot(
         code="SH002",
         project=data["test_project"],
-        sequences=[data["test_seq6"]],
+        sequence=data["test_seq6"],
         responsible=[data["test_lead"]],
     )
 
     data["test_shot3"] = Shot(
         code="SH003",
         project=data["test_project"],
-        sequences=[data["test_seq7"]],
+        sequence=data["test_seq7"],
         responsible=[data["test_lead"]],
     )
 
     data["test_shot4"] = Shot(
         code="SH004",
         project=data["test_project"],
-        sequences=[data["test_seq7"]],
+        sequence=data["test_seq7"],
         responsible=[data["test_lead"]],
     )
 

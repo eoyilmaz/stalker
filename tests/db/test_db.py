@@ -3208,13 +3208,13 @@ def test_persistence_of_sequence(setup_postgresql_db):
     shot1 = Shot(
         code="SH001",
         project=test_project1,
-        sequences=[test_sequence],
+        sequence=test_sequence,
         responsible=[lead],
     )
     shot2 = Shot(
         code="SH002",
         project=test_project1,
-        sequences=[test_sequence],
+        sequence=test_sequence,
         responsible=[lead],
     )
     shot3 = Shot(
@@ -3322,7 +3322,7 @@ def test_persistence_of_shot(setup_postgresql_db):
     shot_kwargs = {
         "code": "SH001",
         "project": test_project1,
-        "sequences": [test_seq1, test_seq2],
+        "sequence": test_seq1,
         "scenes": [test_sce1, test_sce2],
         "status": 0,
         "responsible": [lead],
@@ -3345,7 +3345,7 @@ def test_persistence_of_shot(setup_postgresql_db):
     nice_name = test_shot.nice_name
     notes = test_shot.notes
     references = test_shot.references
-    sequences = test_shot.sequences
+    sequence = test_shot.sequence
     scenes = test_shot.scenes
     status = test_shot.status
     status_list = test_shot.status_list
@@ -3372,7 +3372,7 @@ def test_persistence_of_shot(setup_postgresql_db):
     assert test_shot_db.notes == notes
     assert test_shot_db.references == references
     assert test_shot_db.scenes == scenes
-    assert test_shot_db.sequences == sequences
+    assert test_shot_db.sequence == sequence
     assert test_shot_db.status == status
     assert test_shot_db.status_list == status_list
     assert test_shot_db.tags == tags

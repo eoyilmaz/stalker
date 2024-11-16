@@ -4601,19 +4601,34 @@ def setup_task_db_tests(setup_postgresql_db):
         macos_path="/Volumes/T/",
     )
     data["test_user1"] = User(
-        name="User1", login="user1", email="user1@user1.com", password="1234"
+        name="User1",
+        login="user1",
+        email="user1@user1.com",
+        password="1234",
     )
     data["test_user2"] = User(
-        name="User2", login="user2", email="user2@user2.com", password="1234"
+        name="User2",
+        login="user2",
+        email="user2@user2.com",
+        password="1234",
     )
     data["test_user3"] = User(
-        name="User3", login="user3", email="user3@user3.com", password="1234"
+        name="User3",
+        login="user3",
+        email="user3@user3.com",
+        password="1234",
     )
     data["test_user4"] = User(
-        name="User4", login="user4", email="user4@user4.com", password="1234"
+        name="User4",
+        login="user4",
+        email="user4@user4.com",
+        password="1234",
     )
     data["test_user5"] = User(
-        name="User5", login="user5", email="user5@user5.com", password="1234"
+        name="User5",
+        login="user5",
+        email="user5@user5.com",
+        password="1234",
     )
     data["test_project1"] = Project(
         name="Test Project1",
@@ -5554,3 +5569,19 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
         new_task.remaining_seconds
         == new_task.schedule_seconds - new_task.total_logged_seconds
     )
+
+
+def test_template_variables_for_non_shot_related_task(setup_task_db_tests):
+    """_template_variables() for a non shot related task returns correct data."""
+    data = setup_task_db_tests
+    task = Task(**data["kwargs"])
+    assert task._template_variables() == {
+        "asset": None,
+        "parent_tasks": [task],
+        "project": data["test_project1"],
+        "scenes": [],
+        "sequence": None,
+        "shot": None,
+        "task": task,
+        "type": None
+    }
