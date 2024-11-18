@@ -17,6 +17,7 @@ from stalker import (
     Repository,
     SchedulerBase,
     Shot,
+    Status,
     Studio,
     Task,
     TaskJugglerScheduler,
@@ -46,6 +47,10 @@ class DummyScheduler(SchedulerBase):
 def setup_studio_db_tests(setup_postgresql_db):
     """Set up the test for stalker.models.studio.Studio class."""
     data = dict()
+
+    data["status_rts"] = Status.query.filter_by(code="RTS").first()
+    data["status_wip"] = Status.query.filter_by(code="WIP").first()
+
     data["test_user1"] = User(
         name="User 1", login="user1", email="user1@users.com", password="password"
     )
@@ -80,18 +85,20 @@ def setup_studio_db_tests(setup_postgresql_db):
     data["test_project1"] = Project(
         name="Test Project 1", code="TP1", repository=data["test_repo"]
     )
+    data["test_project1"].status = data["status_wip"]
     DBSession.add(data["test_project1"])
 
     data["test_project2"] = Project(
         name="Test Project 2", code="TP2", repository=data["test_repo"]
     )
+    data["test_project2"].status = data["status_wip"]
     DBSession.add(data["test_project2"])
 
     # an inactive project
     data["test_project3"] = Project(
         name="Test Project 3", code="TP3", repository=data["test_repo"]
     )
-    data["test_project3"].active = False
+    data["test_project3"].status = data["status_rts"]
     DBSession.save(data["test_project3"])
 
     # create assets and shots

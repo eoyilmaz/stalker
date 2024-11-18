@@ -21,6 +21,7 @@ from stalker import (
     Repository,
     Sequence,
     Shot,
+    Status,
     StatusList,
     Structure,
     Task,
@@ -1421,11 +1422,31 @@ def test_to_tjp_is_working_as_expected(setup_project_db_test):
     )
 
 
-def test_active_attribute_is_true_by_default(setup_project_db_test):
-    """active attribute is True by default."""
+def test_project_instance_does_not_have_active_attribute(setup_project_db_test):
+    """Project instances does not have active attribute."""
     data = setup_project_db_test
     new_project = Project(**data["kwargs"])
-    assert new_project.active is True
+    assert hasattr(new_project, "active") is False
+
+
+@pytest.mark.parametrize(
+    "status, expected",
+    [
+        ["RTS", False],
+        ["WIP", True],
+        ["CMPL", False],
+    ],
+)
+def test_is_active_property_depends_on_the_status(
+    setup_project_db_test, status, expected
+):
+    """is_active property depends on the Project.status."""
+    data = setup_project_db_test
+    new_project = Project(**data["kwargs"])
+    status_ins = Status.query.filter_by(code=status).first()
+    assert status_ins is not None
+    new_project.status = status_ins
+    assert new_project.is_active is expected
 
 
 def test_is_active_is_read_only(setup_project_db_test):
@@ -1443,15 +1464,6 @@ def test_is_active_is_read_only(setup_project_db_test):
     )
 
     assert str(cm.value) == error_message
-
-
-def test_is_active_is_working_as_expected(setup_project_db_test):
-    """is_active is working as expected."""
-    data = setup_project_db_test
-    data["test_project"].active = True
-    assert data["test_project"].is_active is True
-    data["test_project"].active = False
-    assert data["test_project"].is_active is False
 
 
 def test_total_logged_seconds_attribute_is_read_only(setup_project_db_test):
