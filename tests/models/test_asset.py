@@ -300,11 +300,11 @@ def test_template_variables_for_asset_related_task(setup_asset_tests):
         "asset": data["asset1"],
         "parent_tasks": [data["asset1"], data["task2"]],
         "project": data["project1"],
-        "scenes": [],
+        "scene": None,
         "sequence": None,
         "shot": None,
         "task": data["task2"],
-        "type": None
+        "type": None,
     }
 
 
@@ -315,9 +315,9 @@ def test_template_variables_for_asset_itself(setup_asset_tests):
         "asset": data["asset1"],
         "parent_tasks": [data["asset1"]],
         "project": data["project1"],
-        "scenes": [],
+        "scene": None,
         "sequence": None,
         "shot": None,
         "task": data["asset1"],
-        "type": data["asset_type1"]
+        "type": data["asset_type1"],
     }

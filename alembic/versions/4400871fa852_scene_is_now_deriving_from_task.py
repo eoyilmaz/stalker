@@ -12,10 +12,9 @@ import stalker
 import sqlalchemy as sa
 
 
-
 # revision identifiers, used by Alembic.
-revision = '4400871fa852'
-down_revision = 'ec1eb2151bb9'
+revision = "4400871fa852"
+down_revision = "ec1eb2151bb9"
 
 
 def upgrade():
@@ -57,21 +56,24 @@ def upgrade():
         )
     )
     # Insert the same data to the Entities
-    op.execute("""
+    op.execute(
+        """
     INSERT INTO "Entities" (id) VALUES (
         (SELECT "SimpleEntities".id FROM "SimpleEntities" WHERE "SimpleEntities".name = 'Scene Statuses')
     )
-    """)
+    """
+    )
     # Insert the same to the StatusLists
     op.execute(
-    """INSERT INTO "StatusLists" (id, target_entity_type) VALUES (
+        """INSERT INTO "StatusLists" (id, target_entity_type) VALUES (
         (SELECT "SimpleEntities".id FROM "SimpleEntities" WHERE "SimpleEntities".name = 'Scene Statuses'),
         'Scene'
     )
-    """)
+    """
+    )
     # Create the same StatusList -> Status relation of a Task
     op.execute(
-    """INSERT INTO "StatusList_Statuses" (status_list_id, status_id)
+        """INSERT INTO "StatusList_Statuses" (status_list_id, status_id)
     SELECT
         "SimpleEntities".id,
         "StatusList_Statuses".status_id
@@ -87,7 +89,8 @@ def upgrade():
     # we need create a Task for each Scene in the database,
     # with the same id of the Scene
     # carry on the data: id, project_id
-    op.execute("""
+    op.execute(
+        """
         INSERT INTO "Tasks" (
             id,
             project_id,
@@ -107,7 +110,8 @@ def upgrade():
             'effort',
             0
         FROM "Scenes"
-    """)
+    """
+    )
 
     # drop the project_id column in Scenes table
     with op.batch_alter_table("Scenes", schema=None) as batch_op:
@@ -129,9 +133,7 @@ def downgrade():
     # set the project_id column not nullable
     op.execute("""ALTER TABLE "Scenes" ALTER COLUMN project_id SET NOT NULL""")
     # Remove the scene entries from Tasks table
-    op.execute(
-        """DELETE FROM "Tasks" WHERE id IN (SELECT id  FROM "Scenes")"""
-    )
+    op.execute("""DELETE FROM "Tasks" WHERE id IN (SELECT id  FROM "Scenes")""")
     # Remove the StatusList entries from StatusList_Statuses
     op.execute(
         """DELETE FROM "StatusList_Statuses" WHERE status_list_id = (
@@ -141,9 +143,7 @@ def downgrade():
         """
     )
     # Remove the StatusList from StatusLists Table
-    op.execute(
-        """DELETE FROM "StatusLists" WHERE target_entity_type = 'Scene'"""
-    )
+    op.execute("""DELETE FROM "StatusLists" WHERE target_entity_type = 'Scene'""")
     # Remove the StatusList from Entities Table
     op.execute(
         """DELETE FROM "Entities" WHERE id IN (
@@ -155,9 +155,7 @@ def downgrade():
         """
     )
     # Remove the StatusList from SimpleEntities Table
-    op.execute(
-        """DELETE FROM "SimpleEntities" WHERE name = 'Scene Statuses'"""
-    )
+    op.execute("""DELETE FROM "SimpleEntities" WHERE name = 'Scene Statuses'""")
 
     # Update the Scenes.id to be a foreign key to Entities.id
     op.drop_constraint("Scenes_id_fkey", "Scenes", type_="foreignkey")

@@ -341,7 +341,7 @@ def test_naming_case(setup_postgresql_db):
     c001 = Task(name="c001", parent=s001)
     DBSession.add(c001)
 
-    effects_scene = Task(name="effectScenes", parent=c001)
+    effects_scene = Task(name="effect scene", parent=c001)
     DBSession.add(effects_scene)
 
     fxA = Task(name="fxA", parent=effects_scene)

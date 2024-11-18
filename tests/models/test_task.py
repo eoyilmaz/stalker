@@ -5579,9 +5579,9 @@ def test_template_variables_for_non_shot_related_task(setup_task_db_tests):
         "asset": None,
         "parent_tasks": [task],
         "project": data["test_project1"],
-        "scenes": [],
+        "scene": None,
         "sequence": None,
         "shot": None,
         "task": task,
-        "type": None
+        "type": None,
     }

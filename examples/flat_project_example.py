@@ -52,8 +52,8 @@ flat_task_template = FilenameTemplate(
 flat_struct = Structure(
     name="Flat Project Structure",
     templates=[flat_task_template]  # we need another template for Assets,
-    # Shots and Sequences but I'm skipping it
-    # for now
+    #                                 Shots and Sequences but I'm skipping it
+    #                                 for now
 )
 
 # query a couple of statuses
@@ -155,7 +155,7 @@ p2 = Project(
 
 # now create new tasks for the normal project
 seq1 = Sequence(name="Sequence", code="SEQ001", project=p2)
-shot1 = Shot(name="SEQ001_0010", code="SEQ001_0010", parent=seq1, sequences=[seq1])
+shot1 = Shot(name="SEQ001_0010", code="SEQ001_0010", parent=seq1, sequence=seq1)
 comp = Task(name="Comp", parent=shot1)
 # you probably will supply a different name/code
 
