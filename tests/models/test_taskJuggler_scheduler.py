@@ -638,17 +638,23 @@ def test_tasks_of_given_projects_are_correctly_scheduled(
 
     assert data["test_task1"].computed_start is None
     assert data["test_task1"].computed_end is None
-    assert data["test_task1"].computed_resources == [
-        data["test_user1"],
-        data["test_user2"],
-    ]
+    assert sorted(data["test_task1"].computed_resources, key=lambda x: x.id) == sorted(
+        [
+            data["test_user1"],
+            data["test_user2"],
+        ],
+        key=lambda x: x.id,
+    )
 
     assert data["test_task2"].computed_start is None
     assert data["test_task2"].computed_end is None
-    assert data["test_task2"].computed_resources == [
-        data["test_user1"],
-        data["test_user2"],
-    ]
+    assert sorted(data["test_task2"].computed_resources, key=lambda x: x.id) == sorted(
+        [
+            data["test_user1"],
+            data["test_user2"],
+        ],
+        key=lambda x: x.id,
+    )
 
     assert dt1.computed_start == datetime.datetime(2013, 4, 16, 9, 0, tzinfo=pytz.utc)
     assert dt1.computed_end == datetime.datetime(2013, 4, 16, 13, 0, tzinfo=pytz.utc)
