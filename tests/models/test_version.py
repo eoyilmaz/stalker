@@ -123,7 +123,7 @@ def setup_version_db_tests(setup_postgresql_db):
         code="SH001",
         project=data["test_project"],
         sequence=data["test_sequence"],
-        scenes=[data["test_scene"]],
+        scene=data["test_scene"],
     )
     DBSession.add(data["test_shot1"])
     DBSession.commit()
@@ -953,11 +953,11 @@ def test_template_variables_sequence(setup_version_db_tests):
     assert kwargs["sequence"] == data["test_sequence"]
 
 
-def test_template_variables_scenes(setup_version_db_tests):
-    """scenes in template variables is correct."""
+def test_template_variables_scene(setup_version_db_tests):
+    """scene in template variables is correct."""
     data = setup_version_db_tests
     kwargs = data["test_version"]._template_variables()
-    assert kwargs["scenes"] == [data["test_scene"]]
+    assert kwargs["scene"] == data["test_scene"]
 
 
 def test_template_variables_shot(setup_version_db_tests):
@@ -1004,14 +1004,14 @@ def test_template_variables_type(setup_version_db_tests):
     assert kwargs["type"] == data["test_version"].type
 
 
-def test_template_variables_for_a_shot_version_contains_scenes(setup_version_db_tests):
-    """template_variables for a Shot version contains scenes."""
+def test_template_variables_for_a_shot_version_contains_scene(setup_version_db_tests):
+    """template_variables for a Shot version contains scene."""
     data = setup_version_db_tests
     v = Version(task=data["test_shot1"])
     template_variables = v._template_variables()
-    assert data["test_shot1"].scenes != []
-    assert "scenes" in template_variables
-    assert template_variables["scenes"] == data["test_shot1"].scenes
+    assert data["test_shot1"].scene is not None
+    assert "scene" in template_variables
+    assert template_variables["scene"] == data["test_shot1"].scene
 
 
 def test_template_variables_for_a_shot_version_contains_sequence(

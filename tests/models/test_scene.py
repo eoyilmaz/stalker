@@ -120,7 +120,7 @@ def test_shots_attribute_elements_tried_to_be_set_to_non_shot_object(
 
 
 def test_equality(setup_scene_db_tests):
-    """equality of scenes."""
+    """equality of scene instances."""
     data = setup_scene_db_tests
     new_seq1 = Scene(**data["kwargs"])
     new_seq2 = Scene(**data["kwargs"])
@@ -135,7 +135,7 @@ def test_equality(setup_scene_db_tests):
 
 
 def test_inequality(setup_scene_db_tests):
-    """inequality of scenes."""
+    """inequality of scene instances."""
     data = setup_scene_db_tests
     new_seq1 = Scene(**data["kwargs"])
     new_seq2 = Scene(**data["kwargs"])

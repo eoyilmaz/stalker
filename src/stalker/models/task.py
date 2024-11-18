@@ -3090,12 +3090,12 @@ class Task(
 
         asset = None
         sequence = None
-        scenes = []
+        scene = None
         shot = None
         if isinstance(self, Shot):
             shot = self
             sequence = self.sequence
-            scenes = self.scenes
+            scene = self.scene
         elif isinstance(self, Asset):
             asset = self
         else:
@@ -3103,7 +3103,7 @@ class Task(
             for parent in self.parents:
                 if isinstance(parent, Shot):
                     sequence = parent.sequence
-                    scenes = parent.scenes
+                    scene = parent.scene
                     break
                 elif isinstance(parent, Asset):
                     asset = parent
@@ -3117,7 +3117,7 @@ class Task(
         return {
             "project": self.project,
             "sequence": sequence,
-            "scenes": scenes,
+            "scene": scene,
             "shot": shot,
             "asset": asset,
             "task": self,

@@ -32,6 +32,13 @@ logger = get_logger(__name__)
 class Shot(Task, CodeMixin):
     """Manages Shot related data.
 
+    A shot is a continuous, unbroken sequence of images that makes up a single
+    part of a film. Shots are organized into :class:`.Sequence` s and
+    :class:`.Scene` s :class:`.Sequence` s group shots together based on time,
+    such as montage or flashback. :class:`.Scene` s group shots together based
+    on location and narrative, marking where and when a specific story event
+    occurs.
+
     .. warning::
 
        .. deprecated:: 0.1.2
@@ -80,14 +87,10 @@ class Shot(Task, CodeMixin):
 
     .. note::
 
-       .. versionadded:: 0.2.0
+       .. versionadded:: 1.0.0
 
-       Shots now have a new attribute called ``scenes``, holding
-       :class:`.Scene` instances which is another grouping attribute like
-       ``sequence``. Where Sequence is grouping the Shots according to their
-       temporal position to each other, Scenes are grouping the Shots according
-       to their view to the world, that is shots taking place in the same set
-       configuration can be grouped together by using Scenes.
+       Shot and Scene relation is now many-to-one, meaning a Shot can only be
+       connected to a single Scene instance through the `Shot.scene` attribute.
 
     Two shots with the same :attr:`.code` cannot be assigned to the same
     :class:`.Sequence`.
@@ -180,10 +183,10 @@ class Shot(Task, CodeMixin):
         back_populates="shots",
     )
 
-    scenes: Mapped[Optional[List["Scene"]]] = relationship(
-        secondary="Shot_Scenes",
-        primaryjoin="Shots.c.id==Shot_Scenes.c.shot_id",
-        secondaryjoin="Shot_Scenes.c.scene_id==Scenes.c.id",
+    scene_id: Mapped[Optional[int]] = mapped_column(ForeignKey("Scenes.id"))
+
+    scene: Mapped[Optional["Scene"]] = relationship(
+        primaryjoin="Shots.c.scene_id==Scenes.c.id",
         back_populates="shots",
     )
 
@@ -241,7 +244,7 @@ class Shot(Task, CodeMixin):
         code: Optional[str] = None,
         project: Optional["Project"] = None,
         sequence: Optional["Sequence"] = None,
-        scenes: Optional[List["Scene"]] = None,
+        scene: Optional["Scene"] = None,
         cut_in: Optional[int] = None,
         cut_out: Optional[int] = None,
         source_in: Optional[int] = None,
@@ -262,11 +265,7 @@ class Shot(Task, CodeMixin):
         CodeMixin.__init__(self, **kwargs)
 
         self.sequence = sequence
-
-        if scenes is None:
-            scenes = []
-        self.scenes = scenes
-
+        self.scene = scene
         self.image_format = image_format
 
         if cut_in is None:
@@ -694,8 +693,8 @@ class Shot(Task, CodeMixin):
             )
         return sequence
 
-    @validates("scenes")
-    def _validate_scenes(self, key: str, scene: "Scene") -> "Scene":
+    @validates("scene")
+    def _validate_scene(self, key: str, scene: "Scene") -> "Scene":
         """Validate the given scene value.
 
         Args:
@@ -710,10 +709,10 @@ class Shot(Task, CodeMixin):
         """
         from stalker.models.scene import Scene
 
-        if not isinstance(scene, Scene):
+        if scene is not None and not isinstance(scene, Scene):
             raise TypeError(
-                f"{self.__class__.__name__}.scenes should all be "
-                "stalker.models.scene.Scene instances, "
+                f"{self.__class__.__name__}.scene should be a "
+                "stalker.models.scene.Scene instance, "
                 f"not {scene.__class__.__name__}: '{scene}'"
             )
         return scene
@@ -795,11 +794,3 @@ class Shot(Task, CodeMixin):
             raise ValueError(f"There is a Shot with the same code: {code}")
 
         return code
-
-
-Shot_Scenes = Table(
-    "Shot_Scenes",
-    Base.metadata,
-    Column("shot_id", Integer, ForeignKey("Shots.id"), primary_key=True),
-    Column("scene_id", Integer, ForeignKey("Scenes.id"), primary_key=True),
-)

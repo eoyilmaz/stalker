@@ -40,8 +40,8 @@ class Scene(Task, CodeMixin):
     )
 
     shots: Mapped[Optional[List["Shot"]]] = relationship(
-        secondary="Shot_Scenes",
-        back_populates="scenes",
+        primaryjoin="Shots.c.scene_id==Scenes.c.id",
+        back_populates="scene",
         doc="""The :class:`.Shot` s that is related with this Scene.
 
         It is a list of :class:`.Shot` instances.

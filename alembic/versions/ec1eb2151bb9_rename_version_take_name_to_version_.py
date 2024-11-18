@@ -10,21 +10,16 @@ from alembic import op
 import sqlalchemy as sa
 
 
-
 # revision identifiers, used by Alembic.
-revision = 'ec1eb2151bb9'
-down_revision = '019378697b5b'
+revision = "ec1eb2151bb9"
+down_revision = "019378697b5b"
 
 
 def upgrade():
     """Upgrade the tables."""
-    op.alter_column(
-        "Versions", "take_name", new_column_name="variant_name"
-    )
+    op.alter_column("Versions", "take_name", new_column_name="variant_name")
 
 
 def downgrade():
     """Downgrade the tables."""
-    op.alter_column(
-        "Versions", "variant_name", new_column_name="take_name"
-    )
+    op.alter_column("Versions", "variant_name", new_column_name="take_name")
