@@ -122,7 +122,7 @@ def setup_version_db_tests(setup_postgresql_db):
         name="SH001",
         code="SH001",
         project=data["test_project"],
-        sequences=[data["test_sequence"]],
+        sequence=data["test_sequence"],
         scenes=[data["test_scene"]],
     )
     DBSession.add(data["test_shot1"])
@@ -946,32 +946,32 @@ def test_template_variables_project(setup_version_db_tests):
     assert kwargs["project"] == data["test_version"].task.project
 
 
-def test_template_variables_sequences(setup_version_db_tests):
-    """sequences in template variables is correct."""
+def test_template_variables_sequence(setup_version_db_tests):
+    """sequence in template variables is correct."""
     data = setup_version_db_tests
     kwargs = data["test_version"]._template_variables()
-    assert kwargs["sequences"] == []
+    assert kwargs["sequence"] == data["test_sequence"]
 
 
 def test_template_variables_scenes(setup_version_db_tests):
     """scenes in template variables is correct."""
     data = setup_version_db_tests
     kwargs = data["test_version"]._template_variables()
-    assert kwargs["scenes"] == []
+    assert kwargs["scenes"] == [data["test_scene"]]
 
 
 def test_template_variables_shot(setup_version_db_tests):
     """shot in template variables is correct."""
     data = setup_version_db_tests
     kwargs = data["test_version"]._template_variables()
-    assert kwargs["shot"] == data["test_version"].task
+    assert kwargs["shot"] is None
 
 
 def test_template_variables_asset(setup_version_db_tests):
     """asset in template variables is correct."""
     data = setup_version_db_tests
     kwargs = data["test_version"]._template_variables()
-    assert kwargs["asset"] == data["test_version"].task
+    assert kwargs["asset"] is None
 
 
 def test_template_variables_task(setup_version_db_tests):
@@ -1014,16 +1014,16 @@ def test_template_variables_for_a_shot_version_contains_scenes(setup_version_db_
     assert template_variables["scenes"] == data["test_shot1"].scenes
 
 
-def test_template_variables_for_a_shot_version_contains_sequences(
+def test_template_variables_for_a_shot_version_contains_sequence(
     setup_version_db_tests,
 ):
-    """template_variables for a Shot version contains sequences."""
+    """template_variables for a Shot version contains sequence."""
     data = setup_version_db_tests
     v = Version(task=data["test_shot1"])
     template_variables = v._template_variables()
-    assert data["test_shot1"].sequences != []
-    assert "sequences" in template_variables
-    assert template_variables["sequences"] == data["test_shot1"].sequences
+    assert data["test_shot1"].sequence is not None
+    assert "sequence" in template_variables
+    assert template_variables["sequence"] == data["test_shot1"].sequence
 
 
 def test_absolute_path_works_as_expected(setup_version_db_tests):
@@ -1765,7 +1765,7 @@ def setup_version_tests():
         name="SH001",
         code="SH001",
         project=data["test_project"],
-        sequences=[data["test_sequence"]],
+        sequence=data["test_sequence"],
         status_list=data["test_shot_status_list"],
     )
 

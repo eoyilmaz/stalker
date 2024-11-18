@@ -42,8 +42,8 @@ class Sequence(Task, CodeMixin):
     )
 
     shots: Mapped[Optional[List["Shot"]]] = relationship(
-        secondary="Shot_Sequences",
-        back_populates="sequences",
+        primaryjoin="Shots.c.sequence_id==Sequences.c.id",
+        back_populates="sequence",
         doc="""The :class:`.Shot` s assigned to this Sequence.
 
         It is a list of :class:`.Shot` instances.

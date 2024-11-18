@@ -3086,13 +3086,28 @@ class Task(
             dict: The template variables.
         """
         # TODO: add test for this template variables
-        from stalker import Shot
+        from stalker import Asset, Shot
 
-        sequences = []
+        asset = None
+        sequence = None
         scenes = []
+        shot = None
         if isinstance(self, Shot):
-            sequences = self.sequences
+            shot = self
+            sequence = self.sequence
             scenes = self.scenes
+        elif isinstance(self, Asset):
+            asset = self
+        else:
+            # Look for shots in parents
+            for parent in self.parents:
+                if isinstance(parent, Shot):
+                    sequence = parent.sequence
+                    scenes = parent.scenes
+                    break
+                elif isinstance(parent, Asset):
+                    asset = parent
+                    break
 
         # get the parent tasks
         task = self
@@ -3101,11 +3116,10 @@ class Task(
 
         return {
             "project": self.project,
-            "sequences": sequences,
-            "sequence": self,
+            "sequence": sequence,
             "scenes": scenes,
-            "shot": self,
-            "asset": self,
+            "shot": shot,
+            "asset": asset,
             "task": self,
             "parent_tasks": parent_tasks,
             "type": self.type,

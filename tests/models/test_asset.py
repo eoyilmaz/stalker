@@ -93,28 +93,28 @@ def setup_asset_tests(setup_postgresql_db):
     data["shot1"] = Shot(
         code="TestSH001",
         project=data["project1"],
-        sequences=[data["seq1"]],
+        sequence=data["seq1"],
         responsible=[data["test_user1"]],
     )
     DBSession.add(data["shot1"])
     data["shot2"] = Shot(
         code="TestSH002",
         project=data["project1"],
-        sequences=[data["seq1"]],
+        sequence=data["seq1"],
         responsible=[data["test_user1"]],
     )
     DBSession.add(data["shot2"])
     data["shot3"] = Shot(
         code="TestSH003",
         project=data["project1"],
-        sequences=[data["seq1"]],
+        sequence=data["seq1"],
         responsible=[data["test_user1"]],
     )
     DBSession.add(data["shot3"])
     data["shot4"] = Shot(
         code="TestSH004",
         project=data["project1"],
-        sequences=[data["seq1"]],
+        sequence=data["seq1"],
         responsible=[data["test_user1"]],
     )
     DBSession.add(data["shot4"])
@@ -291,3 +291,33 @@ def test_hash_value(setup_asset_tests):
     data = setup_asset_tests
     result = hash(data["asset1"])
     assert isinstance(result, int)
+
+
+def test_template_variables_for_asset_related_task(setup_asset_tests):
+    """_template_variables() for an asset related task returns correct data."""
+    data = setup_asset_tests
+    assert data["task2"]._template_variables() == {
+        "asset": data["asset1"],
+        "parent_tasks": [data["asset1"], data["task2"]],
+        "project": data["project1"],
+        "scenes": [],
+        "sequence": None,
+        "shot": None,
+        "task": data["task2"],
+        "type": None
+    }
+
+
+def test_template_variables_for_asset_itself(setup_asset_tests):
+    """_template_variables() for an asset itself returns correct data."""
+    data = setup_asset_tests
+    assert data["asset1"]._template_variables() == {
+        "asset": data["asset1"],
+        "parent_tasks": [data["asset1"]],
+        "project": data["project1"],
+        "scenes": [],
+        "sequence": None,
+        "shot": None,
+        "task": data["asset1"],
+        "type": data["asset_type1"]
+    }
