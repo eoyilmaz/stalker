@@ -9,9 +9,11 @@ from sqlalchemy.ext.orderinglist import ordering_list
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.db.declarative import Base
+from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.entity import Entity
 from stalker.models.mixins import CodeMixin, DateRangeMixin, ReferenceMixin, StatusMixin
+from stalker.models.status import Status
 
 if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.asset import Asset
@@ -218,10 +220,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         "inherit_condition": project_id == Entity.entity_id,
     }
 
-    # TODO: Remove this attribute, because we have the statuses to control if a project
-    #       is active or not. #74
-    active: Mapped[Optional[bool]] = mapped_column(default=True)
-
     clients = association_proxy(
         "client_role", "client", creator=lambda n: ProjectClient(client=n)
     )
@@ -351,8 +349,6 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         self.image_format = image_format
         self.fps = fps
         self.is_stereoscopic = bool(is_stereoscopic)
-
-        self.active = True
 
     def __eq__(self, other: Any) -> bool:
         """Check the equality.
@@ -559,7 +555,9 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
         Returns:
             bool: True if the project is active, False otherwise.
         """
-        return self.active
+        with DBSession.no_autoflush:
+            wip = Status.query.filter_by(code="WIP").first()
+        return self.status == wip
 
     @property
     def total_logged_seconds(self) -> int:

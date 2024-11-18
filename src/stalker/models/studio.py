@@ -28,6 +28,8 @@ from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.mixins import DateRangeMixin, WorkingHoursMixin
 from stalker.models.project import Project
 from stalker.models.schedulers import SchedulerBase
+from stalker.models.status import Status
+
 
 logger = log.get_logger(__name__)
 
@@ -389,9 +391,9 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         Returns:
             List[Project]: List of active Project instances in this studio.
         """
-        # TODO: Filter through the status of the project as the active attribute is
-        #       going to be removed with #74.
-        return Project.query.filter_by(active=True).all()
+        with DBSession.no_autoflush:
+            wip = Status.query.filter_by(code="WIP").first()
+        return Project.query.filter(Project.status == wip).all()
 
     @property
     def inactive_projects(self) -> List[Project]:
@@ -400,9 +402,9 @@ class Studio(Entity, DateRangeMixin, WorkingHoursMixin):
         Returns:
             List[Project]: List of inactive Project instances in this studio.
         """
-        # TODO: Filter through the status of the project as the active attribute is
-        #       going to be removed with #74.
-        return Project.query.filter_by(active=False).all()
+        with DBSession.no_autoflush:
+            wip = Status.query.filter_by(code="WIP").first()
+        return Project.query.filter(Project.status != wip).all()
 
     @property
     def departments(self) -> List[Department]:

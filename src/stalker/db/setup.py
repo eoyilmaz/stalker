@@ -36,7 +36,7 @@ from stalker.db.session import DBSession
 logger: logging.Logger = log.get_logger(__name__)
 
 # TODO: Try to get it from the API (it was not working inside a package before)
-alembic_version: str = "5078390e5527"
+alembic_version: str = "644f5251fc0d"
 
 
 def setup(settings: Optional[Dict[str, Any]] = None) -> None:
