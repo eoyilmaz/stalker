@@ -783,21 +783,21 @@ class WorkingHours(Entity):
                 )
             )
 
-        for key in working_hours.keys():
-            if not isinstance(working_hours[key], list):
+        for day in working_hours:
+            if not isinstance(working_hours[day], list):
                 raise TypeError(
                     '{}.working_hours should be a dictionary with keys "mon, '
                     'tue, wed, thu, fri, sat, sun" and the values should a '
                     "list of lists of two integers like [[540, 720], [800, "
                     "1080]], not {}: '{}'".format(
                         self.__class__.__name__,
-                        working_hours[key].__class__.__name__,
-                        working_hours[key],
+                        working_hours[day].__class__.__name__,
+                        working_hours[day],
                     )
                 )
 
             # validate item values
-            self._validate_working_hours_value(working_hours[key])
+            self._validate_working_hours_value(working_hours[day])
 
         # update the default values with the supplied working_hour dictionary
         # copy the defaults
@@ -868,35 +868,31 @@ class WorkingHours(Entity):
         Returns:
             List[List[int, int]]
         """
-        err1 = (
+        err = (
             "{}.working_hours value should be a list of lists of two "
-            "integers between and the range of integers should be 0-1440, "
-            "not {}"
+            "integers and the range of integers should be between 0-1440, "
+            "not {}: '{}'".format(self.__class__.__name__, value.__class__.__name__, value)
         )
-        err2 = f"{err1}: '{{}}'"
 
         if not isinstance(value, list):
-            raise TypeError(
-                err2.format(self.__class__.__name__, value.__class__.__name__, value)
-            )
+            raise TypeError(err)
 
         for i in value:
             if not isinstance(i, list):
-                raise TypeError(
-                    err2.format(self.__class__.__name__, i.__class__.__name__, i)
-                )
+                raise TypeError(err)
 
             # check list length
             if len(i) != 2:
-                raise RuntimeError(err1.format(self.__class__.__name__, value))
+                raise ValueError(err)
 
             # check type
-            if not isinstance(i[0], int) or not isinstance(i[1], int):
-                raise TypeError(err1.format(self.__class__.__name__, value))
+            for j in range(2):
+                if not isinstance(i[j], int):
+                    raise TypeError(err)
 
-            # check range
-            if i[0] < 0 or i[0] > 1440 or i[1] < 0 or i[1] > 1440:
-                raise ValueError(err1.format(self.__class__.__name__, value))
+                # check range
+                if i[j] < 0 or i[j] > 1440:
+                    raise ValueError(err)
 
         return value
 
