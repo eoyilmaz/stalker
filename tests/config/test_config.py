@@ -230,3 +230,16 @@ def test_update_with_studio_is_working_as_expected(setup_postgresql_db):
 def test_old_style_repo_env_does_not_exist_anymore():
     """repo_env_var_template_old doesn't exist anymore."""
     assert "repo_env_var_template_old" not in defaults.config_values
+
+
+def test_default_working_hours_is_a_dictionary_with_list_values():
+    """default working_hours is a list of lists of two integers."""
+    assert isinstance(defaults.working_hours, dict)
+    assert all(
+        day in defaults.working_hours
+        for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    )
+    assert all(
+        isinstance(defaults.working_hours[day], list)
+        for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
+    )

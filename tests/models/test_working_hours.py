@@ -18,9 +18,7 @@ def test___auto_name___is_true():
 
 
 def test_working_hours_argument_is_skipped():
-    """WorkingHours is created with the default settings by
-    default.
-    """
+    """WorkingHours is created with the default settings by default."""
     wh = WorkingHours()
     assert wh.working_hours == defaults.working_hours
 
@@ -80,67 +78,45 @@ def test_working_hours_attribute_is_set_to_a_dictionary_of_other_formatted_data(
         "not str: 'properly valued'"
     )
 
-
-def test_working_hours_argument_data_is_not_in_correct_range1():
+@pytest.mark.parametrize(
+    "test_key, test_value", [
+        ["sun", [[-10, 1000]]],
+        ["sat", [[900, 1080], [1090, 1500]]],
+    ]
+)
+def test_working_hours_argument_data_is_not_in_correct_range1(test_key, test_value):
     """ValueError raised if the time values are not correct in the working_hours arg."""
     wh = copy.copy(defaults.working_hours)
-    wh["sun"] = [[-10, 1000]]
+    wh[test_key] = test_value
     with pytest.raises(ValueError) as cm:
         WorkingHours(working_hours=wh)
 
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[-10, 1000]]"
+    assert str(cm.value) == (
+        "WorkingHours.working_hours value should be a list of lists of "
+        "two integers and the range of integers should be between 0-1440, "
+        f"not list: '{test_value}'"
     )
 
 
-def test_working_hours_argument_data_is_not_in_correct_range2():
-    """ValueError raised if the time values are not correct in the working_hours arg."""
-    wh = copy.copy(defaults.working_hours)
-    wh["sat"] = [[900, 1080], [1090, 1500]]
-    with pytest.raises(ValueError) as cm:
-        WorkingHours(working_hours=wh)
-
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[900, 1080], [1090, 1500]]"
-    )
-
-
-def test_working_hours_attribute_data_is_not_in_correct_range1():
+@pytest.mark.parametrize(
+    "test_key, test_value", [
+        ["sun", [[-10, 1000]]],
+        ["sat", [[900, 1080], [1090, 1500]]],
+    ]
+)
+def test_working_hours_attribute_data_is_not_in_correct_range1(test_key, test_value):
     """ValueError raised if the times are not correct in the working_hours attr."""
     wh = copy.copy(defaults.working_hours)
-    wh["sun"] = [[-10, 1000]]
+    wh[test_key] = test_value
 
     wh_ins = WorkingHours()
     with pytest.raises(ValueError) as cm:
         wh_ins.working_hours = wh
 
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[-10, 1000]]"
-    )
-
-
-def test_working_hours_attribute_data_is_not_in_correct_range2():
-    """ValueError is raised if the times are not correct in the working_hours attr."""
-    wh_ins = WorkingHours()
-    wh = copy.copy(defaults.working_hours)
-    wh["sat"] = [[900, 1080], [1090, 1500]]
-    with pytest.raises(ValueError) as cm:
-        wh_ins.working_hours = wh
-
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[900, 1080], [1090, 1500]]"
+    assert str(cm.value) == (
+        "WorkingHours.working_hours value should be a list of lists of "
+        "two integers and the range of integers should be between 0-1440, "
+        f"not list: '{test_value}'"
     )
 
 
@@ -171,6 +147,7 @@ def test_working_hours_can_be_indexed_with_day_number():
     """working hours for a day can be reached by an index."""
     wh = WorkingHours()
     assert wh[6] == defaults.working_hours["sun"]
+    # this should not raise any errors
     wh[6] = [[540, 1080]]
 
 
@@ -185,264 +162,66 @@ def test_working_hours_can_be_string_indexed_with_the_date_short_name():
     """working hours info can be reached by using the short date name as the index."""
     wh = WorkingHours()
     assert wh["sun"] == defaults.working_hours["sun"]
+    # this should not raise any errors
     wh["sun"] = [[540, 1080]]
 
 
-def test___setitem__checks_the_given_data_1():
+@pytest.mark.parametrize(
+    "test_key, test_value, error_type", [
+        [0, "not a proper data", TypeError],
+        ["sun", "not a proper data", TypeError],
+
+        [0, ["no proper data"], TypeError],
+        ["sun", ["no proper data"], TypeError],
+
+        [0, [["no proper data"]], ValueError],
+        ["sun", [["no proper data"]], ValueError],
+
+        [0, [[3]], ValueError],
+        [2, [[2, "a"]], TypeError],
+        [1, [[20, 10], ["a", 300]], TypeError],
+        [5, [[323, 1344], [2, "d"]], TypeError],
+        [0, [[4, 100, 3]], ValueError],
+
+        ["mon", [[3]], ValueError],
+        ["mon", [[2, "a"]], TypeError],
+        ["tue", [[20, 10], ["a", 300]], TypeError],
+        ["fri", [[323, 1344], [2, "d"]], TypeError],
+        ["sat", [[4, 100, 3]], ValueError],
+
+        ["sun", [[-10, 100]], ValueError],
+        ["sat", [[0, 1800]], ValueError],
+
+        [7, [[32, 23], [233, 324]], IndexError],
+        [7, [[32, 23], [233, 324]], IndexError],
+        ["zon", [[32, 23], [233, 324]], KeyError],
+    ]
+)
+def test___setitem__checks_the_given_data(test_key, test_value, error_type):
     """__setitem__ checks the given data format."""
     wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh[0] = "not a proper data"
+    with pytest.raises(error_type) as cm:
+        wh[test_key] = test_value
 
-    assert str(cm.value) == (
-        "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not str: 'not a proper data'"
-    )
+    error_message = {
+        TypeError: (
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers and the range of integers should be between 0-1440, "
+            f"not {test_value.__class__.__name__}: '{test_value}'"
+        ),
+        ValueError: (
+            "WorkingHours.working_hours value should be a list of lists of "
+            "two integers and the range of integers should be between 0-1440, "
+            f"not {test_value.__class__.__name__}: '{test_value}'"
+        ),
+        IndexError:  "list index out of range",
+        KeyError: (
+            "\"WorkingHours accepts only ['mon', 'tue', 'wed', 'thu', "
+            "'fri', 'sat', 'sun'] as key, not 'zon'\""
+        ),
+    }[error_type]
 
-
-def test___setitem__checks_the_given_data_2():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-
-    with pytest.raises(TypeError) as cm:
-        wh["sun"] = "not a proper data"
-
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not str: 'not a proper data'"
-    )
-
-
-def test___setitem__checks_the_given_data_3():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh[0] = ["no proper data"]
-    assert str(cm.value) == (
-        "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not str: 'no proper data'"
-    )
-
-
-def test___setitem__checks_the_given_data_4():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh["sun"] = ["no proper data"]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not str: 'no proper data'"
-    )
-
-
-def test___setitem__checks_the_given_data_5():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(RuntimeError) as cm:
-        wh[0] = [["no proper data"]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [['no proper data']]"
-    )
-
-
-def test___setitem__checks_the_given_data_6():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(RuntimeError) as cm:
-        wh["sun"] = [["no proper data"]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [['no proper data']]"
-    )
-
-
-def test___setitem__checks_the_given_data_7():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(RuntimeError) as cm:
-        wh[0] = [[3]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[3]]"
-    )
-
-
-def test___setitem__checks_the_given_data_8():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh[2] = [[2, "a"]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[2, 'a']]"
-    )
-
-
-def test___setitem__checks_the_given_data_9():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh[1] = [[20, 10], ["a", 300]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[20, 10], ['a', 300]]"
-    )
-
-
-def test___setitem__checks_the_given_data_10():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh[5] = [[323, 1344], [2, "d"]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[323, 1344], [2, 'd']]"
-    )
-
-
-def test___setitem__checks_the_given_data_11():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(RuntimeError) as cm:
-        wh[0] = [[4, 100, 3]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[4, 100, 3]]"
-    )
-
-
-def test___setitem__checks_the_given_data_13():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(RuntimeError) as cm:
-        wh["mon"] = [[3]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[3]]"
-    )
-
-
-def test___setitem__checks_the_given_data_14():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh["mon"] = [[2, "a"]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[2, 'a']]"
-    )
-
-
-def test___setitem__checks_the_given_data_15():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh["tue"] = [[20, 10], ["a", 300]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[20, 10], ['a', 300]]"
-    )
-
-
-def test___setitem__checks_the_given_data_16():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(TypeError) as cm:
-        wh["fri"] = [[323, 1344], [2, "d"]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[323, 1344], [2, 'd']]"
-    )
-
-
-def test___setitem__checks_the_given_data_17():
-    """__setitem__ checks the given data format."""
-    wh = WorkingHours()
-    with pytest.raises(RuntimeError) as cm:
-        wh["sat"] = [[4, 100, 3]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[4, 100, 3]]"
-    )
-
-
-def test___setitem__checks_the_value_ranges_1():
-    """ValueError is raised if value is not in the correct range in __setitem__."""
-    wh = WorkingHours()
-    with pytest.raises(ValueError) as cm:
-        wh["sun"] = [[-10, 100]]
-
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[-10, 100]]"
-    )
-
-
-def test___setitem__checks_the_value_ranges_2():
-    """ValueError is raised if value is not in the correct range in __setitem__."""
-    wh = WorkingHours()
-    with pytest.raises(ValueError) as cm:
-        wh["sat"] = [[0, 1800]]
-    assert (
-        str(cm.value)
-        == "WorkingHours.working_hours value should be a list of lists of "
-        "two integers between and the range of integers should be 0-1440, "
-        "not [[0, 1800]]"
-    )
-
-
-def test___setitem__will_not_accept_any_other_key_or_value_1():
-    """it is possible to use the other indexes or keys."""
-    wh = WorkingHours()
-    # indexing out of interested range
-    with pytest.raises(IndexError) as cm:
-        wh[7] = [[32, 23], [233, 324]]
-    assert str(cm.value) == "list index out of range"
-
-
-def test___setitem__will_not_accept_any_other_key_or_value_2():
-    """it is possible to use the other indexes or keys."""
-    wh = WorkingHours()
-    # indexing non-existent day
-    with pytest.raises(KeyError) as cm:
-        wh["zon"] = [[32, 23], [233, 324]]
-    assert (
-        str(cm.value) == "\"WorkingHours accepts only ['mon', 'tue', 'wed', 'thu', "
-        "'fri', 'sat', 'sun'] as key, not 'zon'\""
-    )
+    assert str(cm.value) == error_message
 
 
 def test_working_hours_argument_is_working_as_expected():
@@ -646,37 +425,52 @@ def test_weekly_working_days_is_a_read_only_attribute():
     assert str(cm.value) == error_message
 
 
-def test_weekly_working_days_is_calculated_correctly():
+@pytest.mark.parametrize(
+    "test_data, expected_result", [
+        [
+            {
+                "mon": [[1, 2]],
+                "tue": [[3, 4]],
+                "wed": [[5, 6]],
+                "thu": [[7, 8]],
+                "fri": [[9, 10]],
+                "sat": [],
+                "sun": [],
+            },
+            5
+        ],
+        [
+            {
+                "mon": [[1, 2]],
+                "tue": [[3, 4]],
+                "wed": [[5, 6]],
+                "thu": [[7, 8]],
+                "fri": [[9, 10]],
+                "sat": [[11, 12]],
+                "sun": [],
+            },
+            6
+        ],
+        [
+            {
+                "mon": [[1, 2]],
+                "tue": [[3, 4]],
+                "wed": [[5, 6]],
+                "thu": [[7, 8]],
+                "fri": [[9, 10]],
+                "sat": [[11, 12]],
+                "sun": [[13, 14]],
+            },
+            7
+        ],
+    ]
+)
+def test_weekly_working_days_is_calculated_correctly(test_data, expected_result):
     """weekly working days are calculated correctly."""
     wh = WorkingHours()
-    wh["mon"] = [[1, 2]]
-    wh["tue"] = [[3, 4]]
-    wh["wed"] = [[5, 6]]
-    wh["thu"] = [[7, 8]]
-    wh["fri"] = [[9, 10]]
-    wh["sat"] = []
-    wh["sun"] = []
-    assert wh.weekly_working_days == 5
-
-    wh = WorkingHours()
-    wh["mon"] = [[1, 2]]
-    wh["tue"] = [[3, 4]]
-    wh["wed"] = [[5, 6]]
-    wh["thu"] = [[7, 8]]
-    wh["fri"] = [[9, 10]]
-    wh["sat"] = [[11, 12]]
-    wh["sun"] = []
-    assert wh.weekly_working_days == 6
-
-    wh = WorkingHours()
-    wh["mon"] = [[1, 2]]
-    wh["tue"] = [[3, 4]]
-    wh["wed"] = [[5, 6]]
-    wh["thu"] = [[7, 8]]
-    wh["fri"] = [[9, 10]]
-    wh["sat"] = [[11, 12]]
-    wh["sun"] = [[13, 14]]
-    assert wh.weekly_working_days == 7
+    for day in test_data:
+        wh[day] = test_data[day]
+    assert wh.weekly_working_days == expected_result
 
 
 def test_yearly_working_days_is_a_read_only_attribute():
@@ -697,37 +491,53 @@ def test_yearly_working_days_is_a_read_only_attribute():
     assert str(cm.value) == error_message
 
 
-def test_yearly_working_days_is_calculated_correctly():
+
+@pytest.mark.parametrize(
+    "test_data, expected_result", [
+        [
+            {
+                "mon": [[1, 2]],
+                "tue": [[3, 4]],
+                "wed": [[5, 6]],
+                "thu": [[7, 8]],
+                "fri": [[9, 10]],
+                "sat": [],
+                "sun": [],
+            },
+            261
+        ],
+        [
+            {
+                "mon": [[1, 2]],
+                "tue": [[3, 4]],
+                "wed": [[5, 6]],
+                "thu": [[7, 8]],
+                "fri": [[9, 10]],
+                "sat": [[11, 12]],
+                "sun": [],
+            },
+            313
+        ],
+        [
+            {
+                "mon": [[1, 2]],
+                "tue": [[3, 4]],
+                "wed": [[5, 6]],
+                "thu": [[7, 8]],
+                "fri": [[9, 10]],
+                "sat": [[11, 12]],
+                "sun": [[13, 14]],
+            },
+            365
+        ]
+    ]
+)
+def test_yearly_working_days_is_calculated_correctly(test_data, expected_result):
     """yearly_working_days is calculated correctly."""
     wh = WorkingHours()
-    wh["mon"] = [[1, 2]]
-    wh["tue"] = [[3, 4]]
-    wh["wed"] = [[5, 6]]
-    wh["thu"] = [[7, 8]]
-    wh["fri"] = [[9, 10]]
-    wh["sat"] = []
-    wh["sun"] = []
-    assert wh.yearly_working_days == pytest.approx(261)
-
-    wh = WorkingHours()
-    wh["mon"] = [[1, 2]]
-    wh["tue"] = [[3, 4]]
-    wh["wed"] = [[5, 6]]
-    wh["thu"] = [[7, 8]]
-    wh["fri"] = [[9, 10]]
-    wh["sat"] = [[11, 12]]
-    wh["sun"] = []
-    assert wh.yearly_working_days == pytest.approx(313)
-
-    wh = WorkingHours()
-    wh["mon"] = [[1, 2]]
-    wh["tue"] = [[3, 4]]
-    wh["wed"] = [[5, 6]]
-    wh["thu"] = [[7, 8]]
-    wh["fri"] = [[9, 10]]
-    wh["sat"] = [[11, 12]]
-    wh["sun"] = [[13, 14]]
-    assert wh.yearly_working_days == pytest.approx(365)
+    for day in test_data:
+        wh[day] = test_data[day]
+    assert wh.yearly_working_days == pytest.approx(expected_result)
 
 
 def test_daily_working_hours_argument_is_skipped():
