@@ -53,6 +53,7 @@ from stalker import (
     Type,
     User,
     Vacation,
+    Variant,
     Version,
     WorkingHours,
 )
@@ -75,6 +76,53 @@ from tests.utils import create_random_db, get_admin_user, tear_down_db
 
 logger = log.get_logger(__name__)
 log.set_level(logging.DEBUG)
+
+
+CLASS_NAMES = [
+    "Asset",
+    "AuthenticationLog",
+    "Budget",
+    "BudgetEntry",
+    "Client",
+    "Good",
+    "Group",
+    "Permission",
+    "User",
+    "Department",
+    "SimpleEntity",
+    "Entity",
+    "EntityGroup",
+    "ImageFormat",
+    "Link",
+    "Message",
+    "Note",
+    "Page",
+    "Project",
+    "PriceList",
+    "Repository",
+    "Review",
+    "Role",
+    "Scene",
+    "Sequence",
+    "Shot",
+    "Status",
+    "StatusList",
+    "Structure",
+    "Studio",
+    "Tag",
+    "TimeLog",
+    "Task",
+    "FilenameTemplate",
+    "Ticket",
+    "TicketLog",
+    "Type",
+    "Vacation",
+    "Version",
+    "Daily",
+    "Invoice",
+    "Payment",
+    "Variant",
+]
 
 
 @pytest.fixture(scope="function")
@@ -221,6 +269,49 @@ def test_daily_status_list_initialization(setup_postgresql_db):
     assert all(status.updated_by == admin for status in daily_status_list.statuses)
 
 
+def test_variant_status_list_initialization(setup_postgresql_db):
+    """Variant statuses are correctly created."""
+    variant_status_list = (
+        StatusList.query
+        .filter(StatusList.target_entity_type == "Variant")
+        .first()
+    )
+    assert isinstance(variant_status_list, StatusList)
+    assert variant_status_list.name == "Variant Statuses"
+    expected_status_names = [
+        "Waiting For Dependency",
+        "Ready To Start",
+        "Work In Progress",
+        "Pending Review",
+        "Has Revision",
+        "Dependency Has Revision",
+        "On Hold",
+        "Stopped",
+        "Completed",
+    ]
+    expected_status_codes = [
+        "WFD",
+        "RTS",
+        "WIP",
+        "PREV",
+        "HREV",
+        "DREV",
+        "OH",
+        "STOP",
+        "CMPL",
+    ]
+    assert len(variant_status_list.statuses) == len(expected_status_names)
+    db_status_names = map(lambda x: x.name, variant_status_list.statuses)
+    db_status_codes = map(lambda x: x.code, variant_status_list.statuses)
+    assert sorted(expected_status_names) == sorted(db_status_names)
+    assert sorted(expected_status_codes) == sorted(db_status_codes)
+    # check if the created_by and updated_by attributes are correctly set
+    # to the admin
+    admin = get_admin_user()
+    assert all(status.created_by == admin for status in variant_status_list.statuses)
+    assert all(status.updated_by == admin for status in variant_status_list.statuses)
+
+
 def test_register_creates_suitable_permissions(setup_postgresql_db):
     """stalker.db.register is able to create suitable Permissions."""
 
@@ -284,55 +375,11 @@ def test_register_handles_integrity_errors(
 
 def test_permissions_created_for_all_the_classes(setup_postgresql_db):
     """Permission instances are created for classes in the SOM."""
-    class_names = [
-        "Asset",
-        "AuthenticationLog",
-        "Budget",
-        "BudgetEntry",
-        "Client",
-        "Good",
-        "Group",
-        "Permission",
-        "User",
-        "Department",
-        "SimpleEntity",
-        "Entity",
-        "EntityGroup",
-        "ImageFormat",
-        "Link",
-        "Message",
-        "Note",
-        "Page",
-        "Project",
-        "PriceList",
-        "Repository",
-        "Review",
-        "Role",
-        "Scene",
-        "Sequence",
-        "Shot",
-        "Status",
-        "StatusList",
-        "Structure",
-        "Studio",
-        "Tag",
-        "TimeLog",
-        "Task",
-        "FilenameTemplate",
-        "Ticket",
-        "TicketLog",
-        "Type",
-        "Vacation",
-        "Version",
-        "Daily",
-        "Invoice",
-        "Payment",
-    ]
     permission_db = Permission.query.all()
-    assert len(permission_db) == len(class_names) * len(defaults.actions) * 2
+    assert len(permission_db) == len(CLASS_NAMES) * len(defaults.actions) * 2
     assert all(permission.access in ["Allow", "Deny"] for permission in permission_db)
     assert all(permission.action in defaults.actions for permission in permission_db)
-    assert all(permission.class_name in class_names for permission in permission_db)
+    assert all(permission.class_name in CLASS_NAMES for permission in permission_db)
 
 
 def test_permissions_not_created_over_and_over_again(setup_postgresql_db):
@@ -352,7 +399,7 @@ def test_permissions_not_created_over_and_over_again(setup_postgresql_db):
 
     # and we still have correct amount of Permissions
     permissions = Permission.query.all()
-    assert len(permissions) == 420
+    assert len(permissions) == 430
 
 
 def test_ticket_statuses_are_not_created_over_and_over_again(setup_postgresql_db):
@@ -1251,6 +1298,124 @@ def test_persistence_of_asset(setup_postgresql_db):
     assert status_list == test_asset_db.status_list
     assert tags == test_asset_db.tags
     assert children == test_asset_db.children
+    assert type_ == test_asset_db.type
+    assert updated_by == test_asset_db.updated_by
+
+    # now test the deletion of the asset class
+    DBSession.delete(test_asset_db)
+    DBSession.commit()
+
+    # we should still have the user
+    assert User.query.filter(User.id == created_by.id).first() is not None
+
+    # we should still have the project
+    assert Project.query.filter(Project.id == project.id).first() is not None
+
+
+def test_persistence_of_variant(setup_postgresql_db):
+    """Persistence of Variant."""
+    test_user = User(
+        name="Test User", login="tu", email="test@user.com", password="secret"
+    )
+    test_repository_type = Type(
+        name="Test Repository Type A",
+        code="trta",
+        target_entity_type="Repository",
+    )
+    test_repository = Repository(
+        name="Test Repository A", code="TRA", type=test_repository_type
+    )
+    commercial_type = Type(
+        name="Commercial A", code="comm", target_entity_type="Project"
+    )
+    test_project = Project(
+        name="Test Project For Asset Creation",
+        code="TPFAC",
+        type=commercial_type,
+        repository=test_repository,
+    )
+
+    DBSession.add(test_project)
+    DBSession.commit()
+
+    kwargs = {
+        "name": "Base",
+        "description": "This is a test Variant",
+        "project": test_project,
+        "created_by": test_user,
+    }
+
+    test_variant = Variant(**kwargs)
+
+    DBSession.add(test_variant)
+    DBSession.commit()
+
+    test_task1 = Task(
+        name="test task 1",
+        status=0,
+        project=test_project,
+    )
+
+    test_task2 = Task(
+        name="test task 2",
+        status=0,
+        parent=test_task1,
+    )
+
+    test_task3 = Task(
+        name="test task 3",
+        status=0,
+        parent=test_task2,
+    )
+    test_variant.parent = test_task3
+
+    DBSession.add_all([test_task1, test_task2, test_task3])
+    DBSession.commit()
+
+    created_by = test_variant.created_by
+    date_created = test_variant.date_created
+    date_updated = test_variant.date_updated
+    duration = test_variant.duration
+    description = test_variant.description
+    end = test_variant.end
+    name = test_variant.name
+    nice_name = test_variant.nice_name
+    notes = test_variant.notes
+    project = test_variant.project
+    references = test_variant.references
+    status = test_variant.status
+    status_list = test_variant.status_list
+    start = test_variant.start
+    tags = test_variant.tags
+    children = test_variant.children
+    parent = test_variant.parent
+    type_ = test_variant.type
+    updated_by = test_variant.updated_by
+
+    del test_variant
+
+    test_asset_db = Variant.query.filter_by(name=kwargs["name"]).one()
+    assert isinstance(test_asset_db, Variant)
+
+    # assert test_asset, test_asset_DB)
+    assert test_asset_db.created_by is not None
+    assert created_by == test_asset_db.created_by
+    assert date_created == test_asset_db.date_created
+    assert date_updated == test_asset_db.date_updated
+    assert description == test_asset_db.description
+    assert duration == test_asset_db.duration
+    assert end == test_asset_db.end
+    assert name == test_asset_db.name
+    assert nice_name == test_asset_db.nice_name
+    assert notes == test_asset_db.notes
+    assert project == test_asset_db.project
+    assert references == test_asset_db.references
+    assert start == test_asset_db.start
+    assert status == test_asset_db.status
+    assert status_list == test_asset_db.status_list
+    assert tags == test_asset_db.tags
+    assert children == test_asset_db.children
+    assert parent == test_asset_db.parent
     assert type_ == test_asset_db.type
     assert updated_by == test_asset_db.updated_by
 

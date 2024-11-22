@@ -58,6 +58,7 @@ from stalker.models.task import Task, TaskDependency, TimeLog
 from stalker.models.template import FilenameTemplate
 from stalker.models.ticket import Ticket, TicketLog
 from stalker.models.type import EntityType, Type
+from stalker.models.variant import Variant
 from stalker.models.version import Version
 from stalker.models.wiki import Page
 
@@ -125,6 +126,7 @@ __all__ = [
     "UnitMixin",
     "User",
     "Vacation",
+    "Variant",
     "Version",
     "WorkingHours",
     "WorkingHoursMixin",

@@ -568,7 +568,7 @@ class Task(
       this resource is used for the whole task. This is useful when several
       alternative resources have been specified. Normally the selected resource
       can change after each break. A break is an interval of at least one
-      timeslot where no resources were available.
+      time slot where no resources were available.
 
     :attr:`.persistent_allocation` attribute is True by default.
 
@@ -649,7 +649,7 @@ class Task(
        For parent tasks that have both effort based and duration based children
        tasks the percent complete is calculated as if the
        :attr:`.total_logged_seconds` is properly filled for duration based
-       tasks proportinal to the elapsed time from the :attr:`.start` attr
+       tasks proportional to the elapsed time from the :attr:`.start` attr
        value.
 
     Even tough, the percent_complete attribute of a task is
@@ -841,7 +841,7 @@ class Task(
           Project :class:`.Structure` s.
 
           The :attr:`.path` attribute is a repository relative path, where as
-          the :attr:`.absolute_path` is the full path and includs the OS
+          the :attr:`.absolute_path` is the full path and includes the OS
           dependent repository path.
 
     .. versionadded: 0.2.13
@@ -851,7 +851,7 @@ class Task(
        to the same :class:`.Good`.
 
        Its main purpose of existence is to be able to generate
-       :class:`.BugdetEntry` instances from the tasks that are related to the
+       :class:`.BudgetEntry` instances from the tasks that are related to the
        same :class:`.Good` and because the Goods are defining the cost and MSRP
        of different things, it is possible to create BudgetEntries and thus
        :class;`.Budget` s with this information.
@@ -879,7 +879,7 @@ class Task(
         responsible (List[User]): A list of :class:`.User` instances that is responsible
             of this task.
         watchers (List[User]): A list of :class:`.User` those are added this Task
-            instance to their watchlist.
+            instance to their watch list.
         start (datetime.datetime): The start date and time of this task instance. It is
             only used if the :attr:`.schedule_constraint` attribute is set to
             :attr:`.CONSTRAIN_START` or :attr:`.CONSTRAIN_BOTH`. The default value
@@ -921,7 +921,7 @@ class Task(
             of a task with alternative resources. Should be one of ['minallocated',
             'maxloaded', 'minloaded', 'order', 'random'] and the default value is
             'minallocated'. For more information read the :class:`.Task` class
-            documetation.
+            documentation.
         persistent_allocation (bool): Specifies that once a resource is picked from the
             list of alternatives this resource is used for the whole task. The default
             value is True. For more information read the :class:`.Task` class
@@ -1672,7 +1672,7 @@ class Task(
                 this range.
 
         Raises:
-            TypeError: If the given priorty value is not an integer or float.
+            TypeError: If the given priority value is not an integer or float.
 
         Returns:
             int: The validated priority value.
@@ -3433,7 +3433,7 @@ Task_Responsible = Table(
 # with new duration
 @event.listens_for(TimeLog._start, "set")
 def update_time_log_task_parents_for_start(
-    tlog: TimeLog,
+    timelog: TimeLog,
     new_start: datetime.datetime,
     old_start: datetime.datetime,
     initiator: AttributeEvent,
@@ -3441,23 +3441,23 @@ def update_time_log_task_parents_for_start(
     """Update the parent task of the TimeLog.task if the new_start value is changed.
 
     Args:
-        tlog (TimeLog): The TimeLog instance.
+        timelog (TimeLog): The TimeLog instance.
         new_start (datetime.datetime): The datetime.datetime instance showing the new
             value.
         old_start (datetime.datetime): The datetime.datetime instance showing the old
             value.
         initiator (AttributeEvent): Currently not used.
     """
-    logger.debug(f"Received set event for new_start in target : {tlog}")
-    if tlog.end and old_start and new_start:
-        old_duration = tlog.end - old_start
-        new_duration = tlog.end - new_start
-        __update_total_logged_seconds__(tlog, new_duration, old_duration)
+    logger.debug(f"Received set event for new_start in target : {timelog}")
+    if timelog.end and old_start and new_start:
+        old_duration = timelog.end - old_start
+        new_duration = timelog.end - new_start
+        __update_total_logged_seconds__(timelog, new_duration, old_duration)
 
 
 @event.listens_for(TimeLog._end, "set")
 def update_time_log_task_parents_for_end(
-    tlog: TimeLog,
+    timelog: TimeLog,
     new_end: datetime.datetime,
     old_end: datetime.datetime,
     initiator: sqlalchemy.orm.attributes.AttributeEvent,
@@ -3465,22 +3465,22 @@ def update_time_log_task_parents_for_end(
     """Update the parent task of the TimeLog.task if the new_end value is changed.
 
     Args:
-        tlog (TimeLog): The TimeLog instance.
+        timelog (TimeLog): The TimeLog instance.
         new_end (datetime.datetime): The datetime.datetime instance showing the new
             value.
         old_end (datetime.datetime): The datetime.datetime instance showing the old
             value.
         initiator (sqlalchemy.orm.attributes.AttributeEvent): Currently not used.
     """
-    logger.debug(f"Received set event for new_end in target: {tlog}")
+    logger.debug(f"Received set event for new_end in target: {timelog}")
     if (
-        tlog.start
+        timelog.start
         and isinstance(old_end, datetime.datetime)
         and isinstance(new_end, datetime.datetime)
     ):
-        old_duration = old_end - tlog.start
-        new_duration = new_end - tlog.start
-        __update_total_logged_seconds__(tlog, new_duration, old_duration)
+        old_duration = old_end - timelog.start
+        new_duration = new_end - timelog.start
+        __update_total_logged_seconds__(timelog, new_duration, old_duration)
 
 
 def __update_total_logged_seconds__(
