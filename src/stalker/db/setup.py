@@ -36,7 +36,7 @@ from stalker.db.session import DBSession
 logger: logging.Logger = log.get_logger(__name__)
 
 # TODO: Try to get it from the API (it was not working inside a package before)
-alembic_version: str = "644f5251fc0d"
+alembic_version: str = "91ed52b72b82"
 
 
 def setup(settings: Optional[Dict[str, Any]] = None) -> None:
@@ -145,6 +145,7 @@ def init() -> None:
         "Type",
         "User",
         "Vacation",
+        "Variant",
         "Version",
     ]
 
@@ -201,6 +202,12 @@ def init() -> None:
     )
     create_entity_statuses(
         entity_type="Scene",
+        status_names=defaults.task_status_names,
+        status_codes=defaults.task_status_codes,
+        user=admin,
+    )
+    create_entity_statuses(
+        entity_type="Variant",
         status_names=defaults.task_status_names,
         status_codes=defaults.task_status_codes,
         user=admin,

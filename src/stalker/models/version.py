@@ -139,7 +139,6 @@ class Version(Link, DAGMixin):
     )
 
     is_published: Mapped[Optional[bool]] = mapped_column(default=False)
-
     created_with: Mapped[Optional[str]] = mapped_column(String(256))
 
     def __init__(
