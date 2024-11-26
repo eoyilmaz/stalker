@@ -271,11 +271,9 @@ def test_daily_status_list_initialization(setup_postgresql_db):
 
 def test_variant_status_list_initialization(setup_postgresql_db):
     """Variant statuses are correctly created."""
-    variant_status_list = (
-        StatusList.query
-        .filter(StatusList.target_entity_type == "Variant")
-        .first()
-    )
+    variant_status_list = StatusList.query.filter(
+        StatusList.target_entity_type == "Variant"
+    ).first()
     assert isinstance(variant_status_list, StatusList)
     assert variant_status_list.name == "Variant Statuses"
     expected_status_names = [
@@ -4271,8 +4269,7 @@ def test_persistence_of_review(setup_postgresql_db):
         start=datetime.datetime.now(pytz.utc) + datetime.timedelta(2),
         end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3),
     )
-    rev1 = Review(task=task2, reviewer=user1, schedule_timing=1, schedule_unit="h")
-    DBSession.add_all(
+    DBSession.save(
         [
             task1,
             child_task1,
@@ -4283,10 +4280,20 @@ def test_persistence_of_review(setup_postgresql_db):
             time_log3,
             user1,
             user2,
-            rev1,
         ]
     )
-    DBSession.commit()
+
+    version1 = Version(task=task2)
+    DBSession.save(version1)
+
+    rev1 = Review(
+        task=task2,
+        reviewer=user1,
+        version=version1,
+        schedule_timing=1,
+        schedule_unit="h",
+    )
+    DBSession.save(rev1)
 
     created_by = rev1.created_by
     date_created = rev1.date_created
@@ -4296,6 +4303,7 @@ def test_persistence_of_review(setup_postgresql_db):
     schedule_unit = rev1.schedule_unit
     task = rev1.task
     updated_by = rev1.updated_by
+    version = rev1.version
 
     del rev1
 
@@ -4312,6 +4320,7 @@ def test_persistence_of_review(setup_postgresql_db):
     assert rev1_db.updated_by == updated_by
     assert rev1_db.schedule_timing == schedule_timing
     assert rev1_db.schedule_unit == schedule_unit
+    assert rev1_db.version == version
 
     # delete tests
 

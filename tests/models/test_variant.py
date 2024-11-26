@@ -91,7 +91,6 @@ def setup_variant_tests():
         macos_path="/Volumes/T/",
     )
 
-
     data["test_user1"] = User(
         name="User1", login="user1", email="user1@user1.com", password="1234"
     )

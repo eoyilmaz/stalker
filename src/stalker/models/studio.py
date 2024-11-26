@@ -871,7 +871,9 @@ class WorkingHours(Entity):
         err = (
             "{}.working_hours value should be a list of lists of two "
             "integers and the range of integers should be between 0-1440, "
-            "not {}: '{}'".format(self.__class__.__name__, value.__class__.__name__, value)
+            "not {}: '{}'".format(
+                self.__class__.__name__, value.__class__.__name__, value
+            )
         )
 
         if not isinstance(value, list):

@@ -16,6 +16,7 @@ from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.link import Link
 from stalker.models.mixins import DAGMixin
+from stalker.models.review import Review
 from stalker.models.task import Task
 from stalker.utils import walk_hierarchy
 
@@ -136,6 +137,10 @@ class Version(Link, DAGMixin):
 
         It is a list of :class:`.Link` instances.
         """,
+    )
+
+    reviews: Mapped[Optional[List[Review]]] = relationship(
+        primaryjoin="Reviews.c.version_id==Versions.c.id"
     )
 
     is_published: Mapped[Optional[bool]] = mapped_column(default=False)
@@ -618,6 +623,14 @@ class Version(Link, DAGMixin):
         """
         for v in walk_hierarchy(self, "inputs", method=method):
             yield v
+
+    def request_review(self):
+        """Call the self.task.request_review().
+
+        This is a shortcut to the Task.request_review() method of the related
+        task.
+        """
+        return self.task.request_review(version=self)
 
 
 # VERSION INPUTS

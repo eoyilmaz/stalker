@@ -40,16 +40,30 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     Each Review instance with the same :attr:`.review_number` for a
     :class:`.Task` represents a set of reviews.
 
-    Creating a review will automatically cap the schedule timing value of the
-    related task to the total logged time logs for that task and then extend
-    the timing values according to the review schedule values.
+    .. version-added:: 1.0.0
+
+      Review -> Version relation
+
+      Versions can now be attached to reviews.
+
+    Review instances, alongside the :class:`.Task` can also optionally hold a
+    :class:`.Version` instance. This allows the information of which
+    :class:`.Version` instance has been reviewed as a part of the review
+    process to be much cleaner, and when the Review history is investigated,
+    it will be much easier to identify which :class:`.Version` the review was
+    about.
 
     Args:
         task (Task): A :class:`.Task` instance that this review is related to.
-            It cannot be skipped.
+            It can be skipped if a :class:`.Version` instance has been given.
 
-        review_number (int): This number represents the revision set id that this
-            Review instance belongs to.
+        version (Version): A :class:`.Version` instance that this review
+            instance is related to. The :class:`.Version` and the
+            :class:`.Task` should be related, a ``ValueError`` will be raised
+            if they are not.
+
+        review_number (int): This number represents the revision set id that
+            this Review instance belongs to.
 
         reviewer (User): One of the responsible of the related Task. There will
             be only one Review instances with the same review_number for every
@@ -89,6 +103,16 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         doc="The :class:`.Task` instance that this Review is created for",
     )
 
+    version_id: Mapped[Optional[int]] = mapped_column(
+        "version_id", ForeignKey("Versions.id")
+    )
+
+    version: Mapped[Optional["Version"]] = relationship(
+        primaryjoin="Reviews.c.version_id==Versions.c.id",
+        uselist=False,
+        back_populates="reviews",
+    )
+
     reviewer_id: Mapped[int] = mapped_column(
         ForeignKey("Users.id"),
         nullable=False,
@@ -105,6 +129,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     def __init__(
         self,
         task: Optional["Task"] = None,
+        version: Optional["Version"] = None,
         reviewer: Optional["User"] = None,
         description: str = "",
         **kwargs: Dict[str, Any],
@@ -115,6 +140,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
         self.task = task
+        self.version = version
         self.reviewer = reviewer
 
         # set the status to NEW
@@ -132,15 +158,14 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         """Validate the given task value.
 
         Args:
-            key (str): The name of the validated column.
-            task (Task): The task value to be validated.
+            task (Union[None, Task]): The task value to be validated.
 
         Raises:
             TypeError: If the given task value is not a Task instance.
             ValueError: If the given task is not a leaf task.
 
         Returns:
-            Task: The validated Task instance.
+            Union[None, Task]: The validated Task instance.
         """
         if task is None:
             return task
@@ -164,6 +189,38 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         self._review_number = task.review_number + 1
 
         return task
+
+    @validates("version")
+    def _validate_version(
+        self, key: str, version: Union[None, "Version"]
+    ) -> Union[None, "Version"]:
+        """Validate the given version value.
+
+        Args:
+            key (str): The name of the validated column.
+            version (Union[None, Version]): The version value to be validated.
+        """
+        if version is None:
+            return version
+
+        from stalker.models.version import Version
+
+        if not isinstance(version, Version):
+            raise TypeError(
+                f"{self.__class__.__name__}.version should be a Version "
+                f"instance, not {version.__class__.__name__}: '{version}'"
+            )
+
+        if self.task is not None:
+            if version.task != self.task:
+                raise ValueError(
+                    f"{self.__class__.__name__}.version should be a Version "
+                    f"instance related to this Task: {version}"
+                )
+        else:
+            self.task = version.task
+
+        return version
 
     @validates("reviewer")
     def _validate_reviewer(self, key: str, reviewer: "User") -> "User":

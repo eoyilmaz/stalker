@@ -2578,8 +2578,8 @@ class Task(
         This will ease creating TimeLog instances for task.
 
         Args:
-            resource (User): The :class:`stalker.models.auth.User` instance as the
-                resource for the TimeLog.
+            resource (User): The :class:`stalker.models.auth.User` instance as
+                the resource for the TimeLog.
             start (datetime.datetime): The start date and time.
             end (datetime.datetime): The end date and time.
 
@@ -2591,7 +2591,7 @@ class Task(
         return TimeLog(task=self, resource=resource, start=start, end=end)
         # also updating parent statuses are done in TimeLog._validate_task
 
-    def request_review(self) -> List[Review]:
+    def request_review(self, version: Optional["Version"] = None) -> List[Review]:
         """Create and return Review instances for each of the responsible of this task.
 
         Also set the task status to PREV.
@@ -2601,15 +2601,20 @@ class Task(
 
         Only applicable to leaf tasks.
 
+        Args:
+            version (Optional[Version]): An optional :class:`.Version` instance
+                can also be passed. The :class:`.Version` should be related to
+                this :class:`.Task`.
+
         Raises:
-            StatusError: If the current task status is not WIP a StatusError will be
-                raised as the task has either not been started on being worked yet,
-                it is already on review, a dependency might be under review or this is
-                stopped, hold or completed.
+            StatusError: If the current task status is not WIP a StatusError
+                will be raised as the task has either not been started on being
+                worked yet, it is already on review, a dependency might be
+                under review or this is stopped, hold or completed.
 
         Returns:
-            List[Review]: The list of :class:`stalker.models.review.Review` instances
-                created.
+            List[Review]: The list of :class:`stalker.models.review.Review`
+                instances created.
         """
         # check task status
         with DBSession.no_autoflush:
@@ -2627,7 +2632,7 @@ class Task(
         # create Review instances for each Responsible of this task
         reviews = []
         for responsible in self.responsible:
-            reviews.append(Review(task=self, reviewer=responsible))
+            reviews.append(Review(task=self, version=version, reviewer=responsible))
 
         # update the status to PREV
         self.status = prev

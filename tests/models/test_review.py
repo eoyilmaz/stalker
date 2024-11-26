@@ -8,7 +8,7 @@ import pytest
 
 import pytz
 
-from stalker import Project, Repository, Review, Status, Structure, Task, User
+from stalker import Project, Repository, Review, Status, Structure, Task, User, Version
 from stalker.db.session import DBSession
 
 
@@ -153,6 +153,19 @@ def test_task_argument_is_not_a_leaf_task(setup_review_db_test):
         str(cm.value) == "It is only possible to create a review for a leaf tasks, and "
         "<Task1 (Task)> is not a leaf task."
     )
+
+
+def test_task_argument_can_be_skipped_if_version_is_given(setup_review_db_test):
+    """task argument can be skipped if the version arg is given."""
+    data = setup_review_db_test
+    task1 = Task(name="Task1", project=data["project"])
+    DBSession.save(task1)
+    version = Version(task=task1)
+    DBSession.save(version)
+    data["kwargs"]["version"] = version
+    data["kwargs"].pop("task")
+    review = Review(**data["kwargs"])
+    assert review.task == task1
 
 
 def test_task_argument_is_working_as_expected(setup_review_db_test):
@@ -841,3 +854,108 @@ def test_review_set_property_return_all_the_revision_instances_with_same_review_
     assert review5.review_number == 3
     assert review6.review_number == 3
     assert review7.review_number == 3
+
+
+def test_review__init__version_arg_is_skipped(setup_review_db_test):
+    """Review.__init__() version arg can be skipped."""
+    data = setup_review_db_test
+    data["task1"].responsible = [data["user1"], data["user2"], data["user3"]]
+    now = datetime.datetime.now(pytz.utc)
+    data["task1"].create_time_log(
+        resource=data["user1"], start=now, end=now + datetime.timedelta(hours=1)
+    )
+    data["task1"].status = data["status_wip"]
+    review = Review(task=data["task1"], reviewer=data["task1"].responsible[0])
+    assert isinstance(review, Review)
+
+
+def test_review__init__version_arg_is_none(setup_review_db_test):
+    """Review.__init__() version arg can be None."""
+    data = setup_review_db_test
+    data["task1"].responsible = [data["user1"], data["user2"], data["user3"]]
+    now = datetime.datetime.now(pytz.utc)
+    data["task1"].create_time_log(
+        resource=data["user1"], start=now, end=now + datetime.timedelta(hours=1)
+    )
+    data["task1"].status = data["status_wip"]
+    review = Review(
+        task=data["task1"], version=None, reviewer=data["task1"].responsible[0]
+    )
+    assert isinstance(review, Review)
+
+
+def test_review__init__version_arg_is_not_a_version_instance(setup_review_db_test):
+    """Review.__init__() version arg is not a Version instance."""
+    data = setup_review_db_test
+    data["task1"].responsible = [data["user1"], data["user2"], data["user3"]]
+    now = datetime.datetime.now(pytz.utc)
+    data["task1"].create_time_log(
+        resource=data["user1"], start=now, end=now + datetime.timedelta(hours=1)
+    )
+    data["task1"].status = data["status_wip"]
+    with pytest.raises(TypeError) as cm:
+        _ = Review(
+            task=data["task1"],
+            version="not a version",
+            reviewer=data["task1"].responsible[0],
+        )
+    assert str(cm.value) == (
+        "Review.version should be a Version instance, " "not str: 'not a version'"
+    )
+
+
+def test_review__init__version_arg_is_not_related_to_the_given_task(
+    setup_review_db_test,
+):
+    """Review.__init__() raises ValueError if the version is not matching the task."""
+    data = setup_review_db_test
+    data["task1"].responsible = [data["user1"], data["user2"], data["user3"]]
+    now = datetime.datetime.now(pytz.utc)
+    data["task1"].create_time_log(
+        resource=data["user1"], start=now, end=now + datetime.timedelta(hours=1)
+    )
+    data["task1"].status = data["status_wip"]
+    version = Version(task=data["task2"])
+
+    with pytest.raises(ValueError) as cm:
+        _ = Review(
+            task=data["task1"], version=version, reviewer=data["task1"].responsible[0]
+        )
+    assert str(cm.value) == (
+        "Review.version should be a Version instance "
+        f"related to this Task: {version}"
+    )
+
+
+def test_review___init__accepts_a_version_with_version_argument(setup_review_db_test):
+    """Review.__init__() accepts a Version instance with version argument."""
+    data = setup_review_db_test
+    data["task1"].responsible = [data["user1"], data["user2"], data["user3"]]
+    now = datetime.datetime.now(pytz.utc)
+    data["task1"].create_time_log(
+        resource=data["user1"], start=now, end=now + datetime.timedelta(hours=1)
+    )
+    data["task1"].status = data["status_wip"]
+    version = Version(task=data["task1"])
+
+    review = Review(
+        task=data["task1"], version=version, reviewer=data["task1"].responsible[0]
+    )
+    assert isinstance(review, Review)
+
+
+def test_review___init__version_arg_value_passed_to_version_attr(setup_review_db_test):
+    """Review.__init__() version arg value is passed to the version attr."""
+    data = setup_review_db_test
+    data["task1"].responsible = [data["user1"], data["user2"], data["user3"]]
+    now = datetime.datetime.now(pytz.utc)
+    data["task1"].create_time_log(
+        resource=data["user1"], start=now, end=now + datetime.timedelta(hours=1)
+    )
+    data["task1"].status = data["status_wip"]
+    version = Version(task=data["task1"])
+
+    review = Review(
+        task=data["task1"], version=version, reviewer=data["task1"].responsible[0]
+    )
+    assert review.version == version
