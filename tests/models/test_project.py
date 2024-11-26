@@ -1357,7 +1357,55 @@ def test_tjp_id_is_working_as_expected(setup_project_db_test):
     assert data["test_project"].tjp_id == "Project_654654"
 
 
-def test_to_tjp_is_working_as_expected(setup_project_db_test):
+@pytest.mark.parametrize(
+    "entity_name",
+    [
+        "test_task1",
+        "test_task2",
+        "test_task3",
+        "test_task4",
+        "test_task5",
+        "test_task6",
+        "test_task7",
+        "test_task8",
+        "test_task9",
+        "test_task10",
+        "test_task11",
+        "test_task12",
+        "test_task13",
+        "test_task14",
+        "test_task15",
+        "test_task16",
+        "test_task17",
+        "test_task18",
+        "test_task19",
+        "test_task20",
+        "test_task21",
+        "test_task22",
+        "test_task23",
+        "test_task24",
+        "test_task25",
+        "test_task26",
+        "test_task27",
+        "test_asset1",
+        "test_asset2",
+        "test_asset3",
+        "test_asset4",
+        "test_asset5",
+        "test_shot1",
+        "test_shot2",
+        "test_shot3",
+        "test_shot4",
+        "test_seq1",
+        "test_seq2",
+        "test_seq3",
+        "test_seq4",
+        "test_seq5",
+        "test_seq6",
+        "test_seq7",
+    ],
+)
+def test_to_tjp_is_working_as_expected(setup_project_db_test, entity_name):
     """to_tjp attribute is working as expected."""
     data = setup_project_db_test
     # because of the randomness in the order of the test data being created,
@@ -1370,56 +1418,8 @@ def test_to_tjp_is_working_as_expected(setup_project_db_test):
     assert result.startswith(
         'task Project_{id} "Project_{id}" {{'.format(id=data["test_project"].id)
     )
-
-    entities_to_test = [
-        data["test_project"],
-        data["test_task1"],
-        data["test_task2"],
-        data["test_task3"],
-        data["test_task4"],
-        data["test_task5"],
-        data["test_task6"],
-        data["test_task7"],
-        data["test_task8"],
-        data["test_task9"],
-        data["test_task10"],
-        data["test_task11"],
-        data["test_task12"],
-        data["test_task13"],
-        data["test_task14"],
-        data["test_task15"],
-        data["test_task16"],
-        data["test_task17"],
-        data["test_task18"],
-        data["test_task19"],
-        data["test_task20"],
-        data["test_task21"],
-        data["test_task22"],
-        data["test_task23"],
-        data["test_task24"],
-        data["test_task25"],
-        data["test_task26"],
-        data["test_task27"],
-        data["test_asset1"],
-        data["test_asset2"],
-        data["test_asset3"],
-        data["test_asset4"],
-        data["test_asset5"],
-        data["test_shot1"],
-        data["test_shot2"],
-        data["test_shot3"],
-        data["test_shot4"],
-        data["test_seq1"],
-        data["test_seq2"],
-        data["test_seq3"],
-        data["test_seq4"],
-        data["test_seq5"],
-        data["test_seq6"],
-        data["test_seq7"],
-    ]
-    assert all(
-        condition_tjp_output(entity.to_tjp) in result for entity in entities_to_test
-    )
+    entity = data[entity_name]
+    assert condition_tjp_output(entity.to_tjp) in result
 
 
 def test_project_instance_does_not_have_active_attribute(setup_project_db_test):

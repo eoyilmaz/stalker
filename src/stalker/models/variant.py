@@ -7,7 +7,6 @@ from sqlalchemy.orm import Mapped, mapped_column
 from stalker.models.task import Task
 
 
-
 class Variant(Task):
     """A Task derivative to keep track of Variants in a Task hierarchy.
 

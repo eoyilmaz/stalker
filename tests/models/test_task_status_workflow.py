@@ -17,6 +17,7 @@ from stalker import (
     TimeLog,
     Type,
     User,
+    Version,
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import StatusError
@@ -28,10 +29,16 @@ def setup_task_status_workflow_tests():
     data = dict()
     # test users
     data["test_user1"] = User(
-        name="Test User 1", login="tuser1", email="tuser1@test.com", password="secret"
+        name="Test User 1",
+        login="tuser1",
+        email="tuser1@test.com",
+        password="secret",
     )
     data["test_user2"] = User(
-        name="Test User 2", login="tuser2", email="tuser2@test.com", password="secret"
+        name="Test User 2",
+        login="tuser2",
+        email="tuser2@test.com",
+        password="secret",
     )
     # create a couple of tasks
     data["status_new"] = Status(name="New", code="NEW")
@@ -4171,3 +4178,69 @@ def test_review_set_review_number_is_skipped(setup_task_status_workflow_db_tests
 
     # now check if review_set() will return reviews2
     assert data["test_task3"].review_set() == reviews2
+
+
+def test_request_review_version_arg_is_skipped(setup_task_status_workflow_db_tests):
+    """request_review() version arg can be skipped."""
+    data = setup_task_status_workflow_db_tests
+    data["test_task3"].status = data["status_wip"]
+
+    # request a review
+    reviews = data["test_task3"].request_review()  # Version arg is skipped
+    assert len(reviews) == 2
+
+
+def test_request_review_version_arg_is_none(setup_task_status_workflow_db_tests):
+    """request_review() version arg can be None."""
+    data = setup_task_status_workflow_db_tests
+    data["test_task3"].status = data["status_wip"]
+
+    # request a review
+    reviews = data["test_task3"].request_review(version=None)
+    assert len(reviews) == 2
+
+
+def test_request_review_version_arg_is_not_a_version_instance(
+    setup_task_status_workflow_db_tests,
+):
+    """request_review() version arg is not a Version instance raises TypeError."""
+    data = setup_task_status_workflow_db_tests
+    data["test_task3"].status = data["status_wip"]
+
+    # request a review
+    with pytest.raises(TypeError) as cm:
+        _ = data["test_task3"].request_review(version="Not a version instance")
+
+    assert str(cm.value) == (
+        "Review.version should be a Version instance, "
+        "not str: 'Not a version instance'"
+    )
+
+
+def test_request_review_version_arg_is_not_related_to_the_task(
+    setup_task_status_workflow_db_tests,
+):
+    """request_review() version arg is not related to the Task raises ValueError."""
+    data = setup_task_status_workflow_db_tests
+    data["test_task3"].status = data["status_wip"]
+    version = Version(task=data["test_task2"])
+
+    # request a review
+    with pytest.raises(ValueError) as cm:
+        _ = data["test_task3"].request_review(version=version)
+
+    assert str(cm.value) == (
+        f"Review.version should be a Version instance related to this Task: {version}"
+    )
+
+
+def test_request_review_accepts_version_instance(setup_task_status_workflow_db_tests):
+    """request_review() a Version instance can be passed to it."""
+    data = setup_task_status_workflow_db_tests
+    data["test_task3"].status = data["status_wip"]
+    version = Version(task=data["test_task3"])
+
+    # request a review
+    reviews = data["test_task3"].request_review(version=version)
+    assert reviews[0].version == version
+    assert reviews[1].version == version

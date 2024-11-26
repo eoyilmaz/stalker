@@ -78,11 +78,13 @@ def test_working_hours_attribute_is_set_to_a_dictionary_of_other_formatted_data(
         "not str: 'properly valued'"
     )
 
+
 @pytest.mark.parametrize(
-    "test_key, test_value", [
+    "test_key, test_value",
+    [
         ["sun", [[-10, 1000]]],
         ["sat", [[900, 1080], [1090, 1500]]],
-    ]
+    ],
 )
 def test_working_hours_argument_data_is_not_in_correct_range1(test_key, test_value):
     """ValueError raised if the time values are not correct in the working_hours arg."""
@@ -99,10 +101,11 @@ def test_working_hours_argument_data_is_not_in_correct_range1(test_key, test_val
 
 
 @pytest.mark.parametrize(
-    "test_key, test_value", [
+    "test_key, test_value",
+    [
         ["sun", [[-10, 1000]]],
         ["sat", [[900, 1080], [1090, 1500]]],
-    ]
+    ],
 )
 def test_working_hours_attribute_data_is_not_in_correct_range1(test_key, test_value):
     """ValueError raised if the times are not correct in the working_hours attr."""
@@ -167,35 +170,30 @@ def test_working_hours_can_be_string_indexed_with_the_date_short_name():
 
 
 @pytest.mark.parametrize(
-    "test_key, test_value, error_type", [
+    "test_key, test_value, error_type",
+    [
         [0, "not a proper data", TypeError],
         ["sun", "not a proper data", TypeError],
-
         [0, ["no proper data"], TypeError],
         ["sun", ["no proper data"], TypeError],
-
         [0, [["no proper data"]], ValueError],
         ["sun", [["no proper data"]], ValueError],
-
         [0, [[3]], ValueError],
         [2, [[2, "a"]], TypeError],
         [1, [[20, 10], ["a", 300]], TypeError],
         [5, [[323, 1344], [2, "d"]], TypeError],
         [0, [[4, 100, 3]], ValueError],
-
         ["mon", [[3]], ValueError],
         ["mon", [[2, "a"]], TypeError],
         ["tue", [[20, 10], ["a", 300]], TypeError],
         ["fri", [[323, 1344], [2, "d"]], TypeError],
         ["sat", [[4, 100, 3]], ValueError],
-
         ["sun", [[-10, 100]], ValueError],
         ["sat", [[0, 1800]], ValueError],
-
         [7, [[32, 23], [233, 324]], IndexError],
         [7, [[32, 23], [233, 324]], IndexError],
         ["zon", [[32, 23], [233, 324]], KeyError],
-    ]
+    ],
 )
 def test___setitem__checks_the_given_data(test_key, test_value, error_type):
     """__setitem__ checks the given data format."""
@@ -214,7 +212,7 @@ def test___setitem__checks_the_given_data(test_key, test_value, error_type):
             "two integers and the range of integers should be between 0-1440, "
             f"not {test_value.__class__.__name__}: '{test_value}'"
         ),
-        IndexError:  "list index out of range",
+        IndexError: "list index out of range",
         KeyError: (
             "\"WorkingHours accepts only ['mon', 'tue', 'wed', 'thu', "
             "'fri', 'sat', 'sun'] as key, not 'zon'\""
@@ -426,7 +424,8 @@ def test_weekly_working_days_is_a_read_only_attribute():
 
 
 @pytest.mark.parametrize(
-    "test_data, expected_result", [
+    "test_data, expected_result",
+    [
         [
             {
                 "mon": [[1, 2]],
@@ -437,7 +436,7 @@ def test_weekly_working_days_is_a_read_only_attribute():
                 "sat": [],
                 "sun": [],
             },
-            5
+            5,
         ],
         [
             {
@@ -449,7 +448,7 @@ def test_weekly_working_days_is_a_read_only_attribute():
                 "sat": [[11, 12]],
                 "sun": [],
             },
-            6
+            6,
         ],
         [
             {
@@ -461,9 +460,9 @@ def test_weekly_working_days_is_a_read_only_attribute():
                 "sat": [[11, 12]],
                 "sun": [[13, 14]],
             },
-            7
+            7,
         ],
-    ]
+    ],
 )
 def test_weekly_working_days_is_calculated_correctly(test_data, expected_result):
     """weekly working days are calculated correctly."""
@@ -491,9 +490,9 @@ def test_yearly_working_days_is_a_read_only_attribute():
     assert str(cm.value) == error_message
 
 
-
 @pytest.mark.parametrize(
-    "test_data, expected_result", [
+    "test_data, expected_result",
+    [
         [
             {
                 "mon": [[1, 2]],
@@ -504,7 +503,7 @@ def test_yearly_working_days_is_a_read_only_attribute():
                 "sat": [],
                 "sun": [],
             },
-            261
+            261,
         ],
         [
             {
@@ -516,7 +515,7 @@ def test_yearly_working_days_is_a_read_only_attribute():
                 "sat": [[11, 12]],
                 "sun": [],
             },
-            313
+            313,
         ],
         [
             {
@@ -528,9 +527,9 @@ def test_yearly_working_days_is_a_read_only_attribute():
                 "sat": [[11, 12]],
                 "sun": [[13, 14]],
             },
-            365
-        ]
-    ]
+            365,
+        ],
+    ],
 )
 def test_yearly_working_days_is_calculated_correctly(test_data, expected_result):
     """yearly_working_days is calculated correctly."""

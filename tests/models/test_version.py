@@ -19,6 +19,7 @@ from stalker import (
     Structure,
     Task,
     Type,
+    User,
     Version,
     defaults,
     log,
@@ -50,22 +51,23 @@ def setup_version_db_tests(setup_postgresql_db):
     """Set up the tests for the Version class with a DB."""
     data = dict()
     data["patcher"] = PlatformPatcher()
-    # statuses
-    data["test_status1"] = Status(name="Status1", code="STS1")
-    data["test_status2"] = Status(name="Status2", code="STS2")
-    data["test_status3"] = Status(name="Status3", code="STS3")
-    data["test_status4"] = Status(name="Status4", code="STS4")
-    data["test_status5"] = Status(name="Status5", code="STS5")
-    DBSession.add_all(
-        [
-            data["test_status1"],
-            data["test_status2"],
-            data["test_status3"],
-            data["test_status4"],
-            data["test_status5"],
-        ]
+
+    # Users
+    data["test_user1"] = User(
+        name="Test User 1",
+        login="tuser1",
+        email="tuser1@test.com",
+        password="secret",
     )
-    DBSession.commit()
+    data["test_user2"] = User(
+        name="Test User 2",
+        login="tuser2",
+        email="tuser2@test.com",
+        password="secret",
+    )
+
+    # statuses
+    data["status_wip"] = Status.query.filter_by(code="WIP").first()
 
     # repository
     data["test_repo"] = Repository(
@@ -1649,11 +1651,42 @@ def test_walk_inputs_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
 #     data["fail"]()
 
 
+def test_reviews_attribute_is_a_list_of_reviews(setup_version_db_tests):
+    """Version.reviews attribute is filled with Review instances."""
+    data = setup_version_db_tests
+    data["test_task1"].status = data["status_wip"]
+    data["test_task1"].responsible = [data["test_user1"], data["test_user2"]]
+    version = Version(task=data["test_task1"])
+
+    # request a review
+    reviews = data["test_task1"].request_review(version=version)
+    assert reviews[0].version == version
+    assert reviews[1].version == version
+    assert isinstance(version.reviews, list)
+    assert len(version.reviews) == 2
+    assert version.reviews == reviews
+
+
 @pytest.fixture(scope="function")
 def setup_version_tests():
     """Set up non-DB related tests of Version class."""
     data = dict()
     data["patcher"] = PlatformPatcher()
+
+    # users
+    # test users
+    data["test_user1"] = User(
+        name="Test User 1",
+        login="tuser1",
+        email="tuser1@test.com",
+        password="secret",
+    )
+    data["test_user2"] = User(
+        name="Test User 2",
+        login="tuser2",
+        email="tuser2@test.com",
+        password="secret",
+    )
 
     # statuses
     data["test_status1"] = Status(name="Status1", code="STS1")
@@ -1910,3 +1943,48 @@ def test__hash__is_working_as_expected(setup_version_tests):
     result = hash(v)
     assert isinstance(result, int)
     assert result == v.__hash__()
+
+
+def test_request_review_method_calls_task_request_review_method(
+    setup_version_tests, monkeypatch
+):
+    """request_review() calls Task.request_review() method."""
+    data = setup_version_tests
+    called = []
+
+    def patched_request_review(self, version=None):
+        """Patch the request review method."""
+        called.append(version)
+
+    data["test_task2"].responsible = [
+        data["test_user1"],
+        data["test_user2"],
+    ]
+
+    monkeypatch.setattr(
+        "stalker.models.version.Task.request_review", patched_request_review
+    )
+    v = Version(task=data["test_task2"])
+
+    assert len(called) == 0
+    _ = v.request_review()
+    assert len(called) == 1
+    assert called[0] == v
+
+
+def test_request_review_method_returns_reviews(setup_version_db_tests):
+    """request_review() returns Reviews."""
+    data = setup_version_db_tests
+    task = data["test_task1"]
+    task.responsible = [
+        data["test_user1"],
+        data["test_user2"],
+    ]
+    task.status = data["status_wip"]
+    v = Version(task=task)
+    reviews = v.request_review()
+    assert len(reviews) == 2
+    from stalker.models.review import Review
+
+    assert isinstance(reviews[0], Review)
+    assert isinstance(reviews[1], Review)
