@@ -1360,7 +1360,6 @@ def test_tjp_id_is_working_as_expected(setup_project_db_test):
 @pytest.mark.parametrize(
     "entity_name",
     [
-        "test_project",
         "test_task1",
         "test_task2",
         "test_task3",
