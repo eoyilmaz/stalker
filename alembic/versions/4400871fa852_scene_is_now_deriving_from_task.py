@@ -21,7 +21,7 @@ def upgrade():
     """Upgrade the tables."""
     # Update the Scenes.id to be a foreign key to Tasks.id
     op.drop_constraint("Scenes_id_fkey", "Scenes", type_="foreignkey")
-    op.create_foreign_key("Scenes_id_fkey", "Scenes", "Tasks", "id", "id")
+    op.create_foreign_key("Scenes_id_fkey", "Scenes", "Tasks", ["id"], ["id"])
 
     # Create a StatusList for Scenes
     # Create a SimpleEntity for the StatusList
@@ -159,4 +159,4 @@ def downgrade():
 
     # Update the Scenes.id to be a foreign key to Entities.id
     op.drop_constraint("Scenes_id_fkey", "Scenes", type_="foreignkey")
-    op.create_foreign_key("Scenes_id_fkey", "Scenes", "Entities", "id", "id")
+    op.create_foreign_key("Scenes_id_fkey", "Scenes", "Entities", ["id"], ["id"])
