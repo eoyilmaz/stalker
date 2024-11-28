@@ -780,7 +780,7 @@ def test_summary_argument_is_not_a_string(setup_ticket_tests):
         "Ticket.project should be an instance of "
         "stalker.models.project.Project, not dict: "
         "'{'project': <Test Project 1 (Project)>, "
-        "'links': [<TEST_PROJECT_1_Test_Asset_Modeling_of_Asset_1_Main_v001 "
+        "'links': [<TEST_PROJECT_1_Test_Asset_Modeling_of_Asset_1_v001 "
         "(Version)>], 'summary': ['not a string instance'], 'description': "
         "'This is the long description', 'priority': 'TRIVIAL', 'reported_by': "
         "<Test User ('testuser1') (User)>}'"

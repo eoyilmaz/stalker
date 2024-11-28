@@ -15,9 +15,8 @@ class Variant(Task):
     between different variants and being able to review them individually.
 
     You see, in previous versions of Stalker, the variants were handled as a
-    part of the Version instances with a str attribute called `variant_name`.
-    The down side of that design was not being able to distinguish any reviews
-    per variant.
+    part of the Version instances with a str attribute. The down side of that
+    design was not being able to distinguish any reviews per variant.
 
     So, when a Model task is approved, all its variant approved all together,
     even if one of the variants were still getting worked on.

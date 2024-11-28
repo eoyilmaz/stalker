@@ -61,12 +61,6 @@ class Version(Link, DAGMixin):
            $REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
 
     Args:
-        variant_name (str): A short string holding the current variant name. Variants in
-            Stalker are used for creating variants versions. Versions with the same
-            ``variant_name`` (of the same Task) are numbered together. It can be any
-            alphanumeric value (a-zA-Z0-9_). The default is the string "Main". When
-            skipped it will use the default value. It cannot start with a number. It
-            cannot have white spaces.
         inputs (List[Link]): A list o :class:`.Link` instances, holding the inputs of
             the current version. It could be a texture for a Maya file or an image
             sequence for Nuke, or anything those you can think as the input for the
@@ -104,12 +98,6 @@ class Version(Link, DAGMixin):
         back_populates="versions",
     )
 
-    variant_name: Mapped[Optional[str]] = mapped_column(
-        String(256),
-        default=defaults.version_variant_name,
-        doc="""Variants in Versions are used for representing different variants of the
-        same version.""",
-    )
 
     version_number: Mapped[int] = mapped_column(
         default=1,
@@ -149,7 +137,6 @@ class Version(Link, DAGMixin):
     def __init__(
         self,
         task: Optional[Task] = None,
-        variant_name: str = defaults.version_variant_name,
         inputs: Optional[List["Version"]] = None,
         outputs: Optional[List["Version"]] = None,
         parent: Optional["Version"] = None,
@@ -163,7 +150,6 @@ class Version(Link, DAGMixin):
 
         DAGMixin.__init__(self, parent=parent)
 
-        self.variant_name = variant_name
         self.task = task
         self.version_number = None
         if inputs is None:
@@ -194,62 +180,6 @@ class Version(Link, DAGMixin):
             )
         )
 
-    @classmethod
-    def _format_variant_name(cls, variant_name: str) -> str:
-        """Format the given variant_name value.
-
-        Args:
-            variant_name (str): The variant name value to be formatted.
-
-        Returns:
-            str: The formatted variant name value.
-        """
-        # remove unnecessary characters
-        variant_name = re.sub(r"([^a-zA-Z0-9\s_\-@]+)", r"", variant_name).strip()
-
-        # replace empty spaces with underscores
-        variant_name = re.sub(r"[\s]+", "_", variant_name)
-
-        # replace multiple underscores with only one
-        # variant_name = re.sub(r'([_]+)', r'_', variant_name)
-
-        # remove any non allowed characters from the start
-        variant_name = re.sub(r"^[^a-zA-Z0-9]+", r"", variant_name)
-
-        return variant_name
-
-    @validates("variant_name")
-    def _validate_variant_name(self, key: str, variant_name: str) -> str:
-        """Validate the given variant_name value.
-
-        Args:
-            key (str): The name of the validated column.
-            variant_name (str): The variant name value to be validated.
-
-        Raises:
-            TypeError: If the variant name value is not a string.
-            ValueError: If the variant name value is an empty string.
-
-        Returns:
-            str: The validated variant name value.
-        """
-        if not isinstance(variant_name, str):
-            raise TypeError(
-                "{}.variant_name should be a string, not {}: '{}'".format(
-                    self.__class__.__name__,
-                    variant_name.__class__.__name__,
-                    variant_name,
-                )
-            )
-
-        variant_name = self._format_variant_name(variant_name)
-
-        if variant_name == "":
-            raise ValueError(
-                f"{self.__class__.__name__}.variant_name cannot be an empty string"
-            )
-
-        return variant_name
 
     @property
     def latest_version(self) -> "Version":
@@ -264,7 +194,6 @@ class Version(Link, DAGMixin):
             with DBSession.no_autoflush:
                 latest_version = (
                     Version.query.filter(Version.task == self.task)
-                    .filter(Version.variant_name == self.variant_name)
                     .order_by(Version.version_number.desc())
                     .first()
                 )
@@ -506,7 +435,6 @@ class Version(Link, DAGMixin):
         """
         return (
             Version.query.filter_by(task=self.task)
-            .filter_by(variant_name=self.variant_name)
             .filter_by(is_published=True)
             .order_by(Version.version_number.desc())
             .first()
@@ -547,14 +475,12 @@ class Version(Link, DAGMixin):
 
         Returns:
             bool: True if the other object is equal to this one as an Entity, is a
-                Version instance, has the same task, same variant_name and same
-                version_number.
+                Version instance, has the same task and same version_number.
         """
         return (
             super(Version, self).__eq__(other)
             and isinstance(other, Version)
             and self.task == other.task
-            and self.variant_name == other.variant_name
             and self.version_number == other.version_number
         )
 
@@ -605,11 +531,8 @@ class Version(Link, DAGMixin):
         Returns:
             str: The nice name.
         """
-        naming_parents = self.naming_parents
         return self._format_nice_name(
-            "{}_{}".format(
-                "_".join(map(lambda x: x.nice_name, naming_parents)), self.variant_name
-            )
+            "_".join(map(lambda x: x.nice_name, self.naming_parents))
         )
 
     def walk_inputs(self, method: int = 0) -> Generator[None, "Version", None]:

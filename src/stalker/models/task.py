@@ -367,9 +367,13 @@ class TimeLog(Entity, DateRangeMixin):
                         break
 
             if clashing_time_log_data:
+                import tzlocal
+
+                local_tz = tzlocal.get_localzone()
                 raise OverBookedError(
                     "The resource has another TimeLog between {} and {}".format(
-                        clashing_time_log_data[0], clashing_time_log_data[1]
+                        clashing_time_log_data[0].astimezone(local_tz),
+                        clashing_time_log_data[1].astimezone(local_tz),
                     )
                 )
 

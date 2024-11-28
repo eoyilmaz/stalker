@@ -33,19 +33,6 @@ logger = logging.getLogger("stalker.models.version.Version")
 logger.setLevel(log.logging_level)
 
 
-VARIANT_NAME_TEST_VALUES = [
-    ["Variant Name", "Variant_Name"],
-    ["VariantName", "VariantName"],
-    ["variant name", "variant_name"],
-    ["  variant_name", "variant_name"],
-    ["variant_name   ", "variant_name"],
-    ["   variant   name   ", "variant_name"],
-    ["VariantName", "VariantName"],
-    ["Variant___Name", "Variant___Name"],
-    ["Variant@Name", "Variant@Name"],
-]
-
-
 @pytest.fixture(scope="function")
 def setup_version_db_tests(setup_postgresql_db):
     """Set up the tests for the Version class with a DB."""
@@ -168,7 +155,6 @@ def setup_version_db_tests(setup_postgresql_db):
 
     # now create a version for the Task
     data["kwargs"] = {
-        "variant_name": "TestVariant",
         "inputs": [data["test_input_link1"], data["test_input_link2"]],
         "outputs": [data["test_output_link1"], data["test_output_link2"]],
         "task": data["test_task1"],
@@ -190,117 +176,6 @@ def setup_version_db_tests(setup_postgresql_db):
 def test___auto_name__class_attribute_is_set_to_true():
     """__auto_name__ class attribute is set to True for Version class."""
     assert Version.__auto_name__ is True
-
-
-def test_variant_name_argument_is_skipped_defaults_to_default_value(
-    setup_version_db_tests,
-):
-    """variant_name arg is skipped variant_name attr equals defaults.DEFAULT_VERSION_VARIANT_NAME."""
-    data = setup_version_db_tests
-    data["kwargs"].pop("variant_name")
-    new_version = Version(**data["kwargs"])
-    assert new_version.variant_name == defaults.version_variant_name
-
-
-def test_variant_name_argument_is_none(setup_version_db_tests):
-    """TypeError raised if the variant_name argument is None."""
-    data = setup_version_db_tests
-    data["kwargs"]["variant_name"] = None
-    with pytest.raises(TypeError) as cm:
-        Version(**data["kwargs"])
-    assert (
-        str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
-    )
-
-
-def test_variant_name_attribute_is_none(setup_version_db_tests):
-    """TypeError raised if the variant_name attribute is set to None."""
-    data = setup_version_db_tests
-    with pytest.raises(TypeError) as cm:
-        data["test_version"].variant_name = None
-
-    assert (
-        str(cm.value) == "Version.variant_name should be a string, not NoneType: 'None'"
-    )
-
-
-def test_variant_name_argument_is_empty_string(setup_version_db_tests):
-    """ValueError raised if the variant_name arg is given as an empty string."""
-    data = setup_version_db_tests
-    data["kwargs"]["variant_name"] = ""
-    with pytest.raises(ValueError) as cm:
-        Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name cannot be an empty string"
-
-
-def test_variant_name_attribute_is_empty_string(setup_version_db_tests):
-    """ValueError raised if the variant_name attribute is set to an empty string."""
-    data = setup_version_db_tests
-    with pytest.raises(ValueError) as cm:
-        data["test_version"].variant_name = ""
-    assert str(cm.value) == "Version.variant_name cannot be an empty string"
-
-
-@pytest.mark.parametrize("test_value", [[1, 1.2, ["a list"], {"a": "dict"}]])
-def test_variant_name_argument_is_not_a_string(setup_version_db_tests, test_value):
-    """TypeError raised if the given variant_name argument is not a string."""
-    data = setup_version_db_tests
-    data["kwargs"]["variant_name"] = test_value
-    with pytest.raises(TypeError) as cm:
-        Version(**data["kwargs"])
-
-    assert str(cm.value) == (
-        "Version.variant_name should be a string, not {}: '{}'".format(
-            test_value.__class__.__name__,
-            test_value,
-        )
-    )
-
-
-@pytest.mark.parametrize("test_value", [1, 1.2, ["a list"], {"a": "dict"}])
-def test_variant_name_attribute_is_not_a_string(test_value, setup_version_db_tests):
-    """TypeError raised if the variant_name attr is set to a value other than a str."""
-    data = setup_version_db_tests
-    with pytest.raises(TypeError):
-        data["test_version"].variant_name = test_value
-
-
-def test_variant_name_argument_is_formatted_to_empty_string(setup_version_db_tests):
-    """ValueError raised if the variant_name arg is formatted to an empty str."""
-    data = setup_version_db_tests
-    data["kwargs"]["variant_name"] = "##$½#$"
-    with pytest.raises(ValueError) as cm:
-        _ = Version(**data["kwargs"])
-    assert str(cm.value) == "Version.variant_name cannot be an empty string"
-
-
-def test_variant_name_attribute_is_formatted_to_empty_string(setup_version_db_tests):
-    """ValueError raised if the variant_name arg is formatted to an empty str."""
-    data = setup_version_db_tests
-    with pytest.raises(ValueError) as cm:
-        data["test_version"].variant_name = "##$½#$"
-    assert str(cm.value) == "Version.variant_name cannot be an empty string"
-
-
-@pytest.mark.parametrize("variant_name, expected_result", VARIANT_NAME_TEST_VALUES)
-def test_variant_name_argument_is_formatted_correctly(
-    setup_version_db_tests, variant_name, expected_result
-):
-    """variant_name argument value is formatted correctly."""
-    data = setup_version_db_tests
-    data["kwargs"]["variant_name"] = variant_name
-    new_version = Version(**data["kwargs"])
-    assert new_version.variant_name == expected_result
-
-
-@pytest.mark.parametrize("variant_name, expected_result", VARIANT_NAME_TEST_VALUES)
-def test_variant_name_attribute_is_formatted_correctly(
-    setup_version_db_tests, variant_name, expected_result
-):
-    """variant_name attribute value is formatted correctly."""
-    data = setup_version_db_tests
-    data["test_version"].variant_name = variant_name
-    assert data["test_version"].variant_name == expected_result
 
 
 def test_task_argument_is_skipped(setup_version_db_tests):
@@ -375,8 +250,6 @@ def test_version_number_attribute_is_automatically_generated(setup_version_db_te
     DBSession.commit()
 
     assert data["test_version"].task == new_version.task
-    assert data["test_version"].variant_name == new_version.variant_name
-
     assert new_version.version_number == 2
 
     new_version = Version(**data["kwargs"])
@@ -384,8 +257,6 @@ def test_version_number_attribute_is_automatically_generated(setup_version_db_te
     DBSession.commit()
 
     assert data["test_version"].task == new_version.task
-    assert data["test_version"].variant_name == new_version.variant_name
-
     assert new_version.version_number == 3
 
     new_version = Version(**data["kwargs"])
@@ -393,8 +264,6 @@ def test_version_number_attribute_is_automatically_generated(setup_version_db_te
     DBSession.commit()
 
     assert data["test_version"].task == new_version.task
-    assert data["test_version"].variant_name == new_version.variant_name
-
     assert new_version.version_number == 4
 
 
@@ -675,8 +544,8 @@ def test_parent_attribute_will_not_allow_circular_dependencies(setup_version_db_
         data["test_version"].parent = version1
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_TestVariant_v001 (Version)> (Version) and "
-        "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
+        str(cm.value) == "<tp_SH001_Task1_v001 (Version)> (Version) and "
+        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
 
@@ -699,8 +568,8 @@ def test_parent_attribute_will_not_allow_deeper_circular_dependencies(
         data["test_version"].parent = version2
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_TestVariant_v001 (Version)> (Version) and "
-        "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
+        str(cm.value) == "<tp_SH001_Task1_v001 (Version)> (Version) and "
+        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
 
@@ -781,8 +650,8 @@ def test_children_attribute_will_not_allow_circular_dependencies(
         new_version1.children.append(new_version2)
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_TestVariant_v003 (Version)> (Version) and "
-        "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
+        str(cm.value) == "<tp_SH001_Task1_v003 (Version)> (Version) and "
+        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
 
@@ -811,8 +680,8 @@ def test_children_attribute_will_not_allow_deeper_circular_dependencies(
         new_version1.children.append(new_version3)
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_TestVariant_v004 (Version)> (Version) and "
-        "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
+        str(cm.value) == "<tp_SH001_Task1_v004 (Version)> (Version) and "
+        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
 
@@ -873,7 +742,7 @@ def test_update_paths_will_render_the_appropriate_template_from_the_related_proj
         target_entity_type="Task",
         path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
     data["test_project"].structure.templates.append(ft)
@@ -884,7 +753,7 @@ def test_update_paths_will_render_the_appropriate_template_from_the_related_proj
     assert new_version1.path == "tp/SH001/Task1"
 
     new_version1.extension = ".ma"
-    assert new_version1.filename == "Task1_TestVariant_v002.ma"
+    assert new_version1.filename == "Task1_v002.ma"
 
 
 def test_update_paths_will_preserve_extension(setup_version_db_tests):
@@ -896,7 +765,7 @@ def test_update_paths_will_preserve_extension(setup_version_db_tests):
         target_entity_type="Task",
         path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
     data["test_project"].structure.templates.append(ft)
@@ -908,14 +777,14 @@ def test_update_paths_will_preserve_extension(setup_version_db_tests):
 
     extension = ".ma"
     new_version1.extension = extension
-    assert new_version1.filename == "Task1_TestVariant_v002.ma"
+    assert new_version1.filename == "Task1_v002.ma"
 
     # rename the task and update the paths
     data["test_task1"].name = "Task2"
 
     # now call update_paths and expect the extension to be preserved
     new_version1.update_paths()
-    assert new_version1.filename == "Task2_TestVariant_v002.ma"
+    assert new_version1.filename == "Task2_v002.ma"
     assert new_version1.extension == extension
 
 
@@ -1039,15 +908,13 @@ def test_absolute_path_works_as_expected(setup_version_db_tests):
         "{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/"
         "{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
     data["test_project"].structure.templates.append(ft)
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
     DBSession.commit()
-
-    new_version1.variant_name = "TestVariant@BBOX"
 
     new_version1.update_paths()
     new_version1.extension = ".ma"
@@ -1067,7 +934,7 @@ def test_absolute_full_path_works_as_expected(setup_version_db_tests):
         "{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/"
         "{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
     data["test_project"].structure.templates.append(ft)
@@ -1075,16 +942,11 @@ def test_absolute_full_path_works_as_expected(setup_version_db_tests):
     DBSession.add(new_version1)
     DBSession.commit()
 
-    new_version1.variant_name = "TestVariant@BBOX"
-
     new_version1.update_paths()
     new_version1.extension = ".ma"
     assert new_version1.extension == ".ma"
 
-    assert (
-        new_version1.absolute_full_path
-        == "/mnt/T/tp/SH001/Task1/Task1_TestVariant@BBOX_v002.ma"
-    )
+    assert new_version1.absolute_full_path == "/mnt/T/tp/SH001/Task1/Task1_v002.ma"
 
 
 def test_latest_published_version_is_read_only(setup_version_db_tests):
@@ -1533,15 +1395,14 @@ def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
     DBSession.add_all([task1, task2, task3])
     DBSession.commit()
 
-    version1 = Version(task=task3, variant_name="Variant1@Main")
+    version1 = Version(task=task3)
     DBSession.add(version1)
     DBSession.commit()
 
-    assert version1.nice_name == "{}_{}_{}_{}".format(
+    assert version1.nice_name == "{}_{}_{}".format(
         task1.nice_name,
         task2.nice_name,
         task3.nice_name,
-        version1.variant_name,
     )
 
     # for an asset version
@@ -1551,7 +1412,7 @@ def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
     DBSession.commit()
 
     version2 = Version(task=asset1)
-    assert version2.nice_name == "{}_{}".format(asset1.nice_name, version2.variant_name)
+    assert version2.nice_name == "{}".format(asset1.nice_name)
 
     # for a version of a task of a shot
     shot2 = Shot(
@@ -1571,10 +1432,9 @@ def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
 
     version3 = Version(task=task4)
 
-    assert version3.nice_name == "{}_{}_{}".format(
+    assert version3.nice_name == "{}_{}".format(
         shot2.nice_name,
         task4.nice_name,
-        version3.variant_name,
     )
 
     # for an asset of a shot
@@ -1583,13 +1443,13 @@ def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
     DBSession.commit()
 
     version4 = Version(task=asset2)
-    assert version4.nice_name == "{}_{}".format(asset2.nice_name, version4.variant_name)
+    assert version4.nice_name == "{}".format(asset2.nice_name)
 
 
 def test_string_representation_is_a_little_bit_meaningful(setup_version_db_tests):
     """__str__ or __repr__ result is meaningful."""
     data = setup_version_db_tests
-    assert "<tp_SH001_Task1_TestVariant_v001 (Version)>" == f'{data["test_version"]}'
+    assert "<tp_SH001_Task1_v001 (Version)>" == f'{data["test_version"]}'
 
 
 def test_walk_hierarchy_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
@@ -1843,7 +1703,6 @@ def setup_version_tests():
 
     # now create a version for the Task
     data["kwargs"] = {
-        "variant_name": "TestVariant",
         "inputs": [data["test_input_link1"], data["test_input_link2"]],
         "outputs": [data["test_output_link1"], data["test_output_link2"]],
         "task": data["test_task1"],
@@ -1874,8 +1733,8 @@ def test_children_attribute_will_not_allow_circular_dependencies_2(
         new_version1.children.append(new_version2)
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_TestVariant_v003 (Version)> (Version) and "
-        "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
+        str(cm.value) == "<tp_SH001_Task1_v003 (Version)> (Version) and "
+        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
 
@@ -1898,8 +1757,8 @@ def test_children_attribute_will_not_allow_deeper_circular_dependencies_2(
         new_version1.children.append(new_version3)
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_TestVariant_v004 (Version)> (Version) and "
-        "<tp_SH001_Task1_TestVariant_v002 (Version)> (Version) creates a "
+        str(cm.value) == "<tp_SH001_Task1_v004 (Version)> (Version) and "
+        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
         'circular dependency in their "children" attribute'
     )
 
@@ -1988,3 +1847,9 @@ def test_request_review_method_returns_reviews(setup_version_db_tests):
 
     assert isinstance(reviews[0], Review)
     assert isinstance(reviews[1], Review)
+
+
+def test_variant_name_attr_does_not_exist(setup_version_tests):
+    """Version.variant_name does not exist anymore."""
+    data = setup_version_tests
+    assert hasattr(data["test_version"], "variant_name") is False
