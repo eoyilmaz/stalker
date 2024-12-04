@@ -3758,7 +3758,7 @@ def test_persistence_of_structure(setup_postgresql_db):
         name="Character Asset Template",
         description="This is the template for character assets",
         path="Assets/{{asset_type.name}}/{{pipeline_step.code}}",
-        filename="{{asset.name}}_{{version.variant_name}}_{{asset_type.name}}_\
+        filename="{{asset.name}}_{{asset_type.name}}_\
         v{{version.version_number}}",
         target_entity_type="Asset",
         type=v_type,
@@ -4691,7 +4691,6 @@ def test_persistence_of_version(setup_postgresql_db):
     test_version = Version(
         name="version for task modeling",
         task=test_task,
-        variant_name="MAIN",
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma",
         outputs=[
@@ -4712,7 +4711,6 @@ def test_persistence_of_version(setup_postgresql_db):
     test_version_2 = Version(
         name="version for task modeling",
         task=test_task,
-        variant_name="MAIN",
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v002.ma",
         inputs=[test_version],
@@ -4732,7 +4730,6 @@ def test_persistence_of_version(setup_postgresql_db):
     is_published = test_version.is_published
     full_path = test_version.full_path
     tags = test_version.tags
-    variant_name = test_version.variant_name
     #        tickets = test_version.tickets
     type_ = test_version.type
     updated_by = test_version.updated_by
@@ -4756,7 +4753,6 @@ def test_persistence_of_version(setup_postgresql_db):
     assert test_version_db.is_published == is_published
     assert test_version_db.full_path == full_path
     assert test_version_db.tags == tags
-    assert test_version_db.variant_name == variant_name
     assert test_version_db.type == type_
     assert test_version_db.updated_by == updated_by
     assert test_version_db.version_number == version_number
@@ -4774,7 +4770,6 @@ def test_persistence_of_version(setup_postgresql_db):
     test_version_3 = Version(
         name="version for task modeling",
         task=test_task,
-        variant_name="MAIN",
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v003.ma",
     )
@@ -4801,9 +4796,7 @@ def test_persistence_of_version(setup_postgresql_db):
 
     # create a new version append it to version_3.children and then delete
     # version_3
-    test_version_4 = Version(
-        name="version for task modeling", task=test_task, variant_name="MAIN"
-    )
+    test_version_4 = Version(name="version for task modeling", task=test_task)
     test_version_3.children.append(test_version_4)
     DBSession.save(test_version_4)
     assert test_version_3.children == [test_version_4]
@@ -4840,7 +4833,7 @@ def test_persistence_of_version(setup_postgresql_db):
     assert test_version_4_db.parent is None
 
     # create a new version and assign it as a child of version_5
-    test_version_5 = Version(task=test_task, variant_name="MAIN")
+    test_version_5 = Version(task=test_task)
     DBSession.save(test_version_5)
     test_version_4.children = [test_version_5]
     DBSession.commit()

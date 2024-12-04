@@ -359,9 +359,10 @@ def test_overbooked_error_1(setup_time_log_db_tests):
     with pytest.raises(OverBookedError) as cm:
         TimeLog(**kwargs)
 
+    local_tz = tzlocal.get_localzone()
     assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
-        time_log1.start,
-        time_log1.end,
+        time_log1.start.astimezone(local_tz),
+        time_log1.end.astimezone(local_tz),
     )
 
 
@@ -388,9 +389,10 @@ def test_overbooked_error_2(setup_time_log_db_tests):
     with pytest.raises(OverBookedError) as cm:
         TimeLog(**kwargs)
 
+    local_tz = tzlocal.get_localzone()
     assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
-        time_log1.start,
-        time_log1.end,
+        time_log1.start.astimezone(local_tz),
+        time_log1.end.astimezone(local_tz),
     )
 
 
@@ -417,9 +419,10 @@ def test_overbooked_error_3(setup_time_log_db_tests):
     with pytest.raises(OverBookedError) as cm:
         TimeLog(**kwargs)
 
+    local_tz = tzlocal.get_localzone()
     assert str(cm.value) == "The resource has another TimeLog between {} and {}".format(
-        time_log1.start,
-        time_log1.end,
+        time_log1.start.astimezone(local_tz),
+        time_log1.end.astimezone(local_tz),
     )
 
 

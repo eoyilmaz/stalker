@@ -6,17 +6,32 @@ Stalker Changes
 =====
 
 * `Version.take_name` has been renamed to `Version.variant_name` to follow the industry
-  standard.
-* `Task.depends` renmaed to `Task.depends_on`.
+  standard (and then removed it completely as we now have `Variant` class for this).
+* `Task.depends` renamed to `Task.depends_on`.
 * `TaskDependency.task_depends_to` renamed to `TaskDependency.task_depends_on`.
+* Modernised Stalker as a Python project. It is now fully PEP 517 compliant.
 * Stalker now supports Python versions from 3.8 to 3.13.
+* Stalker is now SQLAlchemy 2.x compliant.
+* Stalker is now fully type hinted.
 * Added GitHub actions for CI/CD practices.
 * Updated validation messages to make them more consistently displaying the current
   type and the value of the validated attribute.
 * Added Makefile workflow to help creating a virtualenv, building, installing, releasing
   etc. actions much more easier.
-* Modernised Stalker as a Python project. It is now fully PEP 517 compliant.
+* Added `tox` config to run the test with Python 3.8 to 3.13.
+* Increased test coverage to 99.71%.
+* Updated documentation theme to `furo`.
 * Renamed OSX to macOS anywhere it is mentioned.
+* `Scene` is now deriving from `Task`.
+* `Shot.sequences` is now `Shot.sequences` and it is many-to-one.
+* `Shot.scenes` is now `Shot.scene` and it is many-to-one.
+* Added the `Variant` class to allow variants to be approved and managed individually.
+* Added `Review.version` attribute to relate a `Version` instance to the review.
+* Removed the `Version.variant_name` attribute. The migration alembic script will create
+  `Variant` instances for each `Version.variant_name` under the container `Task` to hold
+  the information.
+* `Version._template_variables()` now finds the related `Asset`, `Shot` and `Sequence`
+  values and passes them in the returned dictionary.
 
 0.2.27
 ======

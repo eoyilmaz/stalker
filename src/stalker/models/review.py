@@ -385,9 +385,11 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
                 # the two of the tasks to work together and still let the
                 # TJ to be able to schedule the tasks correctly
                 with DBSession.no_autoflush:
-                    tdeps = TaskDependency.query.filter_by(depends_on=dependency).all()
-                for tdep in tdeps:
-                    tdep.dependency_target = "onstart"
+                    task_dependencies = TaskDependency.query.filter_by(
+                        depends_on=dependency
+                    ).all()
+                for task_dependency in task_dependencies:
+                    task_dependency.dependency_target = "onstart"
 
             # also update the status of parents of dependencies
             dependency.update_parent_statuses()

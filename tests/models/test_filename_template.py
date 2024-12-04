@@ -28,7 +28,7 @@ def setup_filename_template_tests():
             name="Test Type", code="tt", target_entity_type="FilenameTemplate"
         ),
         "path": "ASSETS/{{asset.code}}/{{task.type.code}}/",
-        "filename": "{{asset.code}}_{{version.variant_name}}_{{task.type.code}}_"
+        "filename": "{{asset.code}}_{{task.type.code}}_"
         "{{version.version}}_{{user.initials}}",
         "output_path": "",
         "target_entity_type": "Asset",
@@ -315,7 +315,7 @@ def test_naming_case(setup_postgresql_db):
             {%- endif -%}
         {%- endfor -%}
         {%- set fx = parent_tasks[-2] -%}
-        _{{fx.name}}_{{version.variant_name}}_v{{"%02d"|format(version.version_number)}}""",
+        _{{fx.name}}_v{{"%02d"|format(version.version_number)}}""",
     )
     DBSession.add(ft)
 
@@ -357,7 +357,7 @@ def test_naming_case(setup_postgresql_db):
     DBSession.add(v)
     DBSession.commit()
 
-    assert v.filename == "ep101_s001c001_fxA_Main_v01.ma"
+    assert v.filename == "ep101_s001c001_fxA_v01.ma"
 
 
 def test__hash__is_working_as_expected(setup_filename_template_tests):

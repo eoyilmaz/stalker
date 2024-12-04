@@ -121,7 +121,7 @@ def test_readme_tutorial_code(setup_sqlite3):
     DBSession.save(new_version)
 
     assert new_version.absolute_full_path == (
-        f"{repo.path}TP/SH001/Animation/SH001_Animation_Main_v001.ma"
+        f"{repo.path}TP/SH001/Animation/SH001_Animation_v001.ma"
     )
     assert new_version.version_number == 1
 

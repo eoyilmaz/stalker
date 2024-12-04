@@ -4312,7 +4312,7 @@ def test_path_attr_raises_a_runtime_error_if_no_matching_filename_template_found
         target_entity_type="Asset",
         path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
     structure = Structure(name="Movie Project Structure", templates=[ft])
@@ -4343,7 +4343,7 @@ def test_path_attr_is_the_rendered_vers_of_the_related_filename_template_in_the_
         target_entity_type="Task",
         path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
 
@@ -4410,7 +4410,7 @@ def test_absolute_path_attr_raises_a_runtime_error_if_no_matching_filename_templ
         target_entity_type="Asset",
         path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
 
@@ -4445,7 +4445,7 @@ def test_absolute_path_attr_is_rendered_version_of_related_filename_template_in_
         "{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/"
         "{%- endfor -%}",
-        filename="{{task.nice_name}}_{{version.variant_name}}"
+        filename="{{task.nice_name}}"
         '_v{{"%03d"|format(version.version_number)}}{{extension}}',
     )
 
