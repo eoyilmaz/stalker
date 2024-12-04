@@ -1117,9 +1117,19 @@ def test_find_repo_is_working_as_expected(setup_repository_db_tests):
     assert Repository.find_repo(test_path) == new_repo1
 
 
-@pytest.mark.skipif(sys.platform != "win32", reason="Test under Windows only!")
-def test_find_repo_is_case_insensitive_under_windows(setup_repository_db_tests):
+def test_find_repo_is_case_insensitive_under_windows(
+    setup_repository_db_tests, monkeypatch
+):
     """find_repo() is case-insensitive under windows."""
+
+    def patched_platform_system():
+        """Patch the platform.system to always return Windows."""
+        return "Windows"
+
+    monkeypatch.setattr(
+        "stalker.models.repository.platform.system", patched_platform_system
+    )
+
     data = setup_repository_db_tests
     DBSession.add(data["test_repo"])
     DBSession.commit()

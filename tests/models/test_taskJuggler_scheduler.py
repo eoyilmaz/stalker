@@ -343,9 +343,7 @@ def test_schedule_will_not_work_if_the_studio_attribute_is_None(
     )
 
 
-pytest.mark.skipif(sys.platform == "win32", "Runs in Linux/macOS for now!")
-
-
+@pytest.mark.skipif(sys.platform == "win32", reason="Runs in Linux/macOS for now!")
 def test_schedule_will_raise_tj3_command_errors_as_a_runtime_error(
     setup_tsk_juggler_scheduler_db_tests, monkeypatch_tj3
 ):

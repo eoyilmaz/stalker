@@ -58,7 +58,7 @@ class Version(Link, DAGMixin):
 
          Or, let's have a setup with environment variables:
 
-           $REPO{{project.repository.id}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
+           $REPO{{project.repository.code}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
 
     Args:
         inputs (List[Link]): A list o :class:`.Link` instances, holding the inputs of
@@ -97,7 +97,6 @@ class Version(Link, DAGMixin):
         uselist=False,
         back_populates="versions",
     )
-
 
     version_number: Mapped[int] = mapped_column(
         default=1,
@@ -179,7 +178,6 @@ class Version(Link, DAGMixin):
                 entity_type=self.entity_type,
             )
         )
-
 
     @property
     def latest_version(self) -> "Version":
