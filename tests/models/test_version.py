@@ -238,6 +238,256 @@ def test_task_attribute_is_working_as_expected(setup_version_db_tests):
     assert data["test_version"].task is new_task
 
 
+def test_revision_number_arg_is_skipped(setup_version_db_tests):
+    """revision_number arg can be skipped."""
+    data = setup_version_db_tests
+    new_version = Version(**data["kwargs"])
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 1
+
+
+def test_revision_number_arg_is_none(setup_version_db_tests):
+    """revision_number arg can be None."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = None
+    new_version = Version(**data["kwargs"])
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 1
+
+
+def test_revision_number_attr_cannot_be_set_to_none(setup_version_db_tests):
+    """revision_number can be None."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 12
+    new_version = Version(**data["kwargs"])
+    with pytest.raises(TypeError) as cm:
+        new_version.revision_number = None
+    assert str(cm.value) == (
+        "Version.revision_number should be a positive integer, not NoneType: 'None'"
+    )
+
+
+def test_revision_number_arg_is_not_an_integer(setup_version_db_tests):
+    """revision_number arg is not an integer raises TypeError."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = "not an integer"
+    with pytest.raises(TypeError) as cm:
+        _ = Version(**data["kwargs"])
+    assert str(cm.value) == (
+        "Version.revision_number should be a positive integer, "
+        "not str: 'not an integer'"
+    )
+
+
+def test_revision_number_attr_is_not_an_integer(setup_version_db_tests):
+    """revision_number attr is not an integer raises TypeError."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 14
+    new_version = Version(**data["kwargs"])
+    with pytest.raises(TypeError) as cm:
+        new_version.revision_number = "not an integer"
+    assert str(cm.value) == (
+        "Version.revision_number should be a positive integer, "
+        "not str: 'not an integer'"
+    )
+
+
+def test_revision_number_arg_is_not_a_positive_integer(setup_version_db_tests):
+    """revision_number arg is not a positive integer raises ValueError."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = -109
+    with pytest.raises(ValueError) as cm:
+        _ = Version(**data["kwargs"])
+    assert str(cm.value) == (
+        "Version.revision_number should be a positive integer, "
+        "not int: '-109'"
+    )
+
+
+def test_revision_number_attr_is_not_a_positive_integer(setup_version_db_tests):
+    """revision_number attr is not a positive integer raises ValueError."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 153
+    new_version = Version(**data["kwargs"])
+    with pytest.raises(ValueError) as cm:
+        new_version.revision_number = -109
+    assert str(cm.value) == (
+        "Version.revision_number should be a positive integer, "
+        "not int: '-109'"
+    )
+
+
+def test_revision_number_arg_can_be_non_sequential(setup_version_db_tests):
+    """revision_number arg can be set to any positive number."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 21
+    new_version = Version(**data["kwargs"])
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 21
+
+
+def test_revision_number_attr_can_be_non_sequential(setup_version_db_tests):
+    """revision_number attr can be set to any positive number."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 21
+    new_version = Version(**data["kwargs"])
+    assert new_version.revision_number != 13
+    new_version.revision_number = 13
+    assert new_version.revision_number == 13
+
+
+def test_revision_number_attr_changed_will_reset_version_number(setup_version_db_tests):
+    """revision_number attr can be set to any positive number."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 21
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.version_number == 1
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.version_number == 2
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.version_number == 3
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.version_number == 4
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.version_number == 5
+    assert new_version.revision_number != 13
+    new_version.revision_number = 13
+    DBSession.save(new_version)
+    assert new_version.revision_number == 13
+    assert new_version.version_number == 1
+    new_version.revision_number = 21
+    assert new_version.version_number == 5
+
+
+def test_revision_number_attr_not_changed_will_not_reset_version_number(setup_version_db_tests):
+    """revision_number attr can be set to any positive number."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 21
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    new_version.revision_number = 13
+    DBSession.save(new_version)
+    new_version.revision_number = 21
+    DBSession.save(new_version)
+    new_version.revision_number = 21
+    assert new_version.version_number == 5
+
+
+def test_revision_number_arg_value_is_passed_to_revision_number_attr(setup_version_db_tests):
+    """revision_number arg value is passed to revision_number attr."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 21
+    new_version = Version(**data["kwargs"])
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 21
+
+
+def test_revision_number_arg_effects_version_number(setup_version_db_tests):
+    """revision_number arg effects version_number value."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 1
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 1
+    assert new_version.version_number == 2
+
+    # second version
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 1
+    assert new_version.version_number == 3
+
+    # third version
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 1
+    assert new_version.version_number == 4
+
+    # new revision_number series
+    data["kwargs"]["revision_number"] = 2
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 2
+    assert new_version.version_number == 1
+
+    # second version
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 2
+    assert new_version.version_number == 2
+
+    # back to revision_number 1
+    data["kwargs"]["revision_number"] = 1
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert isinstance(new_version, Version)
+    assert new_version.revision_number == 1
+    assert new_version.version_number == 5
+
+
+def test_max_revision_number_returns_the_maximum_revision_number_in_the_db(setup_version_db_tests):
+    """max_revision_number returns the maximum value of the revision_number in the db."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 1
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.revision_number == 1
+    assert new_version.version_number == 2
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.revision_number == 1
+    assert new_version.version_number == 3
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.revision_number == 1
+    assert new_version.version_number == 4
+
+    # new revision_number series
+    data["kwargs"]["revision_number"] = 2
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.revision_number == 2
+    assert new_version.version_number == 1
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.revision_number == 2
+    assert new_version.version_number == 2
+
+    # back to revision_number 1
+    data["kwargs"]["revision_number"] = 1
+    new_version = Version(**data["kwargs"])
+    DBSession.save(new_version)
+    assert new_version.revision_number == 1
+
+    assert new_version.max_revision_number == 2
+
+
+def test_max_revision_number_returns_the_maximum_revision_number_in_the_db_when_no_version(setup_version_db_tests):
+    """max_revision_number returns the maximum value of the revision_number in the db when no version is created."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 1
+    new_version = Version(**data["kwargs"])
+    assert new_version.max_revision_number == 1
+
+
 def test_version_number_attribute_is_automatically_generated(setup_version_db_tests):
     """version_number attribute is automatically generated."""
     data = setup_version_db_tests
@@ -971,28 +1221,34 @@ def test_latest_published_version_is_working_as_expected(setup_version_db_tests)
     """is_latest_published_version is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
-    DBSession.add(new_version1)
-    DBSession.commit()
+    DBSession.save(new_version1)
 
     new_version2 = Version(**data["kwargs"])
-    DBSession.add(new_version2)
-    DBSession.commit()
+    DBSession.save(new_version2)
 
     new_version3 = Version(**data["kwargs"])
-    DBSession.add(new_version3)
-    DBSession.commit()
+    DBSession.save(new_version3)
 
     new_version4 = Version(**data["kwargs"])
-    DBSession.add(new_version4)
-    DBSession.commit()
+    DBSession.save(new_version4)
 
     new_version5 = Version(**data["kwargs"])
-    DBSession.add(new_version5)
-    DBSession.commit()
+    DBSession.save(new_version5)
+
+    # with new revision number
+    data["kwargs"]["revision_number"] = 2
+    new_version6 = Version(**data["kwargs"])
+    DBSession.save(new_version6)
+    new_version7 = Version(**data["kwargs"])
+    DBSession.save(new_version7)
+    new_version8 = Version(**data["kwargs"])
+    DBSession.save(new_version8)
 
     new_version1.is_published = True
     new_version3.is_published = True
     new_version4.is_published = True
+
+    new_version7.is_published = True
 
     assert new_version1.latest_published_version == new_version4
     assert new_version2.latest_published_version == new_version4
@@ -1000,123 +1256,209 @@ def test_latest_published_version_is_working_as_expected(setup_version_db_tests)
     assert new_version4.latest_published_version == new_version4
     assert new_version5.latest_published_version == new_version4
 
+    assert new_version6.latest_published_version == new_version7
+    assert new_version7.latest_published_version == new_version7
+    assert new_version8.latest_published_version == new_version7
+
 
 def test_is_latest_published_version_is_working_as_expected(setup_version_db_tests):
     """is_latest_published_version is working as expected."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
-    DBSession.add(new_version1)
-    DBSession.commit()
+    DBSession.save(new_version1)
 
     new_version2 = Version(**data["kwargs"])
-    DBSession.add(new_version2)
-    DBSession.commit()
+    DBSession.save(new_version2)
 
     new_version3 = Version(**data["kwargs"])
-    DBSession.add(new_version3)
-    DBSession.commit()
+    DBSession.save(new_version3)
 
     new_version4 = Version(**data["kwargs"])
-    DBSession.add(new_version4)
-    DBSession.commit()
+    DBSession.save(new_version4)
 
     new_version5 = Version(**data["kwargs"])
-    DBSession.add(new_version5)
-    DBSession.commit()
+    DBSession.save(new_version5)
+
+    # with new revision number
+    data["kwargs"]["revision_number"] = 2
+    new_version6 = Version(**data["kwargs"])
+    DBSession.save(new_version6)
+    new_version7 = Version(**data["kwargs"])
+    DBSession.save(new_version7)
+    new_version8 = Version(**data["kwargs"])
+    DBSession.save(new_version8)
 
     new_version1.is_published = True
     new_version3.is_published = True
     new_version4.is_published = True
 
-    assert not new_version1.is_latest_published_version()
-    assert not new_version2.is_latest_published_version()
-    assert not new_version3.is_latest_published_version()
-    assert new_version4.is_latest_published_version()
-    assert not new_version5.is_latest_published_version()
+    new_version7.is_published = True
+
+    assert new_version1.is_latest_published_version() is False
+    assert new_version2.is_latest_published_version() is False
+    assert new_version3.is_latest_published_version() is False
+    assert new_version4.is_latest_published_version() is True
+    assert new_version5.is_latest_published_version() is False
+
+    assert new_version6.is_latest_published_version() is False
+    assert new_version7.is_latest_published_version() is True
+    assert new_version8.is_latest_published_version() is False
 
 
 def test_equality_operator(setup_version_db_tests):
     """equality of two Version instances."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
-    DBSession.add(new_version1)
-    DBSession.commit()
+    DBSession.save(new_version1)
 
     new_version2 = Version(**data["kwargs"])
-    DBSession.add(new_version2)
-    DBSession.commit()
+    DBSession.save(new_version2)
 
     new_version3 = Version(**data["kwargs"])
-    DBSession.add(new_version3)
-    DBSession.commit()
+    DBSession.save(new_version3)
 
     new_version4 = Version(**data["kwargs"])
-    DBSession.add(new_version4)
-    DBSession.commit()
+    DBSession.save(new_version4)#
 
     new_version5 = Version(**data["kwargs"])
-    DBSession.add(new_version5)
-    DBSession.commit()
+    DBSession.save(new_version5)
+
+    # with new revision number
+    data["kwargs"]["revision_number"] = 2
+    new_version6 = Version(**data["kwargs"])
+    DBSession.save(new_version6)
+    new_version7 = Version(**data["kwargs"])
+    DBSession.save(new_version7)
+    new_version8 = Version(**data["kwargs"])
+    DBSession.save(new_version8)
 
     new_version1.is_published = True
     new_version3.is_published = True
     new_version4.is_published = True
 
-    assert not new_version1 == new_version2
-    assert not new_version1 == new_version3
-    assert not new_version1 == new_version4
-    assert not new_version1 == new_version5
+    new_version7.is_published = True
 
-    assert not new_version2 == new_version3
-    assert not new_version2 == new_version4
-    assert not new_version2 == new_version5
+    assert (new_version1 == new_version1) is True
+    assert (new_version1 == new_version2) is False
+    assert (new_version1 == new_version3) is False
+    assert (new_version1 == new_version4) is False
+    assert (new_version1 == new_version5) is False
+    assert (new_version1 == new_version6) is False
+    assert (new_version1 == new_version7) is False
+    assert (new_version1 == new_version8) is False
 
-    assert not new_version3 == new_version4
-    assert not new_version3 == new_version5
+    assert (new_version2 == new_version2) is True
+    assert (new_version2 == new_version3) is False
+    assert (new_version2 == new_version4) is False
+    assert (new_version2 == new_version5) is False
+    assert (new_version2 == new_version6) is False
+    assert (new_version2 == new_version7) is False
+    assert (new_version2 == new_version8) is False
 
-    assert not new_version4 == new_version5
+    assert (new_version3 == new_version3) is True
+    assert (new_version3 == new_version4) is False
+    assert (new_version3 == new_version5) is False
+    assert (new_version3 == new_version6) is False
+    assert (new_version3 == new_version7) is False
+    assert (new_version3 == new_version8) is False
+
+    assert (new_version4 == new_version4) is True
+    assert (new_version4 == new_version5) is False
+    assert (new_version4 == new_version6) is False
+    assert (new_version4 == new_version7) is False
+    assert (new_version4 == new_version8) is False
+
+    assert (new_version5 == new_version5) is True
+    assert (new_version5 == new_version6) is False
+    assert (new_version5 == new_version7) is False
+    assert (new_version5 == new_version8) is False
+
+    assert (new_version6 == new_version6) is True
+    assert (new_version6 == new_version7) is False
+    assert (new_version6 == new_version8) is False
+
+    assert (new_version7 == new_version7) is True
+    assert (new_version6 == new_version8) is False
+
+    assert (new_version8 == new_version8) is True
 
 
 def test_inequality_operator(setup_version_db_tests):
     """inequality of two Version instances."""
     data = setup_version_db_tests
     new_version1 = Version(**data["kwargs"])
-    DBSession.add(new_version1)
-    DBSession.commit()
+    DBSession.save(new_version1)
 
     new_version2 = Version(**data["kwargs"])
-    DBSession.add(new_version2)
-    DBSession.commit()
+    DBSession.save(new_version2)
 
     new_version3 = Version(**data["kwargs"])
-    DBSession.add(new_version3)
-    DBSession.commit()
+    DBSession.save(new_version3)
 
     new_version4 = Version(**data["kwargs"])
-    DBSession.add(new_version4)
-    DBSession.commit()
+    DBSession.save(new_version4)
 
     new_version5 = Version(**data["kwargs"])
-    DBSession.add(new_version5)
-    DBSession.commit()
+    DBSession.save(new_version5)
+
+    # with new revision number
+    data["kwargs"]["revision_number"] = 2
+    new_version6 = Version(**data["kwargs"])
+    DBSession.save(new_version6)
+    new_version7 = Version(**data["kwargs"])
+    DBSession.save(new_version7)
+    new_version8 = Version(**data["kwargs"])
+    DBSession.save(new_version8)
 
     new_version1.is_published = True
     new_version3.is_published = True
     new_version4.is_published = True
 
-    assert new_version1 != new_version2
-    assert new_version1 != new_version3
-    assert new_version1 != new_version4
-    assert new_version1 != new_version5
+    new_version7.is_published = True
 
-    assert new_version2 != new_version3
-    assert new_version2 != new_version4
-    assert new_version2 != new_version5
+    assert (new_version1 != new_version1) is False
+    assert (new_version1 != new_version2) is True
+    assert (new_version1 != new_version3) is True
+    assert (new_version1 != new_version4) is True
+    assert (new_version1 != new_version5) is True
+    assert (new_version1 != new_version6) is True
+    assert (new_version1 != new_version7) is True
+    assert (new_version1 != new_version8) is True
 
-    assert new_version3 != new_version4
-    assert new_version3 != new_version5
+    assert (new_version2 != new_version2) is False
+    assert (new_version2 != new_version3) is True
+    assert (new_version2 != new_version4) is True
+    assert (new_version2 != new_version5) is True
+    assert (new_version2 != new_version6) is True
+    assert (new_version2 != new_version7) is True
+    assert (new_version2 != new_version8) is True
 
-    assert new_version4 != new_version5
+    assert (new_version3 != new_version3) is False
+    assert (new_version3 != new_version4) is True
+    assert (new_version3 != new_version5) is True
+    assert (new_version3 != new_version6) is True
+    assert (new_version3 != new_version7) is True
+    assert (new_version3 != new_version8) is True
+
+    assert (new_version4 != new_version4) is False
+    assert (new_version4 != new_version5) is True
+    assert (new_version4 != new_version6) is True
+    assert (new_version4 != new_version7) is True
+    assert (new_version4 != new_version8) is True
+
+    assert (new_version5 != new_version5) is False
+    assert (new_version5 != new_version6) is True
+    assert (new_version5 != new_version7) is True
+    assert (new_version5 != new_version8) is True
+
+    assert (new_version6 != new_version6) is False
+    assert (new_version6 != new_version7) is True
+    assert (new_version6 != new_version8) is True
+
+    assert (new_version7 != new_version7) is False
+    assert (new_version6 != new_version8) is True
+
+    assert (new_version8 != new_version8) is False
 
 
 def test_created_with_argument_can_be_skipped(setup_version_db_tests):
@@ -1276,6 +1618,43 @@ def test_latest_version_attribute_is_working_as_expected(setup_version_db_tests)
     assert new_version2.latest_version == new_version5
     assert new_version3.latest_version == new_version5
     assert new_version4.latest_version == new_version5
+    assert new_version5.latest_version == new_version5
+
+
+def test_latest_version_attribute_is_working_as_expected_for_different_revision_numbers(
+    setup_version_db_tests
+):
+    """latest_version attribute is working as expected for different revision_numbers."""
+    data = setup_version_db_tests
+    data["kwargs"]["revision_number"] = 1
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+
+    new_version2 = Version(**data["kwargs"])
+    DBSession.add(new_version2)
+    DBSession.commit()
+
+    data["kwargs"]["revision_number"] = 2
+    new_version3 = Version(**data["kwargs"])
+    DBSession.add(new_version3)
+    DBSession.commit()
+
+    new_version4 = Version(**data["kwargs"])
+    DBSession.add(new_version4)
+    DBSession.commit()
+
+    data["kwargs"]["revision_number"] = 3
+    new_version5 = Version(**data["kwargs"])
+    DBSession.add(new_version5)
+    DBSession.commit()
+
+    assert new_version5.version_number == 1
+
+    assert new_version1.latest_version == new_version2
+    assert new_version2.latest_version == new_version2
+    assert new_version3.latest_version == new_version4
+    assert new_version4.latest_version == new_version4
     assert new_version5.latest_version == new_version5
 
 

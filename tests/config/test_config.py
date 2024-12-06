@@ -243,3 +243,13 @@ def test_default_working_hours_is_a_dictionary_with_list_values():
         isinstance(defaults.working_hours[day], list)
         for day in ["mon", "tue", "wed", "thu", "fri", "sat", "sun"]
     )
+
+
+def test_default_filename_template_value():
+    """default filename_template includes revision_number."""
+    assert isinstance(defaults.filename_template, str)
+    assert defaults.filename_template == (
+        '{{version.nice_name}}'
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}'
+    )

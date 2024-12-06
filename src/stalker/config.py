@@ -300,7 +300,7 @@ taskreport breakdown "{{csv_file_name}}"{
 }""",
         tj_command="tj3" if sys.platform == "win32" else "/usr/local/bin/tj3",
         path_template="{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}",  # noqa: B950
-        filename_template='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}',  # noqa: B950
+        filename_template='{{version.nice_name}}_r{{"%02d"|format(version.revision_number)}}_v{{"%03d"|format(version.version_number)}}',  # noqa: B950
         # --------------------------------------------
         # the following settings came from oyProjectManager
         sequence_format="%h%p%t %R",

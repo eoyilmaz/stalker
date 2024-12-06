@@ -41,8 +41,9 @@ def upgrade():
         existing_nullable=True,
     )
 
-    # create Variant Status Lists
-    op.execute("""
+    # create Variant Status Lists
+    op.execute(
+        """
         WITH ins1 AS (
             INSERT INTO "SimpleEntities" (
                entity_type,
@@ -70,7 +71,8 @@ def upgrade():
             INSERT INTO "Entities" (id) (SELECT ins1.variant_status_list_id FROM ins1)
         )
         INSERT INTO "StatusLists" (id, target_entity_type) (SELECT ins1.variant_status_list_id, 'Variant' FROM ins1);
-    """)
+    """
+    )
 
     # Add the same statuses of Task StatusList to Variant StatusList
     op.execute(
@@ -106,14 +108,17 @@ def downgrade():
         existing_nullable=True,
     )
     # remove Variant Status List Statuses
-    op.execute("""
+    op.execute(
+        """
         DELETE FROM "StatusList_Statuses"
         WHERE "StatusList_Statuses".status_list_id = (
             SELECT id FROM "StatusLists" WHERE "StatusLists".target_entity_type = 'Variant'
         )
-    """)
+    """
+    )
     # remove Variant Status Lists
-    op.execute("""
+    op.execute(
+        """
         WITH del1 AS (
             DELETE FROM "StatusLists"
                WHERE "StatusLists".target_entity_type = 'Variant'
@@ -122,5 +127,6 @@ def downgrade():
             DELETE FROM "Entities" WHERE "Entities".id = (SELECT del1.deleted_status_list_id FROM del1)
         )
         DELETE FROM "SimpleEntities" WHERE "SimpleEntities".id = (SELECT del1.deleted_status_list_id FROM del1)
-    """)
+    """
+    )
     op.drop_table("Variants")
