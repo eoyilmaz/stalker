@@ -205,6 +205,7 @@ def upgrade():
         """
     )
 
+
 def downgrade():
     """Downgrade the tables."""
     op.add_column(
@@ -214,7 +215,8 @@ def downgrade():
         ),
     )
 
-    op.execute("""
+    op.execute(
+        """
         -- Update Version.variant_name with parent names
         UPDATE "Versions" SET (variant_name, task_id) = (subtable.variant_name, subtable.task_id)
         FROM (
@@ -244,4 +246,5 @@ def downgrade():
             JOIN "SimpleEntities" AS "Variant_SimpleEntities" ON "Variants".id = "Variant_SimpleEntities".id
             WHERE "Variant_SimpleEntities".name = "Versions".variant_name
         );
-    """)
+    """
+    )

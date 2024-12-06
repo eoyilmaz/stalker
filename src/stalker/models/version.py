@@ -9,7 +9,7 @@ import jinja2
 
 from sqlalchemy import Column, ForeignKey, Integer, String, Table
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
-from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
+from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym, validates
 
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
@@ -25,13 +25,12 @@ logger = get_logger(__name__)
 
 
 class Version(Link, DAGMixin):
-    """Holds information about the created versions (files) for a class:`.Task`.
+    """Holds information about the versions created for a class:`.Task`.
 
-    A :class:`.Version` holds information about the
-    created files related to a class:`.Task`. So if one
-    creates a new version for a file or a sequences of file for a
-    :class:`.Task` then the information is hold in the
-    :class:`.Version` instance.
+    A :class:`.Version` instance holds information about the versions created
+    related to a class:`.Task`. So if one creates a new version for a file or a
+    sequences of files for a :class:`.Task` then the information can be hold in
+    the :class:`.Version` instance.
 
     .. versionadded: 0.2.13
 
@@ -60,20 +59,40 @@ class Version(Link, DAGMixin):
 
            $REPO{{project.repository.code}}/{{project.code}}/{%- for parent_task in parent_tasks -%}{{parent_task.nice_name}}/{%- endfor -%}
 
+    .. versionadded: 1.0.0
+
+       Version instances now have an extra numeric counter, preceding the
+       :attr:`.version_number` attribute to allow versions to be better
+       organized alongside revisions or big changes, without relying on the now
+       removed `variant_name` attribute.
+
     Args:
-        inputs (List[Link]): A list o :class:`.Link` instances, holding the inputs of
-            the current version. It could be a texture for a Maya file or an image
-            sequence for Nuke, or anything those you can think as the input for the
-            current Version.
-        outputs (List[Link]): A list of :class:`.Link` instances, holding the outputs of
-            the current version. It could be the rendered image sequences out of Maya or
-            Nuke, or it can be a Targa file which is the output of a Photoshop file, or
-            anything that you can think as the output which is created out of this
+        revision_number (Optional[int]): A positive non-zero integer number
+            holding the major version counter. This can be set with an
+            argument, allowing setting of the revision number as the Version
+            instance is created. So, if a :class:`.Version` is created under
+            the same :class:`Task` before, the newly created :class:`.Version`
+            instances will start from the highest revision number unless it is
+            set to another value. Non-sequential revision numbers can be set.
+            So, one can start with 1 and then can jump to 3 and 10 from there.
+            All the :class:`.Version` instances that have the same
+            :attr:`.revision_number` under the same :class:`.Task` will be
+            considered in the same version stream and version number attribute
+            will be set accordingly. The default is 1. 
+        inputs (List[Link]): A list o :class:`.Link` instances, holding the
+            inputs of the current version. It could be a texture for a Maya
+            file or an image sequence for Nuke, or anything those you can think
+            as the input for the current Version.
+        outputs (List[Link]): A list of :class:`.Link` instances, holding the
+            outputs of the current version. It could be the rendered image
+            sequences out of Maya or Nuke, or it can be a Targa file which is
+            the output of a Photoshop file, or anything that you can think as
+            the output which is created out of this Version.
+        task (Task): A :class:`.Task` instance showing the owner of this
             Version.
-        task (Task): A :class:`.Task` instance showing the owner of this Version.
-        parent (Version): A :class:`.Version` instance which is the parent of this
-            Version. It is mainly used to see which Version is derived from which in the
-            Version history of a :class:`.Task`.
+        parent (Version): A :class:`.Version` instance which is the parent of
+            this Version. It is mainly used to see which Version is derived
+            from which in the Version history of a :class:`.Task`.
     """  # noqa: B950
 
     from stalker import defaults
@@ -96,6 +115,12 @@ class Version(Link, DAGMixin):
         doc="The :class:`.Task` instance that this Version is created for.",
         uselist=False,
         back_populates="versions",
+    )
+
+    _revision_number: Mapped[int] = mapped_column(
+        "revision_number",
+        default=1,
+        nullable=False,
     )
 
     version_number: Mapped[int] = mapped_column(
@@ -141,6 +166,7 @@ class Version(Link, DAGMixin):
         parent: Optional["Version"] = None,
         full_path: Optional[str] = None,
         created_with: Optional[str] = None,
+        revision_number: Optional[int] = None,
         **kwargs: Dict[str, Any],
     ) -> None:
         # call supers __init__
@@ -150,6 +176,9 @@ class Version(Link, DAGMixin):
         DAGMixin.__init__(self, parent=parent)
 
         self.task = task
+        if revision_number is None:
+            revision_number = 1
+        self.revision_number = revision_number
         self.version_number = None
         if inputs is None:
             inputs = []
@@ -179,6 +208,73 @@ class Version(Link, DAGMixin):
             )
         )
 
+    def _validate_revision_number(self, revision_number: int) -> int:
+        """Validate the given revision_number value.
+
+        Args:
+            revision_number (int): The revision_number value to be validated.
+
+        Raises:
+            TypeError: If the given revision_number value is not an integer.
+            ValueError: If the given revision_number value is not a positive integer.
+
+        Returns:
+            int: The validated revision_number value.
+        """
+        error_message = (f"{self.__class__.__name__}.revision_number should be a "
+            f"positive integer, not {revision_number.__class__.__name__}: "
+            f"'{revision_number}'")
+
+        if not isinstance(revision_number, int):
+            raise TypeError(error_message)
+
+        if revision_number < 1:
+            raise ValueError(error_message)
+
+        return revision_number
+
+    def _revision_number_getter(self) -> int:
+        """Return the revision_number value.
+        
+        Returns:
+            int: revision_number attribute value
+        """
+        return self._revision_number
+
+    def _revision_number_setter(self, revision_number: int):
+        """Set the revision attribute value."""
+        revision_number = self._validate_revision_number(revision_number)
+
+        is_updating_revision_number = False
+        if self._revision_number is not None:
+            if revision_number != self._revision_number:
+                logger.debug(
+                    "Updating revision_number from "
+                    f"{self._revision_number} -> {revision_number}"
+                )
+                is_updating_revision_number = True
+            else:
+                logger.debug(
+                    "Revision number is the same... "
+                    f"{self._revision_number} == {revision_number}"
+                )
+        else:
+            logger.debug("revision_number is being set for the first time!")
+
+        self._revision_number = revision_number
+
+        if is_updating_revision_number and self.version_number is not None:
+            # if we are updating the revision_number value,
+            # also update reset the version_number
+            logger.debug("Updated revision_number! so, let's update version_number too!")
+            logger.debug(f"current version_number is {self.version_number}")
+            self.version_number = None
+
+    revision_number: Mapped[int] = synonym(
+        "_revision_number",
+        descriptor=property(_revision_number_getter, _revision_number_setter),
+    )
+
     @property
     def latest_version(self) -> "Version":
         """Return the Version instance with the highest version number in this series.
@@ -192,6 +288,7 @@ class Version(Link, DAGMixin):
             with DBSession.no_autoflush:
                 latest_version = (
                     Version.query.filter(Version.task == self.task)
+                    .filter(Version.revision_number == self.revision_number)
                     .order_by(Version.version_number.desc())
                     .first()
                 )
@@ -202,6 +299,22 @@ class Version(Link, DAGMixin):
                 key=lambda x: x.version_number if x.version_number else -1,
             )
             return all_versions[-1] if all_versions else None
+
+    @property
+    def max_revision_number(self) -> int:
+        """Return the maximum revision number for this Version.
+
+        Returns:
+            int: The maximum revision number for this Version.
+        """
+        with DBSession.no_autoflush:
+            result = (
+                DBSession.query(Version.revision_number)
+                .filter(Version.task_id == self.task_id)
+                .order_by(Version.revision_number.desc())
+                .first()
+            )
+        return result[0] if result else 1
 
     @property
     def max_version_number(self) -> int:
@@ -224,12 +337,7 @@ class Version(Link, DAGMixin):
         Returns:
             int: The validated version number.
         """
-        # get the latest version
-        latest_version = self.latest_version
-
-        max_version_number = 0
-        if latest_version:
-            max_version_number = latest_version.version_number
+        max_version_number = self.max_version_number
 
         logger.debug(f"max_version_number: {max_version_number}")
         logger.debug(f"given version_number: {version_number}")
@@ -237,13 +345,13 @@ class Version(Link, DAGMixin):
         if version_number is not None and version_number > max_version_number:
             return version_number
 
-        if latest_version == self:
+        if self.latest_version == self:
             if self.version_number is not None:
                 version_number = self.version_number
             else:
                 version_number = 1
                 logger.debug(
-                    "self.version_number is weirdly 'None', "
+                    f"{self.__class__.__name__}.version_number is weirdly 'None', "
                     "no database connection maybe?"
                 )
             logger.debug(
@@ -381,15 +489,9 @@ class Version(Link, DAGMixin):
         temp_filename = jinja2.Template(vers_template.filename).render(
             **kwargs, trim_blocks=True, lstrip_blocks=True
         )
-        if isinstance(temp_filename, bytes):
-            temp_filename = temp_filename.decode("utf-8")
-
         temp_path = jinja2.Template(vers_template.path).render(
             **kwargs, trim_blocks=True, lstrip_blocks=True
         )
-        if isinstance(temp_path, bytes):
-            temp_path = temp_path.decode("utf-8")
-
         self.filename = temp_filename
         self.path = temp_path
 
@@ -433,6 +535,7 @@ class Version(Link, DAGMixin):
         """
         return (
             Version.query.filter_by(task=self.task)
+            .filter(Version.revision_number == self.revision_number)
             .filter_by(is_published=True)
             .order_by(Version.version_number.desc())
             .first()

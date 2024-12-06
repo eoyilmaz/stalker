@@ -4691,6 +4691,7 @@ def test_persistence_of_version(setup_postgresql_db):
     test_version = Version(
         name="version for task modeling",
         task=test_task,
+        revision_number=12,
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v001.ma",
         outputs=[
@@ -4705,12 +4706,14 @@ def test_persistence_of_version(setup_postgresql_db):
     # now save it to the database
     DBSession.add(test_version)
     DBSession.commit()
+    assert test_version.revision_number == 12
     assert test_version.version_number == 1
 
     # create a new version
     test_version_2 = Version(
         name="version for task modeling",
         task=test_task,
+        revision_number=12,
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v002.ma",
         inputs=[test_version],
@@ -4718,6 +4721,7 @@ def test_persistence_of_version(setup_postgresql_db):
     assert test_version_2.inputs == [test_version]
     DBSession.add(test_version_2)
     DBSession.commit()
+    assert test_version_2.revision_number == 12
     assert test_version_2.version_number == 2
 
     created_by = test_version.created_by
@@ -4733,6 +4737,8 @@ def test_persistence_of_version(setup_postgresql_db):
     #        tickets = test_version.tickets
     type_ = test_version.type
     updated_by = test_version.updated_by
+    revision_number = test_version.revision_number
+    assert revision_number == 12
     version_number = test_version.version_number
     task = test_version.task
 
@@ -4757,6 +4763,7 @@ def test_persistence_of_version(setup_postgresql_db):
     assert test_version_db.updated_by == updated_by
     assert test_version_db.version_number == version_number
     assert test_version_db.task == task
+    assert test_version_db.revision_number == revision_number
 
     # try to delete version and expect the task, user and other versions
     # to be intact
