@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Stalker specific data types are situated here."""
+import datetime
 import json
 from typing import Any, Dict, TYPE_CHECKING, Union
 
@@ -65,7 +66,7 @@ class DateTimeUTC(TypeDecorator):
 
     impl = DateTime
 
-    def process_bind_param(self, value, dialect):
+    def process_bind_param(self, value: Any, dialect: str) -> datetime.datetime:
         """Process bind param.
 
         Args:
@@ -81,7 +82,7 @@ class DateTimeUTC(TypeDecorator):
             value = value.astimezone(pytz.utc)
         return value
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value: Any, dialect: str) -> datetime.datetime:
         """Process result value.
 
         Args:

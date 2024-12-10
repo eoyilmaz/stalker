@@ -32,8 +32,7 @@ from stalker import (
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import CircularDependencyError
-from stalker.models.mixins import DateRangeMixin
-from stalker.models.task import CONSTRAIN_BOTH, CONSTRAIN_END
+from stalker.models.mixins import DateRangeMixin, ScheduleConstraint
 
 
 @pytest.fixture(scope="function")
@@ -2210,7 +2209,7 @@ def test_start_and_end_attr_values_of_a_container_task_are_defined_by_its_child_
     # remove effort and duration. Why?
     kwargs.pop("schedule_timing")
     kwargs.pop("schedule_unit")
-    kwargs["schedule_constraint"] = CONSTRAIN_BOTH
+    kwargs["schedule_constraint"] = ScheduleConstraint.Both
 
     now = datetime.datetime(2013, 3, 22, 15, 0, tzinfo=pytz.utc)
     dt = datetime.timedelta
@@ -2295,7 +2294,7 @@ def test_start_calc_with_schedule_timing_and_schedule_unit_if_schedule_constrain
 
     kwargs["start"] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
     kwargs["end"] = datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
-    kwargs["schedule_constraint"] = CONSTRAIN_END
+    kwargs["schedule_constraint"] = ScheduleConstraint.End
     kwargs["schedule_timing"] = 10
     kwargs["schedule_unit"] = "d"
 
@@ -2314,7 +2313,7 @@ def test_start_and_end_values_are_not_touched_if_the_schedule_constraint_is_set_
 
     kwargs["start"] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
     kwargs["end"] = datetime.datetime(2013, 4, 27, 0, 0, tzinfo=pytz.utc)
-    kwargs["schedule_constraint"] = CONSTRAIN_BOTH
+    kwargs["schedule_constraint"] = ScheduleConstraint.Both
     kwargs["schedule_timing"] = 100
     kwargs["schedule_unit"] = "d"
 

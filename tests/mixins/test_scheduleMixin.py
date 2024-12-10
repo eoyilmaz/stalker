@@ -173,24 +173,22 @@ def test_schedule_constraint_argument_is_not_an_integer(setup_schedule_mixin_tes
     """TypeError is raised if the schedule_constraint argument is not an int."""
     data = setup_schedule_mixin_tests
     data["kwargs"]["schedule_constraint"] = "not an int"
-    with pytest.raises(TypeError) as cm:
+    with pytest.raises(ValueError) as cm:
         MixedInClass(**data["kwargs"])
 
     assert str(cm.value) == (
-        "MixedInClass.schedule_constraint should be an integer between "
-        "0 and 3, not str: 'not an int'"
+        "constraint should be one of ['None', 'Start', 'End', 'Both'], not 'not an int'"
     )
 
 
 def test_schedule_constraint_attribute_is_not_an_integer(setup_schedule_mixin_tests):
     """TypeError is raised if the schedule_constraint attribute is not an int."""
     data = setup_schedule_mixin_tests
-    with pytest.raises(TypeError) as cm:
+    with pytest.raises(ValueError) as cm:
         data["test_obj"].schedule_constraint = "not an int"
 
     assert str(cm.value) == (
-        "MixedInClass.schedule_constraint should be an integer between "
-        "0 and 3, not str: 'not an int'"
+        "constraint should be one of ['None', 'Start', 'End', 'Both'], not 'not an int'"
     )
 
 
@@ -215,29 +213,37 @@ def test_schedule_constraint_attribute_is_working_as_expected(
     assert data["test_obj"].schedule_constraint == test_value
 
 
-def test_schedule_constraint_argument_value_is_out_of_range(setup_schedule_mixin_tests):
-    """schedule_constraint is clamped to the [0-3] range if it is out of range."""
-    data = setup_schedule_mixin_tests
-    data["kwargs"]["schedule_constraint"] = -1
-    new_task = MixedInClass(**data["kwargs"])
-    assert new_task.schedule_constraint == 0
-
-    data["kwargs"]["schedule_constraint"] = 4
-    new_task = MixedInClass(**data["kwargs"])
-    assert new_task.schedule_constraint == 3
-
-
-def test_schedule_constraint_attribute_value_is_out_of_range(
+@pytest.mark.parametrize(
+    "test_value", [-1, 4]
+)
+def test_schedule_constraint_argument_value_is_out_of_range(
     setup_schedule_mixin_tests,
+    test_value,
 ):
     """schedule_constraint is clamped to the [0-3] range if it is out of range."""
     data = setup_schedule_mixin_tests
-    data["test_obj"].schedule_constraint = -1
-    assert data["test_obj"].schedule_constraint == 0
+    data["kwargs"]["schedule_constraint"] = test_value
+    with pytest.raises(ValueError) as cm:
+        _ = MixedInClass(**data["kwargs"])
+    assert str(cm.value) == (
+        f"{test_value} is not a valid ScheduleConstraint"
+    )
 
-    data["test_obj"].schedule_constraint = 4
-    assert data["test_obj"].schedule_constraint == 3
 
+@pytest.mark.parametrize(
+    "test_value", [-1, 4]
+)
+def test_schedule_constraint_attribute_value_is_out_of_range(
+    setup_schedule_mixin_tests, test_value,
+):
+    """schedule_constraint is clamped to the [0-3] range if it is out of range."""
+    data = setup_schedule_mixin_tests
+    with pytest.raises(ValueError) as cm:
+        data["test_obj"].schedule_constraint = test_value
+
+    assert str(cm.value) == (
+        f"{test_value} is not a valid ScheduleConstraint"
+    )
 
 def test_schedule_timing_argument_skipped(setup_schedule_mixin_tests):
     """schedule_timing is equal to 1h if the schedule_timing arg is skipped."""
