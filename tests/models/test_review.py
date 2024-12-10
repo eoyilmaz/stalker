@@ -10,6 +10,7 @@ import pytz
 
 from stalker import Project, Repository, Review, Status, Structure, Task, User, Version
 from stalker.db.session import DBSession
+from stalker.models.mixins import TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -95,7 +96,7 @@ def setup_review_db_test(setup_postgresql_db):
         depends_on=[data["task3"]],
         responsible=[data["user2"]],
         schedule_timing=2,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
     DBSession.add(data["task4"])
 
@@ -106,7 +107,7 @@ def setup_review_db_test(setup_postgresql_db):
         depends_on=[data["task3"]],
         responsible=[data["user2"]],
         schedule_timing=2,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
     DBSession.add(data["task5"])
 
@@ -117,7 +118,7 @@ def setup_review_db_test(setup_postgresql_db):
         depends_on=[data["task3"]],
         responsible=[data["user2"]],
         schedule_timing=2,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
     DBSession.add(data["task6"])
     data["kwargs"] = {"task": data["task1"], "reviewer": data["user1"]}
@@ -550,7 +551,7 @@ def test_approve_method_updates_task_timings(setup_review_db_test):
     td = datetime.timedelta
 
     data["task3"].schedule_timing = 2
-    data["task3"].schedule_unit = "h"
+    data["task3"].schedule_unit = TimeUnit.Hour
     data["task3"].create_time_log(
         resource=data["task3"].resources[0], start=now, end=now + td(hours=1)
     )
@@ -664,14 +665,15 @@ def test_request_revision_method_updates_task_status_correctly_for_a_multi_respo
     assert data["task1"].status == data["status_hrev"]
 
 
+@pytest.mark.parametrize("schedule_unit", ["h", TimeUnit.Hour])
 def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_if_all_request_revision(
-    setup_review_db_test,
+    setup_review_db_test, schedule_unit
 ):
     """request_revision updates task timing for a Task with multiple responsible."""
     data = setup_review_db_test
     data["task1"].responsible = [data["user1"], data["user2"]]
     data["task1"].schedule_timing = 3
-    data["task1"].schedule_unit = "h"
+    data["task1"].schedule_unit = schedule_unit
 
     assert data["task1"].status == data["status_rts"]
 
@@ -694,24 +696,29 @@ def test_request_revision_method_updates_task_timing_correctly_for_a_multi_respo
     review2 = reviews[1]
 
     review1.request_revision(
-        schedule_timing=2, schedule_unit="h", description="do some 2 hours extra work"
+        schedule_timing=2,
+        schedule_unit=schedule_unit,
+        description="do some 2 hours extra work",
     )
     assert data["task1"].status == data["status_prev"]
 
     # first reviewer
     review2.request_revision(
-        schedule_timing=5, schedule_unit="h", description="do some 5 hours extra work"
+        schedule_timing=5,
+        schedule_unit=schedule_unit,
+        description="do some 5 hours extra work",
     )
 
     assert data["task1"].status == data["status_hrev"]
 
     # check the timing values
     assert data["task1"].schedule_timing == 8
-    assert data["task1"].schedule_unit == "h"
+    assert data["task1"].schedule_unit == TimeUnit.Hour
 
 
+@pytest.mark.parametrize("schedule_unit", ["h", TimeUnit.Hour])
 def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_with_exactly_the_same_amount_of_schedule_timing_as_the_given_revision_timing(
-    setup_review_db_test,
+    setup_review_db_test, schedule_unit
 ):
     """request_revision updates the task timing for a Task with multiple responsible.
 
@@ -721,7 +728,7 @@ def test_request_revision_method_updates_task_timing_correctly_for_a_multi_respo
     data = setup_review_db_test
     data["task1"].responsible = [data["user1"], data["user2"]]
     data["task1"].schedule_timing = 8
-    data["task1"].schedule_unit = "h"
+    data["task1"].schedule_unit = schedule_unit
 
     assert data["task1"].status == data["status_rts"]
 
@@ -744,24 +751,29 @@ def test_request_revision_method_updates_task_timing_correctly_for_a_multi_respo
     review2 = reviews[1]
 
     review1.request_revision(
-        schedule_timing=2, schedule_unit="h", description="do some 2 hours extra work"
+        schedule_timing=2,
+        schedule_unit=schedule_unit,
+        description="do some 2 hours extra work",
     )
     assert data["task1"].status == data["status_prev"]
 
     # first reviewer
     review2.request_revision(
-        schedule_timing=5, schedule_unit="h", description="do some 5 hours extra work"
+        schedule_timing=5,
+        schedule_unit=schedule_unit,
+        description="do some 5 hours extra work",
     )
 
     assert data["task1"].status == data["status_hrev"]
 
     # check the timing values
     assert data["task1"].schedule_timing == 8
-    assert data["task1"].schedule_unit == "h"
+    assert data["task1"].schedule_unit == TimeUnit.Hour
 
 
+@pytest.mark.parametrize("schedule_unit", ["h", TimeUnit.Hour])
 def test_request_revision_method_updates_task_timing_correctly_for_a_multi_responsible_task_with_more_schedule_timing_then_given_revision_timing(
-    setup_review_db_test,
+    setup_review_db_test, schedule_unit
 ):
     """request_revision updates the task timing for a Task with multiple responsible.
 
@@ -771,7 +783,7 @@ def test_request_revision_method_updates_task_timing_correctly_for_a_multi_respo
     data = setup_review_db_test
     data["task1"].responsible = [data["user1"], data["user2"]]
     data["task1"].schedule_timing = 100
-    data["task1"].schedule_unit = "h"
+    data["task1"].schedule_unit = schedule_unit
 
     assert data["task1"].status == data["status_rts"]
 
@@ -794,20 +806,24 @@ def test_request_revision_method_updates_task_timing_correctly_for_a_multi_respo
     review2 = reviews[1]
 
     review1.request_revision(
-        schedule_timing=2, schedule_unit="h", description="do some 2 hours extra work"
+        schedule_timing=2,
+        schedule_unit=schedule_unit,
+        description="do some 2 hours extra work",
     )
     assert data["task1"].status == data["status_prev"]
 
     # first reviewer
     review2.request_revision(
-        schedule_timing=5, schedule_unit="h", description="do some 5 hours extra work"
+        schedule_timing=5,
+        schedule_unit=schedule_unit,
+        description="do some 5 hours extra work",
     )
 
     assert data["task1"].status == data["status_hrev"]
 
     # check the timing values
     assert data["task1"].schedule_timing == 100
-    assert data["task1"].schedule_unit == "h"
+    assert data["task1"].schedule_unit == TimeUnit.Hour
 
 
 def test_review_set_property_return_all_the_revision_instances_with_same_review_number(

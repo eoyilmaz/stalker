@@ -32,7 +32,7 @@ from stalker import (
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import CircularDependencyError
-from stalker.models.mixins import DateRangeMixin, ScheduleConstraint
+from stalker.models.mixins import DateRangeMixin, ScheduleConstraint, TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -155,9 +155,9 @@ def setup_task_tests():
         "persistent_allocation": True,
         "watchers": [data["test_user3"]],
         "bid_timing": 4,
-        "bid_unit": "d",
+        "bid_unit": TimeUnit.Day,
         "schedule_timing": 1,
-        "schedule_unit": "d",
+        "schedule_unit": TimeUnit.Day,
         "start": datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
         "end": datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
         "depends_on": [data["test_dependent_task1"], data["test_dependent_task2"]],
@@ -1210,6 +1210,10 @@ def test_time_logs_attr_is_not_a_list_of_timelog_instances(setup_task_tests):
         [23, "d", 23 * 9 * 3600],
         [2, "w", 2 * 45 * 3600],
         [2.5, "m", 2.5 * 4 * 45 * 3600],
+        [10, TimeUnit.Hour, 10 * 3600],
+        [23, TimeUnit.Day, 23 * 9 * 3600],
+        [2, TimeUnit.Week, 2 * 45 * 3600],
+        [2.5, TimeUnit.Month, 2.5 * 4 * 45 * 3600],
         # [
         #     3.1,
         #     "y",
@@ -1238,6 +1242,10 @@ def test_schedule_seconds_is_working_as_expected_for_an_effort_based_task_no_stu
         [23, "d", 23 * 8 * 3600],
         [2, "w", 2 * 40 * 3600],
         [2.5, "m", 2.5 * 4 * 40 * 3600],
+        [10, TimeUnit.Hour, 10 * 3600],
+        [23, TimeUnit.Day, 23 * 8 * 3600],
+        [2, TimeUnit.Week, 2 * 40 * 3600],
+        [2.5, TimeUnit.Month, 2.5 * 4 * 40 * 3600],
         # [
         #     3.1,
         #     "y",
@@ -1276,13 +1284,13 @@ def test_schedule_seconds_is_working_as_expected_for_a_container_task(setup_task
     parent_task = Task(**kwargs)
     kwargs["schedule_model"] = "effort"
     kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 10 * 3600
     new_task.parent = parent_task
     assert parent_task.schedule_seconds == 10 * 3600
     kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 23 * defaults.daily_working_hours * 3600
     new_task.parent = parent_task
@@ -1291,7 +1299,7 @@ def test_schedule_seconds_is_working_as_expected_for_a_container_task(setup_task
         == 10 * 3600 + 23 * defaults.daily_working_hours * 3600
     )
     kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
+    kwargs["schedule_unit"] = TimeUnit.Week
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 2 * defaults.weekly_working_hours * 3600
     new_task.parent = parent_task
@@ -1303,7 +1311,7 @@ def test_schedule_seconds_is_working_as_expected_for_a_container_task(setup_task
     )
 
     kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
+    kwargs["schedule_unit"] = TimeUnit.Month
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 2.5 * 4 * defaults.weekly_working_hours * 3600
     new_task.parent = parent_task
@@ -1316,7 +1324,7 @@ def test_schedule_seconds_is_working_as_expected_for_a_container_task(setup_task
     )
 
     kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
+    kwargs["schedule_unit"] = TimeUnit.Year
     new_task = Task(**kwargs)
 
     assert new_task.schedule_seconds == pytest.approx(
@@ -1346,7 +1354,7 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
     parent_task = Task(**kwargs)
     kwargs["schedule_model"] = "effort"
     kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 10 * 3600
     new_task.parent = parent_task
@@ -1362,7 +1370,7 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
     new_task.parent = parent_task
     assert parent_task.schedule_seconds == 10 * 3600
     kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 23 * defaults.daily_working_hours * 3600
     new_task.parent = parent_task
@@ -1372,7 +1380,7 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
     )
 
     kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
+    kwargs["schedule_unit"] = TimeUnit.Week
     new_task = Task(**kwargs)
 
     assert new_task.schedule_seconds == 2 * defaults.weekly_working_hours * 3600
@@ -1386,7 +1394,7 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
     )
 
     kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
+    kwargs["schedule_unit"] = TimeUnit.Month
     new_task = Task(**kwargs)
 
     assert new_task.schedule_seconds == 2.5 * 4 * defaults.weekly_working_hours * 3600
@@ -1401,7 +1409,7 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
     )
 
     kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
+    kwargs["schedule_unit"] = TimeUnit.Year
     new_task = Task(**kwargs)
 
     assert new_task.schedule_seconds == pytest.approx(
@@ -1433,20 +1441,20 @@ def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_dee
     assert parent_task2.schedule_seconds == 9 * 3600
     parent_task2.schedule_timing = 5
     assert parent_task2.schedule_seconds == 5 * 9 * 3600
-    parent_task2.schedule_unit = "h"
+    parent_task2.schedule_unit = TimeUnit.Hour
     assert parent_task2.schedule_seconds == 5 * 3600
     parent_task1.parent = parent_task2
     assert parent_task2.schedule_seconds == 9 * 3600
     # create another child task for parent_task2
     child_task = Task(**kwargs)
     child_task.schedule_timing = 10
-    child_task.schedule_unit = "h"
+    child_task.schedule_unit = TimeUnit.Hour
     assert child_task.schedule_seconds == 10 * 3600
     parent_task2.children.append(child_task)
     assert parent_task2.schedule_seconds, 10 * 3600 + 9 * 3600
     kwargs["schedule_model"] = "effort"
     kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 10 * 3600
     new_task.parent = parent_task1
@@ -1465,7 +1473,7 @@ def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_dee
     assert parent_task1.schedule_seconds == 10 * 3600
     assert parent_task2.schedule_seconds == 10 * 3600 + 10 * 3600
     kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 23 * defaults.daily_working_hours * 3600
     new_task.parent = parent_task1
@@ -1480,7 +1488,7 @@ def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_dee
     )
 
     kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
+    kwargs["schedule_unit"] = TimeUnit.Week
     new_task = Task(**kwargs)
     assert new_task.schedule_seconds == 2 * defaults.weekly_working_hours * 3600
     new_task.parent = parent_task1
@@ -1509,7 +1517,7 @@ def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_dee
     )
 
     kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
+    kwargs["schedule_unit"] = TimeUnit.Month
     new_task = Task(**kwargs)
 
     assert new_task.schedule_seconds == 2.5 * 4 * defaults.weekly_working_hours * 3600
@@ -1533,7 +1541,7 @@ def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_dee
     )
 
     kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
+    kwargs["schedule_unit"] = TimeUnit.Year
     new_task = Task(**kwargs)
 
     assert new_task.schedule_seconds == pytest.approx(
@@ -2272,14 +2280,16 @@ def test_end_value_is_calculated_with_the_schedule_timing_and_schedule_unit(
     kwargs["start"] = datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
     kwargs.pop("end")
     kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
 
     new_task = Task(**kwargs)
     assert new_task.end == datetime.datetime(2013, 4, 17, 10, 0, tzinfo=pytz.utc)
 
     kwargs["schedule_timing"] = 5
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     new_task = Task(**kwargs)
+    print(new_task.end)
+    print(type(new_task.end))
     assert new_task.end == datetime.datetime(2013, 4, 22, 0, 0, tzinfo=pytz.utc)
 
 
@@ -2296,7 +2306,7 @@ def test_start_calc_with_schedule_timing_and_schedule_unit_if_schedule_constrain
     kwargs["end"] = datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
     kwargs["schedule_constraint"] = ScheduleConstraint.End
     kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
 
     new_task = Task(**kwargs)
     assert new_task.end == datetime.datetime(2013, 4, 18, 0, 0, tzinfo=pytz.utc)
@@ -2315,7 +2325,7 @@ def test_start_and_end_values_are_not_touched_if_the_schedule_constraint_is_set_
     kwargs["end"] = datetime.datetime(2013, 4, 27, 0, 0, tzinfo=pytz.utc)
     kwargs["schedule_constraint"] = ScheduleConstraint.Both
     kwargs["schedule_timing"] = 100
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
 
     new_task = Task(**kwargs)
     assert new_task.start == datetime.datetime(2013, 4, 17, 0, 0, tzinfo=pytz.utc)
@@ -2515,7 +2525,7 @@ def test_bid_unit_arg_is_skipped(setup_task_tests):
     """
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     kwargs.pop("bid_unit")
     new_task = Task(**kwargs)
     assert new_task.schedule_unit == kwargs["schedule_unit"]
@@ -2529,7 +2539,7 @@ def test_bid_unit_arg_is_none(setup_task_tests):
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["bid_unit"] = None
-    kwargs["schedule_unit"] = "min"
+    kwargs["schedule_unit"] = TimeUnit.Minute
     new_task = Task(**kwargs)
     assert new_task.schedule_unit == kwargs["schedule_unit"]
     assert new_task.bid_unit == new_task.schedule_unit
@@ -2540,7 +2550,7 @@ def test_bid_unit_attr_is_set_to_none(setup_task_tests):
     data = setup_task_tests
     new_task = Task(**data["kwargs"])
     new_task.bid_unit = None
-    assert new_task.bid_unit == "h"
+    assert new_task.bid_unit == TimeUnit.Hour
 
 
 def test_bid_unit_arg_is_not_a_str(setup_task_tests):
@@ -2552,8 +2562,9 @@ def test_bid_unit_arg_is_not_a_str(setup_task_tests):
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
-        "'y'] showing the unit of the bid timing of this Task, not int: '10'"
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not int: '10'"
     )
 
 
@@ -2565,8 +2576,9 @@ def test_bid_unit_attr_is_not_a_str(setup_task_tests):
         new_task.bid_unit = 10
 
     assert str(cm.value) == (
-        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
-        "'y'] showing the unit of the bid timing of this Task, not int: '10'"
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not int: '10'"
     )
 
 
@@ -2574,7 +2586,7 @@ def test_bid_unit_arg_is_working_as_expected(setup_task_tests):
     """bid_unit arg is working as expected."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
-    kwargs["bid_unit"] = "h"
+    kwargs["bid_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
     assert new_task.bid_unit == kwargs["bid_unit"]
 
@@ -2582,7 +2594,7 @@ def test_bid_unit_arg_is_working_as_expected(setup_task_tests):
 def test_bid_unit_attr_is_working_as_expected(setup_task_tests):
     """bid_unit attr is working as expected."""
     data = setup_task_tests
-    test_value = "h"
+    test_value = TimeUnit.Hour
     new_task = Task(**data["kwargs"])
     new_task.bid_unit = test_value
     assert new_task.bid_unit == test_value
@@ -2599,8 +2611,9 @@ def test_bid_unit_arg_value_not_in_defaults_datetime_units(setup_task_tests):
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
-        "'y'] showing the unit of the bid timing of this Task, not str: 'os'"
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not 'os'"
     )
 
 
@@ -2614,8 +2627,9 @@ def test_bid_unit_attr_value_not_in_defaults_datetime_units(setup_task_tests):
         new_task.bid_unit = "sys"
 
     assert str(cm.value) == (
-        "Task.bid_unit should be a string value one of ['min', 'h', 'd', 'w', 'm', "
-        "'y'] showing the unit of the bid timing of this Task, not str: 'sys'"
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not 'sys'"
     )
 
 
@@ -2704,7 +2718,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_root_task(setup_task_tests):
     kwargs = copy.copy(data["kwargs"])
     kwargs["parent"] = None
     kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     kwargs["schedule_model"] = "effort"
     kwargs["depends_on"] = []
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
@@ -2774,7 +2788,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task(setup_task_tests):
 
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     kwargs["schedule_model"] = "effort"
     kwargs["depends_on"] = [dep_task1, dep_task2]
 
@@ -2845,7 +2859,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_timelogs(
 
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     kwargs["schedule_model"] = "effort"
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
@@ -2917,7 +2931,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_deta
     dep_task2 = Task(**kwargs)
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     kwargs["schedule_model"] = "effort"
     kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
@@ -2928,13 +2942,13 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_deta
     tdep1 = new_task2.task_depends_on[0]
     tdep1.dependency_target = "onstart"
     tdep1.gap_timing = 2
-    tdep1.gap_unit = "d"
+    tdep1.gap_unit = TimeUnit.Day
     tdep1.gap_model = "length"
 
     tdep2 = new_task2.task_depends_on[1]
     tdep1.dependency_target = "onstart"
     tdep2.gap_timing = 4
-    tdep2.gap_unit = "d"
+    tdep2.gap_unit = TimeUnit.Day
     tdep2.gap_model = "duration"
 
     # create some random ids
@@ -2999,7 +3013,7 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
 
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     kwargs["schedule_model"] = "effort"
     kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
@@ -3012,13 +3026,13 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
     tdep1 = new_task2.task_depends_on[0]
     tdep1.dependency_target = "onstart"
     tdep1.gap_timing = 2
-    tdep1.gap_unit = "d"
+    tdep1.gap_unit = TimeUnit.Day
     tdep1.gap_model = "length"
 
     tdep2 = new_task2.task_depends_on[1]
     tdep1.dependency_target = "onstart"
     tdep2.gap_timing = 4
-    tdep2.gap_unit = "d"
+    tdep2.gap_unit = TimeUnit.Day
     tdep2.gap_model = "duration"
 
     # create some random id
@@ -3082,7 +3096,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_container_task(setup_task_test
 
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     kwargs["schedule_model"] = "effort"
     kwargs["depends_on"] = [dep_task1, dep_task2]
 
@@ -3194,7 +3208,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_container_task_with_dependency
 
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     kwargs["schedule_model"] = "effort"
     kwargs["depends_on"] = [dep_task1, dep_task2]
 
@@ -3304,7 +3318,7 @@ def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(setup_task_tests):
 
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     kwargs["schedule_model"] = "effort"
     kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["schedule_constraint"] = 3
@@ -4545,7 +4559,8 @@ def test_good_attr_is_working_as_expected(setup_task_tests):
     assert new_task.good == new_good
 
 
-def test_reschedule_on_a_container_task(setup_task_tests):
+@pytest.mark.parametrize("schedule_unit", ["d", TimeUnit.Day])
+def test_reschedule_on_a_container_task(setup_task_tests, schedule_unit):
     """_reschedule on a container task will return immediately."""
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
@@ -4560,7 +4575,7 @@ def test_reschedule_on_a_container_task(setup_task_tests):
 
     start = task_a.start
     end = task_a.end
-    assert task_a._reschedule(10, "d") is None
+    assert task_a._reschedule(10, schedule_unit) is None
     assert task_a.start == start
     assert task_a.end == end
 
@@ -4663,9 +4678,9 @@ def setup_task_db_tests(setup_postgresql_db):
         "persistent_allocation": True,
         "watchers": [data["test_user3"]],
         "bid_timing": 4,
-        "bid_unit": "d",
+        "bid_unit": TimeUnit.Day,
         "schedule_timing": 1,
-        "schedule_unit": "d",
+        "schedule_unit": TimeUnit.Day,
         "start": datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
         "end": datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
         "depends_on": [data["test_dependent_task1"], data["test_dependent_task2"]],
@@ -5450,7 +5465,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
 
     # -------------- HOURS --------------
     kwargs["schedule_timing"] = 10
-    kwargs["schedule_unit"] = "h"
+    kwargs["schedule_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
 
     # create a time_log of 2 hours
@@ -5465,7 +5480,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
 
     # -------------- DAYS --------------
     kwargs["schedule_timing"] = 23
-    kwargs["schedule_unit"] = "d"
+    kwargs["schedule_unit"] = TimeUnit.Day
     new_task = Task(**kwargs)
 
     # create a time_log of 5 days
@@ -5495,7 +5510,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
 
     # ------------------- WEEKS ------------------
     kwargs["schedule_timing"] = 2
-    kwargs["schedule_unit"] = "w"
+    kwargs["schedule_unit"] = TimeUnit.Week
     new_task = Task(**kwargs)
 
     # create a time_log of 2 hours
@@ -5530,7 +5545,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
 
     # ------------------ MONTH -------------------
     kwargs["schedule_timing"] = 2.5
-    kwargs["schedule_unit"] = "m"
+    kwargs["schedule_unit"] = TimeUnit.Month
     new_task = Task(**kwargs)
 
     # create a time_log of 1 month or 30 days, remaining_seconds can be
@@ -5551,7 +5566,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
 
     # ------------------ YEARS ---------------------
     kwargs["schedule_timing"] = 3.1
-    kwargs["schedule_unit"] = "y"
+    kwargs["schedule_unit"] = TimeUnit.Year
     new_task = Task(**kwargs)
 
     # create a time_log of 1 month or 30 days, remaining_seconds can be

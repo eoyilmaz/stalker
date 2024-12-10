@@ -13,6 +13,7 @@ from stalker import Task
 from stalker import TaskDependency
 from stalker import User
 from stalker.db.session import DBSession
+from stalker.models.mixins import TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -68,7 +69,7 @@ def setup_task_dependency_db_test(setup_postgresql_db):
         "depends_on": data["test_task2"],
         "dependency_target": "onend",
         "gap_timing": 0,
-        "gap_unit": "h",
+        "gap_unit": TimeUnit.Hour,
         "gap_model": "length",
     }
     return data
@@ -290,10 +291,10 @@ def test_gap_unit_argument_is_not_a_str_instance(setup_task_dependency_db_test):
     with pytest.raises(TypeError) as cm:
         TaskDependency(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_unit should be a string value one of "
-        "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap "
-        "timing of this TaskDependency, not int: '231'"
+    assert str(cm.value) == (
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not int: '231'"
     )
 
 
@@ -305,9 +306,9 @@ def test_gap_unit_attribute_is_not_a_str_instance(setup_task_dependency_db_test)
         tdep.gap_unit = 2342
 
     assert str(cm.value) == (
-        "TaskDependency.gap_unit should be a string value one of "
-        "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap "
-        "timing of this TaskDependency, not int: '2342'"
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not int: '2342'"
     )
 
 
@@ -318,10 +319,10 @@ def test_gap_unit_argument_value_is_not_in_the_enum_list(setup_task_dependency_d
     with pytest.raises(ValueError) as cm:
         TaskDependency(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_unit should be a string value one of "
-        "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap "
-        "timing of this TaskDependency, not str"
+    assert str(cm.value) == (
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not 'not in the list'"
     )
 
 
@@ -334,30 +335,36 @@ def test_gap_unit_attribute_value_is_not_in_the_enum_list(
     with pytest.raises(ValueError) as cm:
         tdep.gap_unit = "not in the list"
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_unit should be a string value one of "
-        "['min', 'h', 'd', 'w', 'm', 'y'] showing the unit of the gap "
-        "timing of this TaskDependency, not str"
+    assert str(cm.value) == (
+        "unit should be a TimeUnit enum value or one of ['Minute', 'Hour', "
+        "'Day', 'Week', 'Month', 'Year', 'min', 'h', 'd', 'w', 'm', 'y'], "
+        "not 'not in the list'"
     )
 
 
-def test_gap_unit_argument_is_working_as_expected(setup_task_dependency_db_test):
+@pytest.mark.parametrize("gap_unit", ["y", TimeUnit.Year])
+def test_gap_unit_argument_is_working_as_expected(
+    setup_task_dependency_db_test, gap_unit
+):
     """gap_unit argument value is correctly passed to the gap_unit attribute on init."""
     data = setup_task_dependency_db_test
-    test_value = "y"
+    test_value = gap_unit
     data["kwargs"]["gap_unit"] = test_value
     tdep = TaskDependency(**data["kwargs"])
-    assert tdep.gap_unit == test_value
+    assert tdep.gap_unit == TimeUnit.Year
 
 
-def test_gap_unit_attribute_is_working_as_expected(setup_task_dependency_db_test):
+@pytest.mark.parametrize("gap_unit", ["w", TimeUnit.Week])
+def test_gap_unit_attribute_is_working_as_expected(
+    setup_task_dependency_db_test, gap_unit
+):
     """gap_unit attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
-    test_value = "w"
-    assert tdep.gap_unit != test_value
+    test_value = gap_unit
+    assert tdep.gap_unit != TimeUnit.to_unit(test_value)
     tdep.gap_unit = test_value
-    assert tdep.gap_unit == test_value
+    assert tdep.gap_unit == TimeUnit.to_unit(test_value)
 
 
 def test_gap_model_argument_is_skipped(setup_task_dependency_db_test):

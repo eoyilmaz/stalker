@@ -28,6 +28,7 @@ from stalker.config import Config
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 
+from stalker.models.mixins import TimeUnit
 from tests.utils import create_random_db, drop_db, get_server_details_from_url
 
 log.logging_level = logging.INFO
@@ -134,9 +135,9 @@ kwargs = {
     "persistent_allocation": True,
     "watchers": [test_user3],
     "bid_timing": 4,
-    "bid_unit": "d",
+    "bid_unit": TimeUnit.Day,
     "schedule_timing": 1,
-    "schedule_unit": "d",
+    "schedule_unit": TimeUnit.Day,
     "start": datetime.datetime(2013, 4, 8, 13, 0, tzinfo=pytz.utc),
     "end": datetime.datetime(2013, 4, 8, 18, 0, tzinfo=pytz.utc),
     "depends_on": [test_dependent_task1, test_dependent_task2],
@@ -176,7 +177,7 @@ kwargs["schedule_model"] = "effort"
 
 # -------------- HOURS --------------
 kwargs["schedule_timing"] = 10
-kwargs["schedule_unit"] = "h"
+kwargs["schedule_unit"] = TimeUnit.Hour
 new_task = Task(**kwargs)
 DBSession.add(new_task)
 

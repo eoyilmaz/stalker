@@ -12,7 +12,7 @@ from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.link import Link
-from stalker.models.mixins import ProjectMixin, ScheduleMixin, StatusMixin
+from stalker.models.mixins import ProjectMixin, ScheduleMixin, StatusMixin, TimeUnit
 from stalker.models.status import Status
 from stalker.utils import walk_hierarchy
 
@@ -73,8 +73,9 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             float value. Only useful if it is a review which ends up requesting
             a revision.
 
-        schedule_unit (str): Holds the timing unit of this review. Only useful
-            if it is a review which ends up requesting a revision.
+        schedule_unit (Union[str, TimeUnit]): Holds the timing unit of this
+            review. Only useful if it is a review which ends up requesting a
+            revision.
 
         schedule_model (str): It holds the schedule model of this review. Only
             useful if it is a review which ends up requesting a revision.
@@ -292,7 +293,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
     def request_revision(
         self,
         schedule_timing: Union[float, int] = 1,
-        schedule_unit: str = "h",
+        schedule_unit: Union[str, TimeUnit] = TimeUnit.Hour,
         description: str = "",
     ) -> None:
         """Finalize the review by requesting a revision.
@@ -300,8 +301,8 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         Args:
             schedule_timing (Union[float, int]): The schedule timing value for
                 this Review instance.
-            schedule_unit (str): The schedule unit value for this Review
-                instance.
+            schedule_unit (Union[str, TimeUnit]): The schedule unit value for
+                this Review instance.
             description (str): The description for this Review instance.
         """
         # set self timing values

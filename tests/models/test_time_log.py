@@ -15,6 +15,7 @@ from sqlalchemy.exc import IntegrityError
 from stalker import Project, Repository, Status, StatusList, Task, TimeLog, User
 from stalker.db.session import DBSession
 from stalker.exceptions import DependencyViolationError, OverBookedError, StatusError
+from stalker.models.mixins import TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -68,7 +69,7 @@ def setup_time_log_db_tests(setup_postgresql_db):
         name="test task 1",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         resources=[data["test_resource1"]],
     )
     DBSession.add(data["test_task1"])
@@ -77,7 +78,7 @@ def setup_time_log_db_tests(setup_postgresql_db):
         name="test task 2",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         resources=[data["test_resource1"]],
     )
     DBSession.add(data["test_task2"])
@@ -781,7 +782,7 @@ def tests_overbooked_error_fallback_to_python_if_no_db_is_setup_self():
         name="test task 1",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         resources=[data["test_resource1"]],
         status_list=data["task_status_list"],
     )
@@ -790,7 +791,7 @@ def tests_overbooked_error_fallback_to_python_if_no_db_is_setup_self():
         name="test task 2",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         resources=[data["test_resource1"]],
         status_list=data["task_status_list"],
     )
@@ -871,7 +872,7 @@ def tests_overbooked_error_fallback_to_python_if_no_db_is_setup_new_tlog():
         name="test task 1",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         resources=[data["test_resource1"]],
         status_list=data["task_status_list"],
     )
@@ -880,7 +881,7 @@ def tests_overbooked_error_fallback_to_python_if_no_db_is_setup_new_tlog():
         name="test task 2",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         resources=[data["test_resource1"]],
         status_list=data["task_status_list"],
     )
@@ -1178,7 +1179,7 @@ def test_time_log_creation_that_violates_dependency_condition_wip_cmpl_onend(
         name="test task 2",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         depends_on=[task],
         resources=[data["test_resource2"]],
     )
@@ -1236,7 +1237,7 @@ def test_time_log_creation_that_violates_dependency_condition_wip_cmpl_onstart(
         name="test task 2",
         project=data["test_project"],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         depends_on=[task],
         resources=[data["test_resource2"]],
     )

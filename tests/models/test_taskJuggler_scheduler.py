@@ -23,6 +23,7 @@ from stalker import Project
 from stalker import Task
 from stalker import TimeLog
 from stalker.db.session import DBSession
+from stalker.models.mixins import TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -158,7 +159,7 @@ def setup_tsk_juggler_scheduler_db_tests(setup_postgresql_db):
         ],
         schedule_model=0,
         schedule_timing=50,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
     DBSession.add(data["test_task1"])
 
@@ -174,7 +175,7 @@ def setup_tsk_juggler_scheduler_db_tests(setup_postgresql_db):
         depends_on=[data["test_task1"]],
         schedule_model=0,
         schedule_timing=60,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         priority=800,
     )
     DBSession.save(data["test_task2"])
@@ -357,7 +358,7 @@ def test_schedule_will_raise_tj3_command_errors_as_a_runtime_error(
         name="Dummy Task 1",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user1"]],
     )
 
@@ -365,7 +366,7 @@ def test_schedule_will_raise_tj3_command_errors_as_a_runtime_error(
         name="Dummy Task 2",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user2"]],
     )
     DBSession.add_all([dummy_project, dt1, dt2])
@@ -602,7 +603,7 @@ def test_tasks_of_given_projects_are_correctly_scheduled(
         name="Dummy Task 1",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user1"]],
     )
 
@@ -610,7 +611,7 @@ def test_tasks_of_given_projects_are_correctly_scheduled(
         name="Dummy Task 2",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user2"]],
     )
     DBSession.add_all([dummy_project, dt1, dt2])
@@ -675,7 +676,7 @@ def test_csv_file_does_not_exist_returns_without_scheduling(
         name="Dummy Task 1",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user1"]],
     )
 
@@ -683,7 +684,7 @@ def test_csv_file_does_not_exist_returns_without_scheduling(
         name="Dummy Task 2",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user2"]],
     )
     DBSession.add_all([dummy_project, dt1, dt2])

@@ -21,6 +21,7 @@ from stalker import (
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import StatusError
+from stalker.models.mixins import TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -104,7 +105,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -116,7 +117,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -129,7 +130,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -145,7 +146,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -158,7 +159,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -170,7 +171,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -183,7 +184,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -195,7 +196,7 @@ def setup_task_status_workflow_tests():
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -237,7 +238,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         resources=[data["test_user2"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
 
@@ -1335,7 +1336,10 @@ def test_request_revision_in_wip_leaf_task(setup_task_status_workflow_tests):
 
 
 # HREV
-def test_request_revision_in_hrev_leaf_task(setup_task_status_workflow_tests):
+@pytest.mark.parametrize("schedule_unit", ["h", TimeUnit.Hour])
+def test_request_revision_in_hrev_leaf_task(
+    setup_task_status_workflow_tests, schedule_unit
+):
     """StatusError raised if the request_revision action is used in a HREV leaf task."""
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_hrev"]
@@ -1344,19 +1348,23 @@ def test_request_revision_in_hrev_leaf_task(setup_task_status_workflow_tests):
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": schedule_unit,
     }
     with pytest.raises(StatusError) as cm:
         data["test_task3"].request_revision(**kw)
 
-    assert (
-        str(cm.value) == "Test Task 3 (id: 37) is a HREV task, and it is not suitable "
+    assert str(cm.value) == (
+        "Test Task 3 (id: 37) is a HREV task, and it is not suitable "
         "for requesting a revision, please supply a PREV or CMPL task"
     )
 
 
 # OH
-def test_request_revision_in_oh_leaf_task(setup_task_status_workflow_tests):
+@pytest.mark.parametrize("schedule_unit", ["h", TimeUnit.Hour])
+def test_request_revision_in_oh_leaf_task(
+    setup_task_status_workflow_tests,
+    schedule_unit,
+):
     """StatusError raised if the request_revision action is used in a OH leaf task."""
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_oh"]
@@ -1365,7 +1373,7 @@ def test_request_revision_in_oh_leaf_task(setup_task_status_workflow_tests):
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": schedule_unit,
     }
     with pytest.raises(StatusError) as cm:
         data["test_task3"].request_revision(**kw)
@@ -1378,7 +1386,10 @@ def test_request_revision_in_oh_leaf_task(setup_task_status_workflow_tests):
 
 
 # STOP
-def test_request_revision_in_stop_leaf_task(setup_task_status_workflow_tests):
+@pytest.mark.parametrize("schedule_unit", ["h", TimeUnit.Hour])
+def test_request_revision_in_stop_leaf_task(
+    setup_task_status_workflow_tests, schedule_unit
+):
     """StatusError raised if the request_revision action is used in a STOP leaf task."""
     data = setup_task_status_workflow_tests
     data["test_task3"].status = data["status_stop"]
@@ -1387,7 +1398,7 @@ def test_request_revision_in_stop_leaf_task(setup_task_status_workflow_tests):
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": schedule_unit,
     }
     with pytest.raises(StatusError) as cm:
         data["test_task3"].request_revision(**kw)
@@ -1447,7 +1458,7 @@ def test_hold_in_wip_leaf_task_schedule_values(setup_task_status_workflow_tests)
     data["test_task3"].status = data["status_wip"]
     data["test_task3"].hold()
     assert data["test_task3"].schedule_timing == 10
-    assert data["test_task3"].schedule_unit == "d"
+    assert data["test_task3"].schedule_unit == TimeUnit.Day
 
 
 # WIP: Priority is set to 0
@@ -1509,7 +1520,7 @@ def test_hold_in_drev_leaf_task_schedule_values_are_intact(
     data["test_task3"].status = data["status_drev"]
     data["test_task3"].hold()
     assert data["test_task3"].schedule_timing == 10
-    assert data["test_task3"].schedule_unit == "d"
+    assert data["test_task3"].schedule_unit == TimeUnit.Day
 
 
 # DREV: Priority is set to 0
@@ -1631,7 +1642,7 @@ def test_stop_in_wip_leaf_task_schedule_values_clamped(
     data["test_task8"].status = data["status_wip"]
     data["test_task8"].stop()
     assert data["test_task8"].schedule_timing == 2
-    assert data["test_task8"].schedule_unit == "h"
+    assert data["test_task8"].schedule_unit == TimeUnit.Hour
 
 
 # WIP: Dependency Status: WFD -> RTS
@@ -1814,7 +1825,7 @@ def test_stop_in_drev_leaf_task_schedule_values_are_clamped(
     data["test_task8"].status = data["status_drev"]
     data["test_task8"].stop()
     assert data["test_task8"].schedule_timing == 4
-    assert data["test_task8"].schedule_unit == "h"
+    assert data["test_task8"].schedule_unit == TimeUnit.Hour
 
 
 # DREV: parent statuses
@@ -2358,7 +2369,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task1"])
@@ -2370,7 +2381,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task2"])
@@ -2383,7 +2394,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task3"])
@@ -2400,7 +2411,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task4"])
@@ -2413,7 +2424,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task5"])
@@ -2425,7 +2436,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task6"])
@@ -2438,7 +2449,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task7"])
@@ -2450,7 +2461,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         start=datetime.datetime(2013, 6, 20, 0, 0, tzinfo=pytz.utc),
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task8"])
@@ -2476,7 +2487,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         resources=[data["test_user2"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
         schedule_model="effort",
     )
     DBSession.add(data["test_task9"])
@@ -2591,7 +2602,7 @@ def test_request_review_in_wip_leaf_task_review_instances_review_number(
         reviewer=data["test_user1"],
         description="some description",
         schedule_timing=1,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
 
     # the new_review.revision number still should be 1
@@ -2714,14 +2725,14 @@ def test_request_revision_in_cmpl_leaf_task_cmpl_dependent_task_dependency_targe
 
     assert data["test_task4"].status == data["status_prev"]
     for r in reviews:
-        r.request_revision(schedule_timing=1, schedule_unit="h")
+        r.request_revision(schedule_timing=1, schedule_unit=TimeUnit.Hour)
     assert data["test_task4"].status == data["status_hrev"]
 
     kw = {
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     data["test_task9"].request_revision(**kw)
 
@@ -2808,7 +2819,7 @@ def test_request_revision_in_cmpl_leaf_task_cmpl_dependent_task_updated_to_drev(
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     data["test_task9"].request_revision(**kw)
 
@@ -2852,7 +2863,7 @@ def test_request_revision_in_cmpl_leaf_task_dependent_task_parent_status_updated
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     review = data["test_task8"].request_revision(**kw)
 
@@ -2895,7 +2906,7 @@ def test_request_revision_in_cmpl_leaf_task_parent_status_updated_to_wip(
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     review = data["test_task9"].request_revision(**kw)
     assert data["test_asset1"].status == data["status_wip"]
@@ -2937,7 +2948,7 @@ def test_request_revision_in_cmpl_leaf_task_rts_dependent_task_updated_to_wfd(
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     review = data["test_task9"].request_revision(**kw)
     assert data["test_task8"].status == data["status_wfd"]
@@ -2980,12 +2991,12 @@ def test_request_revision_in_cmpl_leaf_task_schedule_info_update(
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     revision = data["test_task3"].request_revision(**kw)
     DBSession.add(revision)
     assert data["test_task3"].schedule_timing == 6
-    assert data["test_task3"].schedule_unit == "h"
+    assert data["test_task3"].schedule_unit == TimeUnit.Hour
 
 
 # CMPL: status update
@@ -3002,7 +3013,7 @@ def test_request_revision_in_cmpl_leaf_task_status_updated_to_hrev(
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     review = data["test_task3"].request_revision(**kw)
     assert data["test_task3"].status == data["status_hrev"]
@@ -3044,7 +3055,7 @@ def test_request_revision_in_cmpl_leaf_task_wip_dependent_task_updated_to_drev(
         "reviewer": data["test_user1"],
         "description": "do something uleyn",
         "schedule_timing": 4,
-        "schedule_unit": "h",
+        "schedule_unit": TimeUnit.Hour,
     }
     review = data["test_task9"].request_revision(**kw)
     assert data["test_task8"].status == data["status_drev"]
@@ -3090,7 +3101,7 @@ def test_request_revision_in_deeper_dependency_setup(
         data["test_task5"].resources[0], now - td(hours=1), now
     )
     data["test_task5"].schedule_timing = 1
-    data["test_task5"].schedule_unit = "h"
+    data["test_task5"].schedule_unit = TimeUnit.Hour
     data["test_task5"].status = data["status_cmpl"]
 
     # test_task6
@@ -3099,7 +3110,7 @@ def test_request_revision_in_deeper_dependency_setup(
         data["test_task6"].resources[0], now, now + td(hours=1)
     )
     data["test_task6"].schedule_timing = 1
-    data["test_task6"].schedule_unit = "h"
+    data["test_task6"].schedule_unit = TimeUnit.Hour
     data["test_task6"].status = data["status_cmpl"]
 
     # test_task3
@@ -3108,7 +3119,7 @@ def test_request_revision_in_deeper_dependency_setup(
         data["test_task3"].resources[0], now + td(hours=1), now + td(hours=2)
     )
     data["test_task3"].schedule_timing = 1
-    data["test_task3"].schedule_unit = "h"
+    data["test_task3"].schedule_unit = TimeUnit.Hour
     data["test_task3"].status = data["status_cmpl"]
 
     # test_task8
@@ -3117,7 +3128,7 @@ def test_request_revision_in_deeper_dependency_setup(
         data["test_task8"].resources[0], now + td(hours=2), now + td(hours=3)
     )
     data["test_task8"].schedule_timing = 1
-    data["test_task8"].schedule_unit = "h"
+    data["test_task8"].schedule_unit = TimeUnit.Hour
     data["test_task8"].status = data["status_cmpl"]
 
     # test_task9
@@ -3126,7 +3137,7 @@ def test_request_revision_in_deeper_dependency_setup(
         data["test_task9"].resources[0], now + td(hours=3), now + td(hours=4)
     )
     data["test_task9"].schedule_timing = 1
-    data["test_task9"].schedule_unit = "h"
+    data["test_task9"].schedule_unit = TimeUnit.Hour
     data["test_task9"].status = data["status_cmpl"]
 
     # now request a revision to the first task (test_task6)
@@ -3155,7 +3166,7 @@ def test_request_revision_in_prev_leaf_task_new_review_instance_is_created(
         reviewer=data["test_user2"],
         description="some description",
         schedule_timing=1,
-        schedule_unit="w",
+        schedule_unit=TimeUnit.Week,
     )
     assert isinstance(new_review, Review)
 
@@ -3181,7 +3192,7 @@ def test_request_revision_in_prev_leaf_task_review_instances_are_deleted(
         reviewer=data["test_user2"],
         description="some description",
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
 
     # now check if the review instances are not in task3.reviews list
@@ -3227,14 +3238,16 @@ def test_request_revision_in_prev_leaf_task_schedule_info_update_also_considers_
     review1 = reviews[0]
     review2 = reviews[1]
 
-    review1.request_revision(schedule_timing=6, schedule_unit="h", description="")
+    review1.request_revision(
+        schedule_timing=6, schedule_unit=TimeUnit.Hour, description=""
+    )
 
     # now request_revision using the task
     review3 = data["test_task3"].request_revision(
         reviewer=data["test_user1"],
         description="do something uleyn",
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
     assert len(data["test_task3"].reviews) == 2
 
@@ -3243,7 +3256,7 @@ def test_request_revision_in_prev_leaf_task_schedule_info_update_also_considers_
 
     # the final timing should be 12 hours
     assert data["test_task3"].schedule_timing == 10
-    assert data["test_task3"].schedule_unit == "d"
+    assert data["test_task3"].schedule_unit == TimeUnit.Day
 
 
 # PREV: Status updated to HREV
@@ -3259,7 +3272,7 @@ def test_request_revision_in_prev_leaf_task_status_updated_to_hrev(
     reviewer = data["test_user1"]
     description = "do something uleyn"
     schedule_timing = 4
-    schedule_unit = "h"
+    schedule_unit = TimeUnit.Hour
 
     data["test_task3"].request_revision(
         reviewer=reviewer,
@@ -3292,7 +3305,7 @@ def test_request_revision_in_prev_leaf_task_timing_is_extended(
         schedule_unit=schedule_unit,
     )
     assert data["test_task3"].schedule_timing == 10
-    assert data["test_task3"].schedule_unit == "d"
+    assert data["test_task3"].schedule_unit == TimeUnit.Day
 
 
 # OH: DREV dependencies -> DREV
