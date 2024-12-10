@@ -342,7 +342,7 @@ class TimeUnit(PythonEnum):
 class TimeUnitDecorator(TypeDecorator):
     """Store TimeUnit as an str and restore as TimeUnit."""
 
-    impl = String(16)
+    impl = Enum(*[u.value for u in TimeUnit], name="TimeUnit")
 
     def process_bind_param(self, value, dialect) -> str:
         """Return the str value of the TimeUnit.
