@@ -55,6 +55,7 @@ from stalker.models.mixins import (
     DAGMixin,
     DateRangeMixin,
     ReferenceMixin,
+    ScheduleConstraint,
     ScheduleMixin,
     StatusMixin,
 )
@@ -68,13 +69,6 @@ if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.version import Version
 
 logger = get_logger(__name__)
-
-
-# schedule constraints
-CONSTRAIN_NONE = 0
-CONSTRAIN_START = 1
-CONSTRAIN_END = 2
-CONSTRAIN_BOTH = 3
 
 
 BINARY_STATUS_VALUES = {
@@ -861,77 +855,82 @@ class Task(
        :class;`.Budget` s with this information.
 
     Args:
-        project (Project): A Task which doesn't have a parent (a root task) should be
-            created with a :class:`.Project` instance. If it is skipped an no
-            :attr:`.parent` is given then Stalker will raise a RuntimeError. If both
-            the ``project`` and the :attr:`.parent` argument contains data and the
-            project of the Task instance given with parent argument is different than
-            the Project instance given with the ``project`` argument then a
-            RuntimeWarning will be raised and the project of the parent task will be
-            used.
+        project (Project): A Task which doesn't have a parent (a root task)
+            should be created with a :class:`.Project` instance. If it is
+            skipped an no :attr:`.parent` is given then Stalker will raise a
+            RuntimeError. If both the ``project`` and the :attr:`.parent`
+            argument contains data and the project of the Task instance given
+            with parent argument is different than the Project instance given
+            with the ``project`` argument then a RuntimeWarning will be raised
+            and the project of the parent task will be used.
         parent (Task): The parent Task or Project of this Task. Every Task in
-            Stalker should be related with a :class:`.Project` instance. So if no
-            parent task is desired, at least a Project instance should be passed as
-            the parent of the created Task or the Task will be an orphan task and
-            Stalker will raise a RuntimeError.
-        depends_on (List[Task]): A list of :class:`.Task` s that this :class:`.Task` is
-            depending on. A Task cannot depend on itself or any other Task which are
-            already depending on this one in anyway or a CircularDependency error
-            will be raised.
-        resources (List[User]): The :class:`.User` s assigned to this :class:`.Task`. A
-            :class:`.Task` without any resource cannot be scheduled.
-        responsible (List[User]): A list of :class:`.User` instances that is responsible
-            of this task.
-        watchers (List[User]): A list of :class:`.User` those are added this Task
-            instance to their watch list.
-        start (datetime.datetime): The start date and time of this task instance. It is
-            only used if the :attr:`.schedule_constraint` attribute is set to
-            :attr:`.CONSTRAIN_START` or :attr:`.CONSTRAIN_BOTH`. The default value
-            is `datetime.datetime.now(pytz.utc)`.
-        end (datetime.datetime): The end date and time of this task instance. It is only
-            used if the :attr:`.schedule_constraint` attribute is set to
-            :attr:`.CONSTRAIN_END` or :attr:`.CONSTRAIN_BOTH`. The default value is
+            Stalker should be related with a :class:`.Project` instance. So if
+            no parent task is desired, at least a Project instance should be
+            passed as the parent of the created Task or the Task will be an
+            orphan task and Stalker will raise a RuntimeError.
+        depends_on (List[Task]): A list of :class:`.Task` s that this
+            :class:`.Task` is depending on. A Task cannot depend on itself or
+            any other Task which are already depending on this one in anyway or
+            a CircularDependency error will be raised.
+        resources (List[User]): The :class:`.User` s assigned to this
+            :class:`.Task`. A :class:`.Task` without any resource cannot be
+            scheduled.
+        responsible (List[User]): A list of :class:`.User` instances that is
+            responsible of this task.
+        watchers (List[User]): A list of :class:`.User` those are added this
+            Task instance to their watch list.
+        start (datetime.datetime): The start date and time of this task
+            instance. It is only used if the :attr:`.schedule_constraint`
+            attribute is set to :attr:`.ScheduleConstraint.Start` or
+            :attr:`.ScheduleConstraint.Both`. The default value is
             `datetime.datetime.now(pytz.utc)`.
+        end (datetime.datetime): The end date and time of this task instance.
+            It is only used if the :attr:`.schedule_constraint` attribute is
+            set to :attr:`.CONSTRAIN_END` or :attr:`.CONSTRAIN_BOTH`. The
+            default value is `datetime.datetime.now(pytz.utc)`.
         schedule_timing (int): The value of the schedule timing.
         schedule_unit (str): The unit value of the schedule timing. Should be
             one of 'min', 'h', 'd', 'w', 'm', 'y'.
         schedule_constraint (int): The schedule constraint. It is the index
             of the schedule constraints value in
             :class:`stalker.config.Config.task_schedule_constraints`.
-        bid_timing (int): The initial bid for this Task. It can be used in measuring how
-            accurate the initial guess was. It will be compared against the total amount
-            of effort spend doing this task. Can be set to None, which will be set to
-            the schedule_timing_day argument value if there is one or 0.
-        bid_unit (str): The unit of the bid value for this Task. Should be one of the
-            'min', 'h', 'd', 'w', 'm', 'y'.
-        is_milestone (bool): A bool (True or False) value showing if this task is a
-            milestone which doesn't need any resource and effort.
-        priority (int): It is a number between 0 to 1000 which defines the priority of
-            the :class:`.Task`. The higher the value the higher its priority. The
-            default value is 500. Mainly used by TaskJuggler.
+        bid_timing (int): The initial bid for this Task. It can be used in
+            measuring how accurate the initial guess was. It will be compared
+            against the total amount of effort spend doing this task. Can be
+            set to None, which will be set to the schedule_timing_day argument
+            value if there is one or 0.
+        bid_unit (str): The unit of the bid value for this Task. Should be one
+            of the 'min', 'h', 'd', 'w', 'm', 'y'.
+        is_milestone (bool): A bool (True or False) value showing if this task
+            is a milestone which doesn't need any resource and effort.
+        priority (int): It is a number between 0 to 1000 which defines the
+            priority of the :class:`.Task`. The higher the value the higher its
+            priority. The default value is 500. Mainly used by TaskJuggler.
 
-            Higher priority tasks will be scheduled to an early date or at least will
-            tried to be scheduled to an early date then a lower priority task (a task
-            that is using the same resources).
+            Higher priority tasks will be scheduled to an early date or at
+            least will tried to be scheduled to an early date then a lower
+            priority task (a task that is using the same resources).
 
-            In complex projects, a task with a lower priority task may steal resources
-            from a higher priority task, this is due to the internals of TaskJuggler, it
-            tries to increase the resource utilization by letting the lower priority
-            task to be completed earlier than the higher priority task. This is done in
-            that way if the lower priority task is dependent of more important tasks
-            (tasks in critical path or tasks with critical resources). Read TaskJuggler
-            documentation for more information on how TaskJuggler schedules tasks.
-        allocation_strategy (str): Defines the allocation strategy for resources
-            of a task with alternative resources. Should be one of ['minallocated',
-            'maxloaded', 'minloaded', 'order', 'random'] and the default value is
-            'minallocated'. For more information read the :class:`.Task` class
-            documentation.
-        persistent_allocation (bool): Specifies that once a resource is picked from the
-            list of alternatives this resource is used for the whole task. The default
-            value is True. For more information read the :class:`.Task` class
-            documentation.
-        good (stalker.models.budget.Good): It is possible to attach a good to this Task
-            to be able to filter and group them later on.
+            In complex projects, a task with a lower priority task may steal
+            resources from a higher priority task, this is due to the internals
+            of TaskJuggler, it tries to increase the resource utilization by
+            letting the lower priority task to be completed earlier than the
+            higher priority task. This is done in that way if the lower
+            priority task is dependent of more important tasks (tasks in
+            critical path or tasks with critical resources). Read TaskJuggler
+            documentation for more information on how TaskJuggler schedules
+            tasks.
+        allocation_strategy (str): Defines the allocation strategy for
+            resources of a task with alternative resources. Should be one of
+            ['minallocated', 'maxloaded', 'minloaded', 'order', 'random'] and
+            the default value is 'minallocated'. For more information read the
+            :class:`.Task` class documentation.
+        persistent_allocation (bool): Specifies that once a resource is picked
+            from the list of alternatives this resource is used for the whole
+            task. The default value is True. For more information read the
+            :class:`.Task` class documentation.
+        good (stalker.models.budget.Good): It is possible to attach a good to
+            this Task to be able to filter and group them later on.
     """
 
     from stalker import defaults
@@ -1488,19 +1487,19 @@ class Task(
         kwargs = {unit["name"]: schedule_timing * unit["multiplier"]}
         calculated_duration = datetime.timedelta(**kwargs)
         if (
-            self.schedule_constraint == CONSTRAIN_NONE
-            or self.schedule_constraint == CONSTRAIN_START
+            self.schedule_constraint == ScheduleConstraint.NONE
+            or self.schedule_constraint == ScheduleConstraint.Start
         ):
             # get end
             self._start, self._end, self._duration = self._validate_dates(
                 self.start, None, calculated_duration
             )
-        elif self.schedule_constraint == CONSTRAIN_END:
+        elif self.schedule_constraint == ScheduleConstraint.End:
             # get start
             self._start, self._end, self._duration = self._validate_dates(
                 None, self.end, calculated_duration
             )
-        elif self.schedule_constraint == CONSTRAIN_BOTH:
+        elif self.schedule_constraint == ScheduleConstraint.Both:
             # restore duration
             self._start, self._end, self._duration = self._validate_dates(
                 self.start, self.end, None

@@ -2,6 +2,7 @@
 """Mixins are situated here."""
 
 import datetime
+from enum import IntEnum
 from typing import (
     Any,
     Dict,
@@ -17,7 +18,7 @@ from typing_extensions import Self
 
 import pytz
 
-from sqlalchemy import Column, Enum, Float, ForeignKey, Integer, Interval, String, Table
+from sqlalchemy import Column, Enum, Float, ForeignKey, Integer, Interval, String, Table, TypeDecorator
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import (
@@ -171,6 +172,94 @@ def create_secondary_table(
         secondary_table = Base.metadata.tables[secondary_table_name]
 
     return secondary_table
+
+
+class ScheduleConstraint(IntEnum):
+    """The schedule constraint enum."""
+    NONE = 0
+    Start = 1
+    End = 2
+    Both = 3
+
+    def __repr__(self) -> str:
+        """Return the enum name for str().
+
+        Returns:
+            str: The name as the string representation of this
+                ScheduleConstraint.
+        """
+        return self.name if self.name != "NONE" else "None"
+
+    __str__ = __repr__
+
+    @classmethod
+    def to_constraint(cls, constraint: Union[int, str, "ScheduleConstraint"]) -> Self:
+        """Validate and return type enum from an input int or str value.
+
+        Args:
+            constraint (Union[str, ScheduleConstraint]): Input `constraint` value.
+            quiet (bool): To raise any exception for invalid value.
+
+        Raises:
+            TypeError: Input value type is invalid.
+            ValueError: Input value is invalid.
+
+        Returns:
+            ScheduleConstraint: ScheduleConstraint value.
+        """
+        # Check if it's a valid str type for a constraint.
+        if constraint is None:
+            constraint = ScheduleConstraint.NONE
+
+        if not isinstance(constraint, (int, str, ScheduleConstraint)):
+            raise TypeError(
+                "constraint should be an int, str or ScheduleConstraint, "
+                f"not {constraint.__class__.__name__}: '{constraint}'"
+            )
+
+        if isinstance(constraint, str):
+            constraint_name_lut = dict([(e.name.lower(), e.name.title() if e.name != "NONE" else "NONE") for e in cls])
+            # also add int values
+            constraint_lower_case = constraint.lower()
+            if constraint_lower_case not in constraint_name_lut:
+                raise ValueError(
+                    "constraint should be one of {}, not '{}'".format(
+                        [e.name.title() for e in cls], constraint
+                    )
+                )
+
+            # Return the enum status for the status value.
+            return cls.__members__[constraint_name_lut[constraint_lower_case]]
+        else:
+            return ScheduleConstraint(constraint)
+
+
+class ScheduleConstraintDecorator(TypeDecorator):
+    """Store ScheduleConstraint as an integer and restore as ScheduleConstraint."""
+
+    impl = Integer
+
+    def process_bind_param(self, value, dialect) -> int:
+        """Return the integer value of the ScheduleConstraint.
+
+        Args:
+            value (ScheduleConstraint): The ScheduleConstraint value.
+            dialect (str): The name of the dialect.
+
+        Returns:
+            int: The value of the ScheduleConstraint.
+        """
+        # just return the value
+        return value.value
+    
+    def process_result_value(self, value, dialect):
+        """Return a ScheduleConstraint.
+
+        Args:
+            value (int): The integer value.
+            dialect (str): The name of the dialect.
+        """
+        return ScheduleConstraint.to_constraint(value)
 
 
 class TargetEntityTypeMixin(object):
@@ -1338,7 +1427,7 @@ class ScheduleMixin(object):
         schedule_timing: Optional[float] = None,
         schedule_unit: Optional[str] = None,
         schedule_model: Optional[str] = None,
-        schedule_constraint: int = 0,
+        schedule_constraint: ScheduleConstraint = ScheduleConstraint.NONE,
         **kwargs: Dict[str, Any],
     ) -> None:
         self.schedule_constraint = schedule_constraint
@@ -1440,7 +1529,7 @@ class ScheduleMixin(object):
         )
 
     @declared_attr
-    def schedule_constraint(cls) -> Mapped[int]:
+    def schedule_constraint(cls) -> Mapped[ScheduleConstraint]:
         """Create the schedule_constraint attribute as a declared attribute.
 
         Returns:
@@ -1448,11 +1537,11 @@ class ScheduleMixin(object):
         """
         return mapped_column(
             f"{cls.__default_schedule_attr_name__}_constraint",
-            Integer,
+            ScheduleConstraintDecorator(),
             default=0,
             nullable=False,
-            doc="""An integer number showing the constraint schema for this
-            task.
+            doc="""A ScheduleConstraint value showing the constraint schema
+            for this task.
 
             Possible values are:
 
@@ -1463,22 +1552,17 @@ class ScheduleMixin(object):
                3   Constrain Both
              ===== ===============
 
-            For convenience use **stalker.models.task.CONSTRAIN_NONE**,
-            **stalker.models.task.CONSTRAIN_START**,
-            **stalker.models.task.CONSTRAIN_END**,
-            **stalker.models.task.CONSTRAIN_BOTH**.
-
             This value is going to be used to constrain the start and end date
             values of this task. So if you want to pin the start of a task to a
             certain date. Set its :attr:`.schedule_constraint` value to
-            **CONSTRAIN_START**. When the task is scheduled by **TaskJuggler**
-            the start date will be pinned to the :attr:`start` attribute of
-            this task.
+            :attr:`.ScheduleConstraint.Start`. When the task is scheduled by
+            **TaskJuggler** the start date will be pinned to the :attr:`start`
+            attribute of this task.
 
             And if both of the date values (start and end) wanted to be pinned
             to certain dates (making the task effectively a ``duration`` task)
             set the desired :attr:`start` and :attr:`end` and then set the
-            :attr:`schedule_constraint` to **CONSTRAIN_BOTH**.
+            :attr:`schedule_constraint` to :att:`.ScheduleConstraint.Both`.
             """,
         )
 
@@ -1486,36 +1570,22 @@ class ScheduleMixin(object):
     def _validate_schedule_constraint(
         self,
         key: str,
-        schedule_constraint: Union[None, int],
+        schedule_constraint: Union[None, int, str],
     ) -> int:
         """Validate the given schedule_constraint value.
 
         Args:
             key (str): The name of the validated column.
-            schedule_constraint (int): The schedule_constraint value to be validated.
-
-        Raises:
-            TypeError: If the schedule_constraint is not an int.
+            schedule_constraint (Union[None, int, str]): The value to be
+                validated.
 
         Returns:
-            int: The validated schedule_constraint value.
+            ScheduleConstraint: The validated schedule_constraint value.
         """
-        if not schedule_constraint:
-            schedule_constraint = 0
+        if schedule_constraint is None:
+            schedule_constraint = ScheduleConstraint.NONE
 
-        if not isinstance(schedule_constraint, int):
-            raise TypeError(
-                "{cls}.{attr}_constraint should be an integer "
-                "between 0 and 3, not {constraint_class}: '{constraint}'".format(
-                    cls=self.__class__.__name__,
-                    attr=self.__default_schedule_attr_name__,
-                    constraint_class=schedule_constraint.__class__.__name__,
-                    constraint=schedule_constraint,
-                )
-            )
-
-        schedule_constraint = max(schedule_constraint, 0)
-        schedule_constraint = min(schedule_constraint, 3)
+        schedule_constraint = ScheduleConstraint.to_constraint(schedule_constraint)
 
         return schedule_constraint
 
