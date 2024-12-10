@@ -891,9 +891,9 @@ class Task(
         schedule_timing (int): The value of the schedule timing.
         schedule_unit (str): The unit value of the schedule timing. Should be
             one of 'min', 'h', 'd', 'w', 'm', 'y'.
-        schedule_constraint (int): The schedule constraint. It is the index
-            of the schedule constraints value in
-            :class:`stalker.config.Config.task_schedule_constraints`.
+        schedule_constraint (ScheduleConstraint): The
+            :class:`.ScheduleConstraint` value. The default is
+            `ScheduleConstraint.NONE`.
         bid_timing (int): The initial bid for this Task. It can be used in
             measuring how accurate the initial guess was. It will be compared
             against the total amount of effort spend doing this task. Can be
@@ -1153,7 +1153,7 @@ class Task(
         schedule_timing: float = 1.0,
         schedule_unit: str = "h",
         schedule_model: Optional[str] = None,
-        schedule_constraint: int = 0,
+        schedule_constraint: Optional[ScheduleConstraint] = ScheduleConstraint.NONE,
         bid_timing: Optional[Union[int, float]] = None,
         bid_unit: Optional[str] = None,
         is_milestone: bool = False,
@@ -2256,7 +2256,7 @@ class Task(
                     self.update_schedule_info()
                 return self._total_logged_seconds
 
-            if self.schedule_model in "effort":
+            if self.schedule_model == "effort":
                 logger.debug("effort based task detected!")
                 try:
                     sql = """
