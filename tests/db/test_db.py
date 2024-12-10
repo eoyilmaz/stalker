@@ -72,7 +72,7 @@ from sqlalchemy.exc import (
     ProgrammingError,
 )
 
-from stalker.models.mixins import ScheduleConstraint
+from stalker.models.mixins import ScheduleConstraint, TimeUnit
 from tests.utils import create_random_db, get_admin_user, tear_down_db
 
 logger = log.get_logger(__name__)
@@ -3363,7 +3363,7 @@ def test_persistence_of_sequence(setup_postgresql_db):
         "project": test_project1,
         "schedule_model": "effort",
         "schedule_timing": 50,
-        "schedule_unit": "d",
+        "schedule_unit": TimeUnit.Day,
         "responsible": [lead],
     }
     test_sequence = Sequence(**kwargs)
@@ -3974,6 +3974,8 @@ def test_persistence_of_task(setup_postgresql_db):
         name="Test Task",
         watchers=[user3],
         parent=asset1,
+        schedule_timing=10,
+        schedule_unit=TimeUnit.Hour,
         schedule_constraint=ScheduleConstraint.Start,
     )
     child_task1 = Task(
@@ -4079,6 +4081,7 @@ def test_persistence_of_task(setup_postgresql_db):
     parent = task1.parent
     priority = task1.priority
     resources = task1.resources
+    schedule_unit = task1.schedule_unit
     schedule_constraint = task1.schedule_constraint
     schedule_model = task1.schedule_model
     schedule_timing = task1.schedule_timing
@@ -4127,6 +4130,8 @@ def test_persistence_of_task(setup_postgresql_db):
     assert task1_db.updated_by == updated_by
     assert task1_db.versions == versions
     assert task1_db.watchers == watchers
+    assert task1_db.schedule_unit == schedule_unit
+    assert isinstance(task1_db.schedule_unit, TimeUnit)
     assert task1_db.schedule_constraint == schedule_constraint
     assert isinstance(task1_db.schedule_constraint, ScheduleConstraint)
     assert task1_db.schedule_model == schedule_model
@@ -4237,7 +4242,7 @@ def test_persistence_of_review(setup_postgresql_db):
         watchers=[user3],
         parent=asset1,
         schedule_timing=5,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
     child_task1 = Task(
         name="Child Task 1",
@@ -4300,7 +4305,7 @@ def test_persistence_of_review(setup_postgresql_db):
         reviewer=user1,
         version=version1,
         schedule_timing=1,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
     )
     DBSession.save(rev1)
 

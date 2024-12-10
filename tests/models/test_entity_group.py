@@ -14,6 +14,7 @@ from stalker import (
     Type,
     User,
 )
+from stalker.models.mixins import TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -119,9 +120,9 @@ def setup_entity_group_tests():
         watchers=[data["test_user3"]],
         parent=data["asset1"],
         schedule_timing=5,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         bid_timing=52,
-        bid_unit="h",
+        bid_unit=TimeUnit.Hour,
         status_list=data["task_status_list"],
     )
 

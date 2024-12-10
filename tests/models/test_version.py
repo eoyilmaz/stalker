@@ -299,8 +299,7 @@ def test_revision_number_arg_is_not_a_positive_integer(setup_version_db_tests):
     with pytest.raises(ValueError) as cm:
         _ = Version(**data["kwargs"])
     assert str(cm.value) == (
-        "Version.revision_number should be a positive integer, "
-        "not int: '-109'"
+        "Version.revision_number should be a positive integer, " "not int: '-109'"
     )
 
 
@@ -312,8 +311,7 @@ def test_revision_number_attr_is_not_a_positive_integer(setup_version_db_tests):
     with pytest.raises(ValueError) as cm:
         new_version.revision_number = -109
     assert str(cm.value) == (
-        "Version.revision_number should be a positive integer, "
-        "not int: '-109'"
+        "Version.revision_number should be a positive integer, " "not int: '-109'"
     )
 
 
@@ -364,7 +362,9 @@ def test_revision_number_attr_changed_will_reset_version_number(setup_version_db
     assert new_version.version_number == 5
 
 
-def test_revision_number_attr_not_changed_will_not_reset_version_number(setup_version_db_tests):
+def test_revision_number_attr_not_changed_will_not_reset_version_number(
+    setup_version_db_tests,
+):
     """revision_number attr can be set to any positive number."""
     data = setup_version_db_tests
     data["kwargs"]["revision_number"] = 21
@@ -386,7 +386,9 @@ def test_revision_number_attr_not_changed_will_not_reset_version_number(setup_ve
     assert new_version.version_number == 5
 
 
-def test_revision_number_arg_value_is_passed_to_revision_number_attr(setup_version_db_tests):
+def test_revision_number_arg_value_is_passed_to_revision_number_attr(
+    setup_version_db_tests,
+):
     """revision_number arg value is passed to revision_number attr."""
     data = setup_version_db_tests
     data["kwargs"]["revision_number"] = 21
@@ -443,7 +445,9 @@ def test_revision_number_arg_effects_version_number(setup_version_db_tests):
     assert new_version.version_number == 5
 
 
-def test_max_revision_number_returns_the_maximum_revision_number_in_the_db(setup_version_db_tests):
+def test_max_revision_number_returns_the_maximum_revision_number_in_the_db(
+    setup_version_db_tests,
+):
     """max_revision_number returns the maximum value of the revision_number in the db."""
     data = setup_version_db_tests
     data["kwargs"]["revision_number"] = 1
@@ -480,7 +484,9 @@ def test_max_revision_number_returns_the_maximum_revision_number_in_the_db(setup
     assert new_version.max_revision_number == 2
 
 
-def test_max_revision_number_returns_the_maximum_revision_number_in_the_db_when_no_version(setup_version_db_tests):
+def test_max_revision_number_returns_the_maximum_revision_number_in_the_db_when_no_version(
+    setup_version_db_tests,
+):
     """max_revision_number returns the maximum value of the revision_number in the db when no version is created."""
     data = setup_version_db_tests
     data["kwargs"]["revision_number"] = 1
@@ -1318,7 +1324,7 @@ def test_equality_operator(setup_version_db_tests):
     DBSession.save(new_version3)
 
     new_version4 = Version(**data["kwargs"])
-    DBSession.save(new_version4)#
+    DBSession.save(new_version4)  #
 
     new_version5 = Version(**data["kwargs"])
     DBSession.save(new_version5)
@@ -1622,7 +1628,7 @@ def test_latest_version_attribute_is_working_as_expected(setup_version_db_tests)
 
 
 def test_latest_version_attribute_is_working_as_expected_for_different_revision_numbers(
-    setup_version_db_tests
+    setup_version_db_tests,
 ):
     """latest_version attribute is working as expected for different revision_numbers."""
     data = setup_version_db_tests

@@ -78,7 +78,7 @@ class Version(Link, DAGMixin):
             All the :class:`.Version` instances that have the same
             :attr:`.revision_number` under the same :class:`.Task` will be
             considered in the same version stream and version number attribute
-            will be set accordingly. The default is 1. 
+            will be set accordingly. The default is 1.
         inputs (List[Link]): A list o :class:`.Link` instances, holding the
             inputs of the current version. It could be a texture for a Maya
             file or an image sequence for Nuke, or anything those you can think
@@ -221,9 +221,11 @@ class Version(Link, DAGMixin):
         Returns:
             int: The validated revision_number value.
         """
-        error_message = (f"{self.__class__.__name__}.revision_number should be a "
+        error_message = (
+            f"{self.__class__.__name__}.revision_number should be a "
             f"positive integer, not {revision_number.__class__.__name__}: "
-            f"'{revision_number}'")
+            f"'{revision_number}'"
+        )
 
         if not isinstance(revision_number, int):
             raise TypeError(error_message)
@@ -235,7 +237,7 @@ class Version(Link, DAGMixin):
 
     def _revision_number_getter(self) -> int:
         """Return the revision_number value.
-        
+
         Returns:
             int: revision_number attribute value
         """
@@ -266,7 +268,9 @@ class Version(Link, DAGMixin):
         if is_updating_revision_number and self.version_number is not None:
             # if we are updating the revision_number value,
             # also update reset the version_number
-            logger.debug("Updated revision_number! so, let's update version_number too!")
+            logger.debug(
+                "Updated revision_number! so, let's update version_number too!"
+            )
             logger.debug(f"current version_number is {self.version_number}")
             self.version_number = None
 

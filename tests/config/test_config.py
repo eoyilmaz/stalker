@@ -249,7 +249,7 @@ def test_default_filename_template_value():
     """default filename_template includes revision_number."""
     assert isinstance(defaults.filename_template, str)
     assert defaults.filename_template == (
-        '{{version.nice_name}}'
+        "{{version.nice_name}}"
         '_r{{"%02d"|format(version.revision_number)}}'
         '_v{{"%03d"|format(version.version_number)}}'
     )

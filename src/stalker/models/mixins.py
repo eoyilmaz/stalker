@@ -2,7 +2,7 @@
 """Mixins are situated here."""
 
 import datetime
-from enum import IntEnum
+from enum import Enum as PythonEnum, IntEnum
 from typing import (
     Any,
     Dict,
@@ -18,7 +18,17 @@ from typing_extensions import Self
 
 import pytz
 
-from sqlalchemy import Column, Enum, Float, ForeignKey, Integer, Interval, String, Table, TypeDecorator
+from sqlalchemy import (
+    Column,
+    Enum,
+    Float,
+    ForeignKey,
+    Integer,
+    Interval,
+    String,
+    Table,
+    TypeDecorator,
+)
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.ext.declarative import declared_attr
 from sqlalchemy.orm import (
@@ -176,6 +186,7 @@ def create_secondary_table(
 
 class ScheduleConstraint(IntEnum):
     """The schedule constraint enum."""
+
     NONE = 0
     Start = 1
     End = 2
@@ -213,17 +224,24 @@ class ScheduleConstraint(IntEnum):
 
         if not isinstance(constraint, (int, str, ScheduleConstraint)):
             raise TypeError(
-                "constraint should be an int, str or ScheduleConstraint, "
+                "constraint should be a ScheduleConstraint enum value or an "
+                "int or a str, "
                 f"not {constraint.__class__.__name__}: '{constraint}'"
             )
 
         if isinstance(constraint, str):
-            constraint_name_lut = dict([(e.name.lower(), e.name.title() if e.name != "NONE" else "NONE") for e in cls])
+            constraint_name_lut = dict(
+                [
+                    (c.name.lower(), c.name.title() if c.name != "NONE" else "NONE")
+                    for c in cls
+                ]
+            )
             # also add int values
             constraint_lower_case = constraint.lower()
             if constraint_lower_case not in constraint_name_lut:
                 raise ValueError(
-                    "constraint should be one of {}, not '{}'".format(
+                    "constraint should be a ScheduleConstraint enum value or "
+                    "one of {}, not '{}'".format(
                         [e.name.title() for e in cls], constraint
                     )
                 )
@@ -251,7 +269,7 @@ class ScheduleConstraintDecorator(TypeDecorator):
         """
         # just return the value
         return value.value
-    
+
     def process_result_value(self, value, dialect):
         """Return a ScheduleConstraint.
 
@@ -260,6 +278,93 @@ class ScheduleConstraintDecorator(TypeDecorator):
             dialect (str): The name of the dialect.
         """
         return ScheduleConstraint.to_constraint(value)
+
+
+class TimeUnit(PythonEnum):
+    """The time unit enum."""
+
+    Minute = "min"
+    Hour = "h"
+    Day = "d"
+    Week = "w"
+    Month = "m"
+    Year = "y"
+
+    def __str__(self) -> str:
+        """Return the string representation.
+
+        Returns:
+            str: The string representation.
+        """
+        return str(self.value)
+
+    @classmethod
+    def to_unit(cls, unit: Union[str, "TimeUnit"]) -> "TimeUnit":
+        """Convert the given unit value to a TimeUnit enum.
+
+        Args:
+            unit (Union[str, TimeUnit]): The value to convert to a
+                TimeUnit.
+
+        Raises:
+            TypeError: Input value type is invalid.
+            ValueError: Input value is invalid.
+
+        Returns:
+            TimeUnit: The enum.
+        """
+        if not isinstance(unit, (str, TimeUnit)):
+            raise TypeError(
+                "unit should be a TimeUnit enum value or one of {}, "
+                "not {}: '{}'".format(
+                    [u.name.title() for u in cls] + [u.value for u in cls],
+                    unit.__class__.__name__,
+                    unit,
+                )
+            )
+        if isinstance(unit, str):
+            unit_name_lut = dict([(u.name.lower(), u.name) for u in cls])
+            unit_name_lut.update(dict([(u.value.lower(), u.name) for u in cls]))
+            unit_lower_case = unit.lower()
+            if unit_lower_case not in unit_name_lut:
+                raise ValueError(
+                    "unit should be a TimeUnit enum value or one of {}, "
+                    "not '{}'".format(
+                        [u.name.title() for u in cls] + [u.value for u in cls], unit
+                    )
+                )
+
+            return cls.__members__[unit_name_lut[unit_lower_case]]
+
+        return unit
+
+
+class TimeUnitDecorator(TypeDecorator):
+    """Store TimeUnit as an str and restore as TimeUnit."""
+
+    impl = Enum(*[u.value for u in TimeUnit], name="TimeUnit")
+
+    def process_bind_param(self, value, dialect) -> str:
+        """Return the str value of the TimeUnit.
+
+        Args:
+            value (TimeUnit): The TimeUnit value.
+            dialect (str): The name of the dialect.
+
+        Returns:
+            str: The value of the TimeUnit.
+        """
+        # just return the value
+        return value.value
+
+    def process_result_value(self, value, dialect):
+        """Return a TimeUnit.
+
+        Args:
+            value (str): The string value to convert to TimeUnit.
+            dialect (str): The name of the dialect.
+        """
+        return TimeUnit.to_unit(value)
 
 
 class TargetEntityTypeMixin(object):
@@ -1419,13 +1524,13 @@ class ScheduleMixin(object):
     # some default values that can be overridden in Mixed in classes
     __default_schedule_attr_name__ = "schedule"
     __default_schedule_timing__ = defaults.timing_resolution.seconds / 60
-    __default_schedule_unit__ = "h"
+    __default_schedule_unit__ = TimeUnit.Hour
     __default_schedule_models__ = defaults.task_schedule_models
 
     def __init__(
         self,
         schedule_timing: Optional[float] = None,
-        schedule_unit: Optional[str] = None,
+        schedule_unit: TimeUnit = TimeUnit.Hour,
         schedule_model: Optional[str] = None,
         schedule_constraint: ScheduleConstraint = ScheduleConstraint.NONE,
         **kwargs: Dict[str, Any],
@@ -1460,7 +1565,7 @@ class ScheduleMixin(object):
         )
 
     @declared_attr
-    def schedule_unit(cls) -> Mapped[Optional[str]]:
+    def schedule_unit(cls) -> Mapped[Optional[TimeUnit]]:
         """Create the schedule_unit attribute as a declared attribute.
 
         Returns:
@@ -1468,12 +1573,11 @@ class ScheduleMixin(object):
         """
         return mapped_column(
             f"{cls.__default_schedule_attr_name__}_unit",
-            Enum(*defaults.datetime_units, name="TimeUnit"),
+            TimeUnitDecorator(),
             nullable=True,
-            default="h",
-            doc=f"It is the unit of the {cls.__default_schedule_attr_name__} timing."
-            "It is a string value. And should be one of 'min', 'h', 'd', 'w', 'm', "
-            "'y'.",
+            default=TimeUnit.Hour,
+            doc=f"It is the unit of the {cls.__default_schedule_attr_name__} "
+            "timing. It is a TimeUnit enum value.",
         )
 
     @declared_attr
@@ -1631,48 +1735,23 @@ class ScheduleMixin(object):
         return schedule_model
 
     @validates("schedule_unit")
-    def _validate_schedule_unit(self, key: str, schedule_unit: Union[None, str]) -> str:
+    def _validate_schedule_unit(
+        self, key: str, schedule_unit: Union[None, str, TimeUnit]
+    ) -> TimeUnit:
         """Validate the given schedule_unit.
 
         Args:
             key (str): The name of the validated column.
-            schedule_unit (Union[None, str]): The schedule_unit value to be validated.
-
-        Raises:
-            TypeError: If the schedule_unit is not a str.
-            ValueError: If the schedule_unit value is not one of the
-                defaults.datetime_units.
+            schedule_unit (Union[None, str, TimeUnit]): The schedule_unit value
+                to be validated.
 
         Returns:
-            str: The validated schedule_unit value.
+            TimeUnit: The validated schedule_unit value.
         """
         if schedule_unit is None:
             schedule_unit = self.__default_schedule_unit__
 
-        if not isinstance(schedule_unit, str):
-            raise TypeError(
-                "{cls}.{attr}_unit should be a string value one of "
-                "{defaults} showing the unit of the {attr} timing of this "
-                "{cls}, not {unit_class}: '{unit}'".format(
-                    cls=self.__class__.__name__,
-                    attr=self.__default_schedule_attr_name__,
-                    defaults=defaults.datetime_units,
-                    unit_class=schedule_unit.__class__.__name__,
-                    unit=schedule_unit,
-                )
-            )
-
-        if schedule_unit not in defaults.datetime_units:
-            raise ValueError(
-                "{cls}.{attr}_unit should be a string value one of "
-                "{defaults} showing the unit of the {attr} timing of "
-                "this {cls}, not {unit_class}".format(
-                    cls=self.__class__.__name__,
-                    attr=self.__default_schedule_attr_name__,
-                    defaults=defaults.datetime_units,
-                    unit_class=schedule_unit.__class__.__name__,
-                )
-            )
+        schedule_unit = TimeUnit.to_unit(schedule_unit)
 
         return schedule_unit
 
@@ -1716,7 +1795,7 @@ class ScheduleMixin(object):
     @classmethod
     def least_meaningful_time_unit(
         cls, seconds: int, as_work_time: bool = True
-    ) -> Tuple[int, str]:
+    ) -> Tuple[int, TimeUnit]:
         """Return the least meaningful time unit that corresponds to the given seconds.
 
         So if:
@@ -1739,13 +1818,14 @@ class ScheduleMixin(object):
               raise RuntimeError
 
         Args:
-            seconds (int): An integer showing the total seconds to be converted.
-            as_work_time (bool): Should the input be considered as work time or calendar
-                time.
+            seconds (int): An integer showing the total seconds to be
+                converted.
+            as_work_time (bool): Should the input be considered as work time or
+                calendar time.
 
         Returns:
-            int, string: Returns one integer and one string, showing the timing value
-                and the unit.
+            int, TimeUnit: Returns one integer and a TimeUnit enum value,
+                showing the timing value and the unit.
         """
         minutes = 60
         hour = 3600
@@ -1762,37 +1842,37 @@ class ScheduleMixin(object):
         if as_work_time:
             logger.debug("calculating in work time")
             if seconds % year_wt == 0:  # noqa: S001
-                return seconds // year_wt, "y"
+                return seconds // year_wt, TimeUnit.Year
             elif seconds % month_wt == 0:  # noqa: S001
-                return seconds // month_wt, "m"
+                return seconds // month_wt, TimeUnit.Month
             elif seconds % week_wt == 0:  # noqa: S001
-                return seconds // week_wt, "w"
+                return seconds // week_wt, TimeUnit.Week
             elif seconds % day_wt == 0:  # noqa: S001
-                return seconds // day_wt, "d"
+                return seconds // day_wt, TimeUnit.Day
         else:
             logger.debug("calculating in calendar time")  # noqa: S001
             if seconds % year == 0:  # noqa: S001
-                return seconds // year, "y"
+                return seconds // year, TimeUnit.Year
             elif seconds % month == 0:  # noqa: S001
-                return seconds // month, "m"
+                return seconds // month, TimeUnit.Month
             elif seconds % week == 0:  # noqa: S001
-                return seconds // week, "w"
+                return seconds // week, TimeUnit.Week
             elif seconds % day == 0:  # noqa: S001
-                return seconds // day, "d"
+                return seconds // day, TimeUnit.Day
 
         # in either case
         if seconds % hour == 0:  # noqa: S001
-            return seconds // hour, "h"
+            return seconds // hour, TimeUnit.Hour
 
         # at this point we understand that it has a residual of less then one
         # minute so return in minutes
-        return seconds // minutes, "min"
+        return seconds // minutes, TimeUnit.Minute
 
     @classmethod
     def to_seconds(
         cls,
         timing: float,
-        unit: Union[None, str],
+        unit: Union[None, str, TimeUnit],
         model: str,
     ) -> Union[None, float]:
         """Convert the schedule values to seconds.
@@ -1804,9 +1884,11 @@ class ScheduleMixin(object):
 
         Args:
             timing (float): The timing value.
-            unit (str): The unit value, one of 'min', 'h', 'd', 'w', 'm', 'y'.
-            model (str): The schedule model, one of 'effort', 'length' or 'duration'.
-
+            unit (Union[None, str, TimeUnit]): The unit value, a TimeUnit enum
+                value or one of ['min', 'h', 'd', 'w', 'm', 'y', 'Minute',
+                'Hour', 'Day', 'Week', 'Month', 'Year'].
+            model (str): The schedule model, one of 'effort', 'length' or
+                'duration'.
 
         Returns:
             Union[None, float]: The converted seconds value.
@@ -1814,13 +1896,15 @@ class ScheduleMixin(object):
         if not unit:
             return None
 
+        unit = TimeUnit.to_unit(unit)
+
         lut = {
-            "min": 60,
-            "h": 3600,
-            "d": 86400,
-            "w": 604800,
-            "m": 2419200,
-            "y": 31536000,
+            TimeUnit.Minute: 60,
+            TimeUnit.Hour: 3600,
+            TimeUnit.Day: 86400,
+            TimeUnit.Week: 604800,
+            TimeUnit.Month: 2419200,
+            TimeUnit.Year: 31536000,
         }
 
         if model in ["effort", "length"]:
@@ -1830,18 +1914,20 @@ class ScheduleMixin(object):
             year_wt = int(defaults.yearly_working_days) * day_wt
 
             lut = {
-                "min": 60,
-                "h": 3600,
-                "d": day_wt,
-                "w": week_wt,
-                "m": month_wt,
-                "y": year_wt,
+                TimeUnit.Minute: 60,
+                TimeUnit.Hour: 3600,
+                TimeUnit.Day: day_wt,
+                TimeUnit.Week: week_wt,
+                TimeUnit.Month: month_wt,
+                TimeUnit.Year: year_wt,
             }
 
         return timing * lut[unit]
 
     @classmethod
-    def to_unit(cls, seconds: int, unit: Union[None, str], model: str) -> float:
+    def to_unit(
+        cls, seconds: int, unit: Union[None, str, TimeUnit], model: str
+    ) -> float:
         """Convert the ``seconds`` value to the given ``unit``.
 
         Depending on to the ``schedule_model`` the value will differ. So if the
@@ -1852,22 +1938,26 @@ class ScheduleMixin(object):
 
         Args:
             seconds (int): The seconds to convert.
-            unit (str): The unit value, one of 'min', 'h', 'd', 'w', 'm', 'y'.
+            unit (Union[None, str, TimeUnit]): The unit value, a TimeUnit enum
+                value one of ['min', 'h', 'd', 'w', 'm', 'y', 'Minute', 'Hour',
+                'Day', 'Week', 'Month', 'Year'] or a TimeUnit enum value.
             model (str): The schedule model, one of 'effort', 'length' or 'duration'.
 
         Returns:
             float: The seconds converted to the given unit considering the given model.
         """
-        if not unit:
+        if unit is None:
             return None
 
+        unit = TimeUnit.to_unit(unit)
+
         lut = {
-            "min": 60,
-            "h": 3600,
-            "d": 86400,
-            "w": 604800,
-            "m": 2419200,
-            "y": 31536000,
+            TimeUnit.Minute: 60,
+            TimeUnit.Hour: 3600,
+            TimeUnit.Day: 86400,
+            TimeUnit.Week: 604800,
+            TimeUnit.Month: 2419200,
+            TimeUnit.Year: 31536000,
         }
 
         if model in ["effort", "length"]:
@@ -1877,12 +1967,12 @@ class ScheduleMixin(object):
             year_wt = int(defaults.yearly_working_days) * day_wt
 
             lut = {
-                "min": 60,
-                "h": 3600,
-                "d": day_wt,
-                "w": week_wt,
-                "m": month_wt,
-                "y": year_wt,
+                TimeUnit.Minute: 60,
+                TimeUnit.Hour: 3600,
+                TimeUnit.Day: day_wt,
+                TimeUnit.Week: week_wt,
+                TimeUnit.Month: month_wt,
+                TimeUnit.Year: year_wt,
             }
 
         return seconds / lut[unit]

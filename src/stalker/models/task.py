@@ -57,6 +57,8 @@ from stalker.models.mixins import (
     ReferenceMixin,
     ScheduleConstraint,
     ScheduleMixin,
+    TimeUnit,
+    TimeUnitDecorator,
     StatusMixin,
 )
 from stalker.models.review import Review
@@ -1095,8 +1097,8 @@ class Task(
         """,
     )
 
-    bid_unit: Mapped[Optional[str]] = mapped_column(
-        Enum(*defaults.datetime_units, name="TimeUnit"),
+    bid_unit: Mapped[Optional[TimeUnit]] = mapped_column(
+        TimeUnitDecorator,
         doc="""The unit of the initial bid of this Task. It is a string value.
         And should be one of 'min', 'h', 'd', 'w', 'm', 'y'.
         """,
@@ -1151,11 +1153,11 @@ class Task(
         start: Optional[datetime.datetime] = None,
         end: Optional[datetime.datetime] = None,
         schedule_timing: float = 1.0,
-        schedule_unit: str = "h",
+        schedule_unit: TimeUnit = TimeUnit.Hour,
         schedule_model: Optional[str] = None,
         schedule_constraint: Optional[ScheduleConstraint] = ScheduleConstraint.NONE,
         bid_timing: Optional[Union[int, float]] = None,
-        bid_unit: Optional[str] = None,
+        bid_unit: Optional[TimeUnit] = None,
         is_milestone: bool = False,
         priority: int = defaults.task_priority,
         allocation_strategy: str = defaults.allocation_strategy[0],
@@ -1447,15 +1449,18 @@ class Task(
         return schedule_timing
 
     @validates("schedule_unit")
-    def _validate_schedule_unit(self, key: str, schedule_unit: str) -> str:
+    def _validate_schedule_unit(
+        self, key: str, schedule_unit: Union[str, TimeUnit]
+    ) -> TimeUnit:
         """Validate the given schedule_unit value.
 
         Args:
             key (str): The name of the validated column.
-            schedule_unit (str): The schedule_unit value to be validated.
+            schedule_unit (Union[str, TimeUnit]): The schedule_unit value to be
+                validated.
 
         Returns:
-            str: The validated schedule_unit value.
+            TimeUnit: The validated schedule_unit value.
         """
         schedule_unit = ScheduleMixin._validate_schedule_unit(self, key, schedule_unit)
 
@@ -1465,14 +1470,15 @@ class Task(
         return schedule_unit
 
     def _reschedule(
-        self, schedule_timing: Union[int, float], schedule_unit: str
+        self, schedule_timing: Union[int, float], schedule_unit: Union[str, TimeUnit]
     ) -> None:
         """Update the start and end date with schedule_timing and schedule_unit values.
 
         Args:
             schedule_timing (Union[int, float]): An integer or float value showing the
                 value of the schedule timing.
-            schedule_unit (str): One of 'min', 'h', 'd', 'w', 'm', 'y'
+            schedule_unit (Union[str, TimeUnit]): One of 'min', 'h', 'd',
+                'w', 'm', 'y' or a TimeUnit enum value.
         """
         # update end date value by using the start and calculated duration
         if not self.is_leaf:
@@ -1480,7 +1486,12 @@ class Task(
 
         from stalker import defaults
 
-        unit = defaults.datetime_units_to_timedelta_kwargs.get(schedule_unit, None)
+        schedule_unit_value = None
+        if schedule_unit is not None:
+            schedule_unit = TimeUnit.to_unit(schedule_unit)
+            schedule_unit_value = schedule_unit.value
+
+        unit = defaults.datetime_units_to_timedelta_kwargs.get(schedule_unit_value)
         if not unit:  # we are in a pre flushing state do not do anything
             return
 
@@ -1984,48 +1995,23 @@ class Task(
         return bid_timing
 
     @validates("bid_unit")
-    def _validate_bid_unit(self, key: str, bid_unit: str) -> str:
+    def _validate_bid_unit(self, key: str, bid_unit: Union[str, TimeUnit]) -> str:
         """Validate the given bid_unit value.
 
         Args:
             key (str): The name of the validated column.
-            bid_unit (str): The timing unit of the bid value, should be one of
-                ["min", "h", "d", "w", "m", "y"].
-
-        Raises:
-            TypeError: If the given bid_unit is not a str.
-            ValueError: If the given bid_unit is not one of the values ["min", "h", "d",
-                "w", "m", "y"].
+            bid_unit (Union[str, TimeUnit]): The timing unit of the bid
+                value, should be a TimeUnit enum value or one of ["min", "h",
+                "d", "w", "m", "y", "Minute", "Hour", "Day", "Week", "Month",
+                "Year"].
 
         Returns:
             str: The validated bid_unit value.
         """
         if bid_unit is None:
-            bid_unit = "h"
+            bid_unit = TimeUnit.Hour
 
-        from stalker import defaults
-
-        if not isinstance(bid_unit, str):
-            raise TypeError(
-                "{cls}.bid_unit should be a string value one of {units} showing the "
-                "unit of the bid timing of this {cls}, not {bid_cls}: '{bid}'".format(
-                    cls=self.__class__.__name__,
-                    units=defaults.datetime_units,
-                    bid_cls=bid_unit.__class__.__name__,
-                    bid=bid_unit,
-                )
-            )
-
-        if bid_unit not in defaults.datetime_units:
-            raise ValueError(
-                "{cls}.bid_unit should be a string value one of {units} showing the "
-                "unit of the bid timing of this {cls}, not {bid_cls}: '{bid}'".format(
-                    cls=self.__class__.__name__,
-                    units=defaults.datetime_units,
-                    bid_cls=bid_unit.__class__.__name__,
-                    bid=bid_unit,
-                )
-            )
+        bid_unit = TimeUnit.to_unit(bid_unit)
 
         return bid_unit
 
@@ -2648,7 +2634,7 @@ class Task(
         reviewer: Optional[User] = None,
         description: str = "",
         schedule_timing: int = 1,
-        schedule_unit: str = "h",
+        schedule_unit: Union[str, TimeUnit] = TimeUnit.Hour,
     ) -> Review:
         """Request revision.
 
@@ -2671,10 +2657,10 @@ class Task(
             schedule_timing (int): The timing value of the requested revision.
                 The task will be extended this much of duration. Works along
                 with the ``schedule_unit`` parameter. The default value is 1.
-            schedule_unit (str): The timing unit value of the requested
-                revision. The task will be extended this much of duration.
-                Works along with the ``schedule_timing`` parameter. The default
-                value is 'h' for 'hour'.
+            schedule_unit (Union[str, TimeUnit]): The timing unit value of the
+                requested revision. The task will be extended this much of
+                duration. Works along with the ``schedule_timing`` parameter.
+                The default value is `TimeUnit.Hour`.
 
         Raises:
             StatusError: If the status of the current task is not PREV or CMPL.
@@ -3202,7 +3188,7 @@ class TaskDependency(Base, ScheduleMixin):
     __default_schedule_attr_name__ = "gap"  # used in docstring of ScheduleMixin
     __default_schedule_models__ = defaults.task_dependency_gap_models
     __default_schedule_timing__ = 0
-    __default_schedule_unit__ = "h"
+    __default_schedule_unit__ = TimeUnit.Hour
 
     __tablename__ = "Task_Dependencies"
 
@@ -3269,7 +3255,7 @@ class TaskDependency(Base, ScheduleMixin):
         depends_on: Optional["Task"] = None,
         dependency_target: Optional[str] = None,
         gap_timing: Optional[Union[float, int]] = 0,
-        gap_unit: Optional[str] = "h",
+        gap_unit: Optional[TimeUnit] = TimeUnit.Hour,
         gap_model: Optional[str] = "length",
     ) -> None:
         ScheduleMixin.__init__(

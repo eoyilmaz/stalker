@@ -15,6 +15,7 @@ from stalker import (
     User,
     Version,
 )
+from stalker.models.mixins import TimeUnit
 
 
 def test_readme_tutorial_code(setup_sqlite3):
@@ -110,7 +111,7 @@ def test_readme_tutorial_code(setup_sqlite3):
         parent=shot,
         depends_on=[animation],  # Lighting cannot start before Animation ends,
         schedule_timing=1,
-        schedule_unit="d",  # The task expected to take 1 day to complete
+        schedule_unit=TimeUnit.Day,  # The task expected to take 1 day to complete
         resources=[me],
     )
     DBSession.save([animation, lighting])

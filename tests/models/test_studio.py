@@ -28,6 +28,7 @@ from stalker import (
     defaults,
 )
 from stalker.db.session import DBSession
+from stalker.models.mixins import TimeUnit
 
 
 class DummyScheduler(SchedulerBase):
@@ -165,7 +166,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task1"])
 
@@ -175,7 +176,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task2"])
 
@@ -185,7 +186,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=5,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task3"])
 
@@ -198,7 +199,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task4"])
 
@@ -209,7 +210,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task4"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task5"])
 
@@ -220,7 +221,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task4"], data["test_task5"]],
         schedule_timing=3,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task6"])
 
@@ -231,7 +232,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task6"]],
         schedule_timing=3,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task7"])
 
@@ -242,7 +243,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user3"]],
         alternative_resources=[data["test_user1"], data["test_user2"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task8"])
 
@@ -253,7 +254,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user2"]],
         depends_on=[data["test_task8"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task9"])
 
@@ -264,7 +265,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task8"], data["test_task9"]],
         schedule_timing=3,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task10"])
 
@@ -275,7 +276,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task10"]],
         schedule_timing=4,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task11"])
 
@@ -286,7 +287,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task12"])
 
@@ -297,7 +298,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user2"], data["test_user3"]],
         depends_on=[data["test_task12"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task13"])
 
@@ -308,7 +309,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user2"], data["test_user3"]],
         depends_on=[data["test_task12"], data["test_task13"]],
         schedule_timing=3,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task14"])
 
@@ -319,7 +320,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user2"], data["test_user3"]],
         depends_on=[data["test_task14"]],
         schedule_timing=4,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task15"])
 
@@ -330,7 +331,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task16"])
 
@@ -341,7 +342,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task16"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task17"])
 
@@ -352,7 +353,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task16"], data["test_task17"]],
         schedule_timing=3,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task18"])
 
@@ -363,7 +364,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user3"]],
         depends_on=[data["test_task18"]],
         schedule_timing=4,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task19"])
 
@@ -374,7 +375,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user3"]],
         alternative_resources=[data["test_user1"], data["test_user2"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task20"])
 
@@ -385,7 +386,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user2"]],
         depends_on=[data["test_task20"]],
         schedule_timing=2,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task21"])
 
@@ -396,7 +397,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user2"]],
         depends_on=[data["test_task20"], data["test_task21"]],
         schedule_timing=3,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task22"])
 
@@ -407,7 +408,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         alternative_resources=[data["test_user1"], data["test_user2"]],
         depends_on=[data["test_task22"]],
         schedule_timing=4,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task23"])
 
@@ -421,7 +422,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task24"])
 
@@ -432,7 +433,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=15,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task25"])
 
@@ -443,7 +444,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task26"])
 
@@ -454,7 +455,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user1"]],
         alternative_resources=[data["test_user2"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task27"])
 
@@ -465,7 +466,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task28"])
 
@@ -476,7 +477,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=15,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task29"])
 
@@ -487,7 +488,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task30"])
 
@@ -498,7 +499,7 @@ def setup_studio_db_tests(setup_postgresql_db):
         resources=[data["test_user2"]],
         alternative_resources=[data["test_user1"], data["test_user3"]],
         schedule_timing=10,
-        schedule_unit="d",
+        schedule_unit=TimeUnit.Day,
     )
     DBSession.add(data["test_task31"])
 
@@ -1328,7 +1329,7 @@ def test_schedule_schedules_only_tasks_of_the_given_projects_with_the_given_sche
         name="Dummy Task 1",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user1"]],
     )
 
@@ -1336,7 +1337,7 @@ def test_schedule_schedules_only_tasks_of_the_given_projects_with_the_given_sche
         name="Dummy Task 2",
         project=dummy_project,
         schedule_timing=4,
-        schedule_unit="h",
+        schedule_unit=TimeUnit.Hour,
         resources=[data["test_user2"]],
     )
     DBSession.add_all([dummy_project, dt1, dt2])
