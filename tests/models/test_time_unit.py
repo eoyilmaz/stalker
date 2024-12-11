@@ -112,7 +112,7 @@ def test_to_unit_unit_is_not_a_str():
 
 
 def test_to_unit_unit_is_not_a_valid_str():
-    """TimeUnit.to_unit() constraint is not a valid str."""
+    """TimeUnit.to_unit() unit is not a valid str."""
     with pytest.raises(ValueError) as cm:
         _ = TimeUnit.to_unit("not a valid value")
 
@@ -124,7 +124,7 @@ def test_to_unit_unit_is_not_a_valid_str():
 
 
 @pytest.mark.parametrize(
-    "unit_name,constraint",
+    "unit_name,unit",
     [
         # Minute
         ["Min", TimeUnit.Minute],
@@ -179,6 +179,6 @@ def test_to_unit_unit_is_not_a_valid_str():
         ["yEaR", TimeUnit.Year],
     ],
 )
-def test_schedule_unit_to_unit_is_working_properly(unit_name, constraint):
+def test_schedule_unit_to_unit_is_working_properly(unit_name, unit):
     """TimeUnit can parse schedule unit names."""
-    assert TimeUnit.to_unit(unit_name) == constraint
+    assert TimeUnit.to_unit(unit_name) == unit

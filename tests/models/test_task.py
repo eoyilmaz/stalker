@@ -32,7 +32,12 @@ from stalker import (
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import CircularDependencyError
-from stalker.models.mixins import DateRangeMixin, ScheduleConstraint, TimeUnit
+from stalker.models.mixins import (
+    DateRangeMixin,
+    ScheduleConstraint,
+    ScheduleModel,
+    TimeUnit,
+)
 
 
 @pytest.fixture(scope="function")
@@ -974,7 +979,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
-    kwargs["schedule_model"] = "duration"
+    kwargs["schedule_model"] = ScheduleModel.Duration
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -1001,7 +1006,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
-    kwargs["schedule_model"] = "duration"
+    kwargs["schedule_model"] = ScheduleModel.Duration
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -1027,7 +1032,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
-    kwargs["schedule_model"] = "duration"
+    kwargs["schedule_model"] = ScheduleModel.Duration
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -1057,7 +1062,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
-    kwargs["schedule_model"] = "duration"
+    kwargs["schedule_model"] = ScheduleModel.Duration
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -1083,7 +1088,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_duration_based_leaf_
     data = setup_task_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
-    kwargs["schedule_model"] = "duration"
+    kwargs["schedule_model"] = ScheduleModel.Duration
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -1228,7 +1233,7 @@ def test_schedule_seconds_is_working_as_expected_for_an_effort_based_task_no_stu
     data = setup_task_tests
     # no studio, using defaults
     kwargs = copy.copy(data["kwargs"])
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["schedule_timing"] = schedule_timing
     kwargs["schedule_unit"] = schedule_unit
     new_task = Task(**kwargs)
@@ -1266,7 +1271,7 @@ def test_schedule_seconds_is_working_as_expected_for_an_effort_based_task_with_s
         daily_working_hours=8,
         timing_resolution=datetime.timedelta(hours=1),
     )
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["schedule_timing"] = schedule_timing
     kwargs["schedule_unit"] = schedule_unit
     new_task = Task(**kwargs)
@@ -1282,7 +1287,7 @@ def test_schedule_seconds_is_working_as_expected_for_a_container_task(setup_task
     # no studio, using defaults
     kwargs = copy.copy(data["kwargs"])
     parent_task = Task(**kwargs)
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["schedule_timing"] = 10
     kwargs["schedule_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
@@ -1352,7 +1357,7 @@ def test_schedule_seconds_is_working_okay_for_a_container_task_if_the_child_is_u
     kwargs = copy.copy(data["kwargs"])
     # no studio, using defaults
     parent_task = Task(**kwargs)
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["schedule_timing"] = 10
     kwargs["schedule_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
@@ -1452,7 +1457,7 @@ def test_schedule_seconds_is_working_okay_for_a_task_if_the_child_is_updated_dee
     assert child_task.schedule_seconds == 10 * 3600
     parent_task2.children.append(child_task)
     assert parent_task2.schedule_seconds, 10 * 3600 + 9 * 3600
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["schedule_timing"] = 10
     kwargs["schedule_unit"] = TimeUnit.Hour
     new_task = Task(**kwargs)
@@ -2719,7 +2724,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_root_task(setup_task_tests):
     kwargs["parent"] = None
     kwargs["schedule_timing"] = 10
     kwargs["schedule_unit"] = TimeUnit.Day
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["depends_on"] = []
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
@@ -2789,7 +2794,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task(setup_task_tests):
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
     kwargs["schedule_unit"] = TimeUnit.Hour
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["depends_on"] = [dep_task1, dep_task2]
 
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
@@ -2860,7 +2865,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_timelogs(
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
     kwargs["schedule_unit"] = TimeUnit.Hour
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
     new_task2 = Task(**kwargs)
@@ -2932,7 +2937,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_deta
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
     kwargs["schedule_unit"] = TimeUnit.Hour
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
 
@@ -2943,13 +2948,13 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_deta
     tdep1.dependency_target = "onstart"
     tdep1.gap_timing = 2
     tdep1.gap_unit = TimeUnit.Day
-    tdep1.gap_model = "length"
+    tdep1.gap_model = ScheduleModel.Length
 
     tdep2 = new_task2.task_depends_on[1]
     tdep1.dependency_target = "onstart"
     tdep2.gap_timing = 4
     tdep2.gap_unit = TimeUnit.Day
-    tdep2.gap_model = "duration"
+    tdep2.gap_model = ScheduleModel.Duration
 
     # create some random ids
     data["test_project1"].id = 120
@@ -3014,7 +3019,7 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1003
     kwargs["schedule_unit"] = TimeUnit.Hour
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
     kwargs["alternative_resources"] = [data["test_user3"]]
@@ -3027,13 +3032,13 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
     tdep1.dependency_target = "onstart"
     tdep1.gap_timing = 2
     tdep1.gap_unit = TimeUnit.Day
-    tdep1.gap_model = "length"
+    tdep1.gap_model = ScheduleModel.Length
 
     tdep2 = new_task2.task_depends_on[1]
     tdep1.dependency_target = "onstart"
     tdep2.gap_timing = 4
     tdep2.gap_unit = TimeUnit.Day
-    tdep2.gap_model = "duration"
+    tdep2.gap_model = ScheduleModel.Duration
 
     # create some random id
     data["test_project1"].id = 120
@@ -3097,7 +3102,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_container_task(setup_task_test
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1
     kwargs["schedule_unit"] = TimeUnit.Day
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["depends_on"] = [dep_task1, dep_task2]
 
     kwargs["resources"] = [data["test_user1"], data["test_user2"]]
@@ -3209,7 +3214,7 @@ def test_to_tjp_attr_is_working_as_expected_for_a_container_task_with_dependency
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1
     kwargs["schedule_unit"] = TimeUnit.Day
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["depends_on"] = [dep_task1, dep_task2]
 
     data["test_user1"].name = "Test User 1"
@@ -3319,7 +3324,7 @@ def test_to_tjp_schedule_constraint_is_reflected_in_tjp_file(setup_task_tests):
     kwargs["name"] = "Modeling"
     kwargs["schedule_timing"] = 1
     kwargs["schedule_unit"] = TimeUnit.Day
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
     kwargs["depends_on"] = [dep_task1, dep_task2]
     kwargs["schedule_constraint"] = 3
     kwargs["start"] = datetime.datetime(2013, 5, 3, 14, 0, tzinfo=pytz.utc)
@@ -4780,7 +4785,7 @@ def test_percent_complete_attr_is_not_using_any_time_logs_for_a_duration_task(
     data = setup_task_db_tests
     kwargs = copy.copy(data["kwargs"])
     kwargs["depends_on"] = []
-    kwargs["schedule_model"] = "duration"
+    kwargs["schedule_model"] = ScheduleModel.Duration
 
     dt = datetime.datetime
     td = datetime.timedelta
@@ -5011,7 +5016,7 @@ def test_percent_complete_attr_working_okay_for_a_task_w_effort_and_duration_chi
     # create a duration based task
     new_task2 = Task(**kwargs)
     new_task2.status = data["status_rts"]
-    new_task2.schedule_model = "duration"
+    new_task2.schedule_model = ScheduleModel.Duration
     new_task2.start = now - td(days=1, hours=1)
     new_task2.end = now - td(hours=1)
     DBSession.add(new_task2)
@@ -5083,10 +5088,10 @@ def test_percent_complete_attr_is_okay_for_a_task_with_effort_and_length_based_c
     DBSession.add(tlog2)
     DBSession.commit()
 
-    # create a duration based task
+    # create a length based task
     new_task2 = Task(**kwargs)
     new_task2.status = data["status_rts"]
-    new_task2.schedule_model = "length"
+    new_task2.schedule_model = ScheduleModel.Length
     new_task2.start = now - td(hours=10)
     new_task2.end = now - td(hours=1)
     DBSession.add(new_task2)
@@ -5461,7 +5466,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
     td = datetime.timedelta
     now = dt(2013, 4, 19, 10, 0, tzinfo=pytz.utc)
 
-    kwargs["schedule_model"] = "effort"
+    kwargs["schedule_model"] = ScheduleModel.Effort
 
     # -------------- HOURS --------------
     kwargs["schedule_timing"] = 10

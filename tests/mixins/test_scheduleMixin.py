@@ -9,7 +9,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 import stalker
 from stalker import ScheduleMixin, SimpleEntity, defaults
-from stalker.models.mixins import TimeUnit
+from stalker.models.mixins import ScheduleModel, TimeUnit
 
 
 class MixedInClass(SimpleEntity, ScheduleMixin):
@@ -40,7 +40,7 @@ def setup_schedule_mixin_tests():
         "name": "Test Object",
         "schedule_timing": 1,
         "schedule_unit": TimeUnit.Hour,
-        "schedule_model": "effort",
+        "schedule_model": ScheduleModel.Effort,
         "schedule_constraint": 0,
     }
     data["test_obj"] = MixedInClass(**data["kwargs"])
@@ -52,7 +52,7 @@ def setup_schedule_mixin_tests():
 def test_schedule_model_attribute_is_effort_by_default(setup_schedule_mixin_tests):
     """schedule_model is effort by default."""
     data = setup_schedule_mixin_tests
-    assert data["test_obj"].schedule_model == "effort"
+    assert data["test_obj"].schedule_model == ScheduleModel.Effort
 
 
 def test_schedule_model_argument_is_none(setup_schedule_mixin_tests):
@@ -60,14 +60,14 @@ def test_schedule_model_argument_is_none(setup_schedule_mixin_tests):
     data = setup_schedule_mixin_tests
     data["kwargs"]["schedule_model"] = None
     new_task = MixedInClass(**data["kwargs"])
-    assert new_task.schedule_model == "effort"
+    assert new_task.schedule_model == ScheduleModel.Effort
 
 
 def test_schedule_model_attribute_is_set_to_none(setup_schedule_mixin_tests):
     """schedule_model will be 'effort' if it is set to None."""
     data = setup_schedule_mixin_tests
     data["test_obj"].schedule_model = None
-    assert data["test_obj"].schedule_model == "effort"
+    assert data["test_obj"].schedule_model == ScheduleModel.Effort
 
 
 def test_schedule_model_argument_is_not_a_string(setup_schedule_mixin_tests):
@@ -78,8 +78,8 @@ def test_schedule_model_argument_is_not_a_string(setup_schedule_mixin_tests):
         MixedInClass(**data["kwargs"])
 
     assert str(cm.value) == (
-        "MixedInClass.schedule_model should be one of ['effort', 'length', "
-        "'duration'], not int: '234'"
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], not int: '234'"
     )
 
 
@@ -90,8 +90,9 @@ def test_schedule_model_attribute_is_not_a_string(setup_schedule_mixin_tests):
         data["test_obj"].schedule_model = 2343
 
     assert str(cm.value) == (
-        "MixedInClass.schedule_model should be one of ['effort', 'length', "
-        "'duration'], not int: '2343'"
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], "
+        "not int: '2343'"
     )
 
 
@@ -103,8 +104,9 @@ def test_schedule_model_argument_is_not_in_correct_value(setup_schedule_mixin_te
         MixedInClass(**data["kwargs"])
 
     assert str(cm.value) == (
-        "MixedInClass.schedule_model should be one of ['effort', 'length', "
-        "'duration'], not str: 'not in the list'"
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], not "
+        "'not in the list'"
     )
 
 
@@ -115,27 +117,34 @@ def test_schedule_model_attribute_is_not_in_correct_value(setup_schedule_mixin_t
         data["test_obj"].schedule_model = "not in the list"
 
     assert str(cm.value) == (
-        "MixedInClass.schedule_model should be one of ['effort', 'length', "
-        "'duration'], not str: 'not in the list'"
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], "
+        "not 'not in the list'"
     )
 
 
-def test_schedule_model_argument_is_working_as_expected(setup_schedule_mixin_tests):
+@pytest.mark.parametrize("schedule_model", ["duration", ScheduleModel.Duration])
+def test_schedule_model_argument_is_working_as_expected(
+    setup_schedule_mixin_tests, schedule_model
+):
     """schedule_model arg is passed to the schedule_model attribute."""
     data = setup_schedule_mixin_tests
-    test_value = "duration"
+    test_value = schedule_model
     data["kwargs"]["schedule_model"] = test_value
     new_task = MixedInClass(**data["kwargs"])
-    assert new_task.schedule_model == test_value
+    assert new_task.schedule_model == ScheduleModel.to_model(test_value)
 
 
-def test_schedule_model_attribute_is_working_as_expected(setup_schedule_mixin_tests):
+@pytest.mark.parametrize("schedule_model", ["duration", ScheduleModel.Duration])
+def test_schedule_model_attribute_is_working_as_expected(
+    setup_schedule_mixin_tests, schedule_model
+):
     """schedule_model attribute is working as expected."""
     data = setup_schedule_mixin_tests
-    test_value = "duration"
-    assert data["test_obj"].schedule_model != test_value
+    test_value = schedule_model
+    assert data["test_obj"].schedule_model != ScheduleModel.to_model(test_value)
     data["test_obj"].schedule_model = test_value
-    assert data["test_obj"].schedule_model == test_value
+    assert data["test_obj"].schedule_model == ScheduleModel.to_model(test_value)
 
 
 def test_schedule_constraint_is_0_by_default(setup_schedule_mixin_tests):
@@ -455,6 +464,18 @@ def test_least_meaningful_time_unit_is_working_as_expected(
         ["effort", 1, TimeUnit.Week, 162000],
         ["effort", 1, TimeUnit.Month, 648000],
         ["effort", 1, TimeUnit.Year, 8424000],
+        [ScheduleModel.Effort, 1, "min", 60],
+        [ScheduleModel.Effort, 1, "h", 3600],
+        [ScheduleModel.Effort, 1, "d", 32400],
+        [ScheduleModel.Effort, 1, "w", 162000],
+        [ScheduleModel.Effort, 1, "m", 648000],
+        [ScheduleModel.Effort, 1, "y", 8424000],
+        [ScheduleModel.Effort, 1, TimeUnit.Minute, 60],
+        [ScheduleModel.Effort, 1, TimeUnit.Hour, 3600],
+        [ScheduleModel.Effort, 1, TimeUnit.Day, 32400],
+        [ScheduleModel.Effort, 1, TimeUnit.Week, 162000],
+        [ScheduleModel.Effort, 1, TimeUnit.Month, 648000],
+        [ScheduleModel.Effort, 1, TimeUnit.Year, 8424000],
         # length values
         ["length", 1, "min", 60],
         ["length", 1, "h", 3600],
@@ -468,6 +489,18 @@ def test_least_meaningful_time_unit_is_working_as_expected(
         ["length", 1, TimeUnit.Week, 162000],
         ["length", 1, TimeUnit.Month, 648000],
         ["length", 1, TimeUnit.Year, 8424000],
+        [ScheduleModel.Length, 1, "min", 60],
+        [ScheduleModel.Length, 1, "h", 3600],
+        [ScheduleModel.Length, 1, "d", 32400],
+        [ScheduleModel.Length, 1, "w", 162000],
+        [ScheduleModel.Length, 1, "m", 648000],
+        [ScheduleModel.Length, 1, "y", 8424000],
+        [ScheduleModel.Length, 1, TimeUnit.Minute, 60],
+        [ScheduleModel.Length, 1, TimeUnit.Hour, 3600],
+        [ScheduleModel.Length, 1, TimeUnit.Day, 32400],
+        [ScheduleModel.Length, 1, TimeUnit.Week, 162000],
+        [ScheduleModel.Length, 1, TimeUnit.Month, 648000],
+        [ScheduleModel.Length, 1, TimeUnit.Year, 8424000],
         # duration values
         ["duration", 1, "min", 60],
         ["duration", 1, "h", 3600],
@@ -481,6 +514,18 @@ def test_least_meaningful_time_unit_is_working_as_expected(
         ["duration", 1, TimeUnit.Week, 604800],
         ["duration", 1, TimeUnit.Month, 2419200],
         ["duration", 1, TimeUnit.Year, 31536000],
+        [ScheduleModel.Duration, 1, "min", 60],
+        [ScheduleModel.Duration, 1, "h", 3600],
+        [ScheduleModel.Duration, 1, "d", 86400],
+        [ScheduleModel.Duration, 1, "w", 604800],
+        [ScheduleModel.Duration, 1, "m", 2419200],
+        [ScheduleModel.Duration, 1, "y", 31536000],
+        [ScheduleModel.Duration, 1, TimeUnit.Minute, 60],
+        [ScheduleModel.Duration, 1, TimeUnit.Hour, 3600],
+        [ScheduleModel.Duration, 1, TimeUnit.Day, 86400],
+        [ScheduleModel.Duration, 1, TimeUnit.Week, 604800],
+        [ScheduleModel.Duration, 1, TimeUnit.Month, 2419200],
+        [ScheduleModel.Duration, 1, TimeUnit.Year, 31536000],
     ],
 )
 def test_to_seconds_is_working_as_expected(

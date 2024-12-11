@@ -13,7 +13,7 @@ from stalker import Task
 from stalker import TaskDependency
 from stalker import User
 from stalker.db.session import DBSession
-from stalker.models.mixins import TimeUnit
+from stalker.models.mixins import ScheduleModel, TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -70,7 +70,7 @@ def setup_task_dependency_db_test(setup_postgresql_db):
         "dependency_target": "onend",
         "gap_timing": 0,
         "gap_unit": TimeUnit.Hour,
-        "gap_model": "length",
+        "gap_model": ScheduleModel.Length,
     }
     return data
 
@@ -372,7 +372,9 @@ def test_gap_model_argument_is_skipped(setup_task_dependency_db_test):
     data = setup_task_dependency_db_test
     data["kwargs"].pop("gap_model")
     tdep = TaskDependency(**data["kwargs"])
-    assert tdep.gap_model == defaults.task_dependency_gap_models[0]
+    assert tdep.gap_model == ScheduleModel.to_model(
+        defaults.task_dependency_gap_models[0]
+    )
 
 
 def test_gap_model_argument_is_none(setup_task_dependency_db_test):
@@ -380,7 +382,9 @@ def test_gap_model_argument_is_none(setup_task_dependency_db_test):
     data = setup_task_dependency_db_test
     data["kwargs"]["gap_model"] = None
     tdep = TaskDependency(**data["kwargs"])
-    assert tdep.gap_model == defaults.task_dependency_gap_models[0]
+    assert tdep.gap_model == ScheduleModel.to_model(
+        defaults.task_dependency_gap_models[0]
+    )
 
 
 def test_gap_model_attribute_is_none(setup_task_dependency_db_test):
@@ -388,7 +392,9 @@ def test_gap_model_attribute_is_none(setup_task_dependency_db_test):
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     tdep.gap_model = None
-    assert tdep.gap_model == defaults.task_dependency_gap_models[0]
+    assert tdep.gap_model == ScheduleModel.to_model(
+        defaults.task_dependency_gap_models[0]
+    )
 
 
 def test_gap_model_argument_is_not_a_str_instance(setup_task_dependency_db_test):
@@ -398,9 +404,10 @@ def test_gap_model_argument_is_not_a_str_instance(setup_task_dependency_db_test)
     with pytest.raises(TypeError) as cm:
         TaskDependency(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not int: '231'"
+    assert str(cm.value) == (
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], "
+        "not int: '231'"
     )
 
 
@@ -411,9 +418,10 @@ def test_gap_model_attribute_is_not_a_str_instance(setup_task_dependency_db_test
     with pytest.raises(TypeError) as cm:
         tdep.gap_model = 2342
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not int: '2342'"
+    assert str(cm.value) == (
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], "
+        "not int: '2342'"
     )
 
 
@@ -426,9 +434,10 @@ def test_gap_model_argument_value_is_not_in_the_enum_list(
     with pytest.raises(ValueError) as cm:
         TaskDependency(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not str: 'not in the list'"
+    assert str(cm.value) == (
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], "
+        "not 'not in the list'"
     )
 
 
@@ -441,29 +450,36 @@ def test_gap_model_attribute_value_is_not_in_the_enum_list(
     with pytest.raises(ValueError) as cm:
         tdep.gap_model = "not in the list"
 
-    assert (
-        str(cm.value) == "TaskDependency.gap_model should be one of ['length', "
-        "'duration'], not str: 'not in the list'"
+    assert str(cm.value) == (
+        "model should be a ScheduleModel enum value or one of ['Effort', "
+        "'Duration', 'Length', 'effort', 'duration', 'length'], "
+        "not 'not in the list'"
     )
 
 
-def test_gap_model_argument_is_working_as_expected(setup_task_dependency_db_test):
+@pytest.mark.parametrize("gap_model", ["duration", ScheduleModel.Duration])
+def test_gap_model_argument_is_working_as_expected(
+    setup_task_dependency_db_test, gap_model
+):
     """gap_model arg is passed okay to the gap_model attr on init."""
     data = setup_task_dependency_db_test
-    test_value = "duration"
+    test_value = gap_model
     data["kwargs"]["gap_model"] = test_value
     tdep = TaskDependency(**data["kwargs"])
-    assert tdep.gap_model == test_value
+    assert tdep.gap_model == ScheduleModel.to_model(test_value)
 
 
-def test_gap_model_attribute_is_working_as_expected(setup_task_dependency_db_test):
+@pytest.mark.parametrize("gap_model", ["duration", ScheduleModel.Duration])
+def test_gap_model_attribute_is_working_as_expected(
+    setup_task_dependency_db_test, gap_model
+):
     """gap_model attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
-    test_value = "duration"
-    assert tdep.gap_model != test_value
+    test_value = gap_model
+    assert tdep.gap_model != ScheduleModel.to_model(test_value)
     tdep.gap_model = test_value
-    assert tdep.gap_model == test_value
+    assert tdep.gap_model == ScheduleModel.to_model(test_value)
 
 
 def test_dependency_target_argument_is_skipped(setup_task_dependency_db_test):

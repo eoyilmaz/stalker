@@ -344,7 +344,7 @@ class TimeUnitDecorator(TypeDecorator):
 
     impl = Enum(*[u.value for u in TimeUnit], name="TimeUnit")
 
-    def process_bind_param(self, value, dialect) -> str:
+    def process_bind_param(self, value: TimeUnit, dialect: str) -> str:
         """Return the str value of the TimeUnit.
 
         Args:
@@ -357,7 +357,7 @@ class TimeUnitDecorator(TypeDecorator):
         # just return the value
         return value.value
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value: str, dialect: str) -> TimeUnit:
         """Return a TimeUnit.
 
         Args:
@@ -365,6 +365,90 @@ class TimeUnitDecorator(TypeDecorator):
             dialect (str): The name of the dialect.
         """
         return TimeUnit.to_unit(value)
+
+
+class ScheduleModel(PythonEnum):
+    """The schedule model enum."""
+
+    Effort = "effort"
+    Duration = "duration"
+    Length = "length"
+
+    def __str__(self) -> str:
+        """Return the string representation.
+
+        Returns:
+            str: The string representation.
+        """
+        return str(self.value)
+
+    @classmethod
+    def to_model(cls, model: Union[str, "ScheduleModel"]) -> "ScheduleModel":
+        """Convert the given model value to a ScheduleModel enum.
+
+        Args:
+            model (Union[str, ScheduleModel]): The value to convert to a
+                ScheduleModel.
+
+        Raises:
+            TypeError: Input value type is invalid.
+            ValueError: Input value is invalid.
+
+        Returns:
+            ScheduleModel: The enum.
+        """
+        if not isinstance(model, (str, ScheduleModel)):
+            raise TypeError(
+                "model should be a ScheduleModel enum value or one of {}, "
+                "not {}: '{}'".format(
+                    [u.name.title() for u in cls] + [u.value for u in cls],
+                    model.__class__.__name__,
+                    model,
+                )
+            )
+        if isinstance(model, str):
+            model_name_lut = dict([(m.name.lower(), m.name) for m in cls])
+            model_name_lut.update(dict([(m.value.lower(), m.name) for m in cls]))
+            model_lower_case = model.lower()
+            if model_lower_case not in model_name_lut:
+                raise ValueError(
+                    "model should be a ScheduleModel enum value or one of {}, "
+                    "not '{}'".format(
+                        [m.name.title() for m in cls] + [m.value for m in cls], model
+                    )
+                )
+
+            return cls.__members__[model_name_lut[model_lower_case]]
+
+        return model
+
+
+class ScheduleModelDecorator(TypeDecorator):
+    """Store ScheduleModel as a str and restore as ScheduleModel."""
+
+    impl = Enum(*[m.value for m in ScheduleModel], name=f"ScheduleModel")
+
+    def process_bind_param(self, value, dialect) -> str:
+        """Return the str value of the ScheduleModel.
+
+        Args:
+            value (ScheduleModel): The ScheduleModel value.
+            dialect (str): The name of the dialect.
+
+        Returns:
+            str: The value of the ScheduleModel.
+        """
+        # just return the value
+        return value.value
+
+    def process_result_value(self, value: str, dialect: str) -> ScheduleModel:
+        """Return a ScheduleModel.
+
+        Args:
+            value (str): The string value to convert to ScheduleModel.
+            dialect (str): The name of the dialect.
+        """
+        return ScheduleModel.to_model(value)
 
 
 class TargetEntityTypeMixin(object):
@@ -1525,13 +1609,13 @@ class ScheduleMixin(object):
     __default_schedule_attr_name__ = "schedule"
     __default_schedule_timing__ = defaults.timing_resolution.seconds / 60
     __default_schedule_unit__ = TimeUnit.Hour
-    __default_schedule_models__ = defaults.task_schedule_models
+    __default_schedule_model__ = ScheduleModel.Effort
 
     def __init__(
         self,
         schedule_timing: Optional[float] = None,
         schedule_unit: TimeUnit = TimeUnit.Hour,
-        schedule_model: Optional[str] = None,
+        schedule_model: Optional[ScheduleModel] = ScheduleModel.Effort,
         schedule_constraint: ScheduleConstraint = ScheduleConstraint.NONE,
         **kwargs: Dict[str, Any],
     ) -> None:
@@ -1581,7 +1665,7 @@ class ScheduleMixin(object):
         )
 
     @declared_attr
-    def schedule_model(cls) -> Mapped[str]:
+    def schedule_model(cls) -> Mapped[ScheduleModel]:
         """Create the schedule_model attribute as a declared attribute.
 
         Returns:
@@ -1589,15 +1673,13 @@ class ScheduleMixin(object):
         """
         return mapped_column(
             f"{cls.__default_schedule_attr_name__}_model",
-            Enum(
-                *cls.__default_schedule_models__,
-                name=f"{cls.__name__}{cls.__default_schedule_attr_name__.title()}Model",
-            ),
-            default=cls.__default_schedule_models__[0],
+            ScheduleModelDecorator(),
+            default=ScheduleModel.Effort,
             nullable=False,
-            doc="""Defines the schedule model which is going to be used by
-            **TaskJuggler** while scheduling this Task. It has three possible
-            values; **effort**, **duration**, **length**. ``effort`` is the
+            doc="""Defines the schedule model which is used by **TaskJuggler**
+            while scheduling this Projects. It is handled as a ScheduleModel
+            enum value which has three possible values; **effort**,
+            **duration**, **length**. :attr:`.ScheduleModel.Effort` is the
             default value. Each value causes this task to be scheduled in
             different ways:
 
@@ -1611,8 +1693,9 @@ class ScheduleMixin(object):
                      doesn't mean that the task duration will be 4 days. If the
                      resource works overtime then the task will be finished
                      before 4 days or if the resource will not be available
-                     (due to a vacation) then the task duration can be much
-                     more.
+                     (due to a vacation or task coinciding to a weekend day)
+                     then the task duration can be much more bigger than
+                     required effort.
 
             duration The duration of the task will exactly be equal to
                      :attr:`.schedule_timing` regardless of the resource
@@ -1695,8 +1778,8 @@ class ScheduleMixin(object):
 
     @validates("schedule_model")
     def _validate_schedule_model(
-        self, key: str, schedule_model: Union[None, str]
-    ) -> str:
+        self, key: str, schedule_model: Union[None, str, ScheduleModel]
+    ) -> ScheduleModel:
         """Validate the given schedule_model value.
 
         Args:
@@ -1704,33 +1787,13 @@ class ScheduleMixin(object):
             schedule_model (Union[None, str]): The schedule_model value to be
                 validated.
 
-        Raises:
-            TypeError: If the schedule_model is not a str.
-            ValueError: If the schedule_model value is not one of the values in
-                the self.__default_schedule_models__ list.
-
         Returns:
-            str: The validated schedule_model value.
+            ScheduleModel: The validated schedule_model value.
         """
-        if not schedule_model:
-            schedule_model = self.__default_schedule_models__[0]
-
-        error_message = (
-            "{cls}.{attr}_model should be one of {defaults}, not "
-            "{model_class}: '{model}'".format(
-                cls=self.__class__.__name__,
-                attr=self.__default_schedule_attr_name__,
-                defaults=self.__default_schedule_models__,
-                model_class=schedule_model.__class__.__name__,
-                model=schedule_model,
-            )
-        )
-
-        if not isinstance(schedule_model, str):
-            raise TypeError(error_message)
-
-        if schedule_model not in self.__default_schedule_models__:
-            raise ValueError(error_message)
+        if schedule_model is None:
+            schedule_model = self.__default_schedule_model__
+        else:
+            schedule_model = ScheduleModel.to_model(schedule_model)
 
         return schedule_model
 
@@ -1873,7 +1936,7 @@ class ScheduleMixin(object):
         cls,
         timing: float,
         unit: Union[None, str, TimeUnit],
-        model: str,
+        model: Union[str, ScheduleModel],
     ) -> Union[None, float]:
         """Convert the schedule values to seconds.
 
@@ -1887,8 +1950,8 @@ class ScheduleMixin(object):
             unit (Union[None, str, TimeUnit]): The unit value, a TimeUnit enum
                 value or one of ['min', 'h', 'd', 'w', 'm', 'y', 'Minute',
                 'Hour', 'Day', 'Week', 'Month', 'Year'].
-            model (str): The schedule model, one of 'effort', 'length' or
-                'duration'.
+            model (str): The schedule model, preferably a ScheduleModel enum
+                value or one of 'effort', 'length' or 'duration'.
 
         Returns:
             Union[None, float]: The converted seconds value.
@@ -1907,7 +1970,7 @@ class ScheduleMixin(object):
             TimeUnit.Year: 31536000,
         }
 
-        if model in ["effort", "length"]:
+        if model in [ScheduleModel.Effort, ScheduleModel.Length]:
             day_wt = defaults.daily_working_hours * 3600
             week_wt = defaults.weekly_working_days * day_wt
             month_wt = 4 * week_wt
@@ -1926,30 +1989,38 @@ class ScheduleMixin(object):
 
     @classmethod
     def to_unit(
-        cls, seconds: int, unit: Union[None, str, TimeUnit], model: str
+        cls,
+        seconds: int,
+        unit: Union[None, str, TimeUnit],
+        model: Union[str, ScheduleModel],
     ) -> float:
         """Convert the ``seconds`` value to the given ``unit``.
 
         Depending on to the ``schedule_model`` the value will differ. So if the
         ``schedule_model`` is 'effort' or 'length' then the ``seconds`` and
         ``schedule_unit`` values are interpreted as work time, if the
-        ``schedule_model`` is 'duration' then the ``seconds`` and
-        ``schedule_unit`` values are considered as calendar time.
+        ``schedule_model`` is :attr:`ScheduleModel.Duration` then the
+        ``seconds`` and ``schedule_unit`` values are considered as calendar
+        time.
 
         Args:
             seconds (int): The seconds to convert.
             unit (Union[None, str, TimeUnit]): The unit value, a TimeUnit enum
                 value one of ['min', 'h', 'd', 'w', 'm', 'y', 'Minute', 'Hour',
                 'Day', 'Week', 'Month', 'Year'] or a TimeUnit enum value.
-            model (str): The schedule model, one of 'effort', 'length' or 'duration'.
+            model (Union[str, ScheduleModel]): The schedule model, either a
+                ScheduleModel enum value or one of 'effort', 'length' or
+                'duration'.
 
         Returns:
-            float: The seconds converted to the given unit considering the given model.
+            float: The seconds converted to the given unit considering the
+                given model.
         """
         if unit is None:
             return None
 
         unit = TimeUnit.to_unit(unit)
+        model = ScheduleModel.to_model(model)
 
         lut = {
             TimeUnit.Minute: 60,
@@ -1960,7 +2031,7 @@ class ScheduleMixin(object):
             TimeUnit.Year: 31536000,
         }
 
-        if model in ["effort", "length"]:
+        if model in [ScheduleModel.Effort, ScheduleModel.Length]:
             day_wt = defaults.daily_working_hours * 3600
             week_wt = defaults.weekly_working_days * day_wt
             month_wt = 4 * week_wt

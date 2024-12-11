@@ -28,7 +28,7 @@ from stalker.config import Config
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 
-from stalker.models.mixins import TimeUnit
+from stalker.models.mixins import ScheduleModel, TimeUnit
 from tests.utils import create_random_db, drop_db, get_server_details_from_url
 
 log.logging_level = logging.INFO
@@ -173,7 +173,7 @@ dt = datetime.datetime
 td = datetime.timedelta
 now = dt(2017, 3, 15, 0, 30, tzinfo=pytz.utc)
 
-kwargs["schedule_model"] = "effort"
+kwargs["schedule_model"] = ScheduleModel.Effort
 
 # -------------- HOURS --------------
 kwargs["schedule_timing"] = 10

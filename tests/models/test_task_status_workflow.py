@@ -21,7 +21,7 @@ from stalker import (
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import StatusError
-from stalker.models.mixins import TimeUnit
+from stalker.models.mixins import ScheduleModel, TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -106,7 +106,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     data["test_task2"] = Task(
@@ -118,7 +118,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     data["test_task3"] = Task(
@@ -131,7 +131,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     # children tasks
@@ -147,7 +147,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     data["test_task5"] = Task(
@@ -160,7 +160,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     data["test_task6"] = Task(
@@ -172,7 +172,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     # children of data["test_task2"]
@@ -185,7 +185,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     data["test_task8"] = Task(
@@ -197,7 +197,7 @@ def setup_task_status_workflow_tests():
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     data["test_asset_status_list"] = StatusList(
@@ -239,7 +239,7 @@ def setup_task_status_workflow_tests():
         resources=[data["test_user2"]],
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
 
     # --------------
@@ -2370,7 +2370,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task1"])
 
@@ -2382,7 +2382,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task2"])
 
@@ -2395,7 +2395,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task3"])
 
@@ -2412,7 +2412,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task4"])
 
@@ -2425,7 +2425,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task5"])
 
@@ -2437,7 +2437,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task6"])
 
@@ -2450,7 +2450,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task7"])
 
@@ -2462,7 +2462,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         end=datetime.datetime(2013, 6, 30, 0, 0, tzinfo=pytz.utc),
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task8"])
 
@@ -2488,7 +2488,7 @@ def setup_task_status_workflow_db_tests(setup_postgresql_db):
         resources=[data["test_user2"]],
         schedule_timing=10,
         schedule_unit=TimeUnit.Day,
-        schedule_model="effort",
+        schedule_model=ScheduleModel.Effort,
     )
     DBSession.add(data["test_task9"])
     DBSession.commit()

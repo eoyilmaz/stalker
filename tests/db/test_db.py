@@ -72,7 +72,7 @@ from sqlalchemy.exc import (
     ProgrammingError,
 )
 
-from stalker.models.mixins import ScheduleConstraint, TimeUnit
+from stalker.models.mixins import ScheduleConstraint, ScheduleModel, TimeUnit
 from tests.utils import create_random_db, get_admin_user, tear_down_db
 
 logger = log.get_logger(__name__)
@@ -3361,7 +3361,7 @@ def test_persistence_of_sequence(setup_postgresql_db):
         "code": "TS",
         "description": "this is a test sequence",
         "project": test_project1,
-        "schedule_model": "effort",
+        "schedule_model": ScheduleModel.Effort,
         "schedule_timing": 50,
         "schedule_unit": TimeUnit.Day,
         "responsible": [lead],
@@ -3976,6 +3976,7 @@ def test_persistence_of_task(setup_postgresql_db):
         parent=asset1,
         schedule_timing=10,
         schedule_unit=TimeUnit.Hour,
+        schedule_model=ScheduleModel.Effort,
         schedule_constraint=ScheduleConstraint.Start,
     )
     child_task1 = Task(
@@ -4135,6 +4136,7 @@ def test_persistence_of_task(setup_postgresql_db):
     assert task1_db.schedule_constraint == schedule_constraint
     assert isinstance(task1_db.schedule_constraint, ScheduleConstraint)
     assert task1_db.schedule_model == schedule_model
+    assert isinstance(task1_db.schedule_model, ScheduleModel)
     assert task1_db.schedule_timing == schedule_timing
     assert task1_db.schedule_unit == schedule_unit
     assert version2.inputs == [version4]
