@@ -130,8 +130,6 @@ def test_to_constraint_constraint_is_not_a_valid_str():
         [3, ScheduleConstraint.Both],
     ],
 )
-def test_schedule_constraint_to_constraint_is_working_properly(
-    constraint_name, constraint
-):
+def test_to_constraint_is_working_properly(constraint_name, constraint):
     """ScheduleConstraint can parse schedule constraint names."""
     assert ScheduleConstraint.to_constraint(constraint_name) == constraint

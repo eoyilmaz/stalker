@@ -13,7 +13,7 @@ from stalker import Task
 from stalker import TaskDependency
 from stalker import User
 from stalker.db.session import DBSession
-from stalker.models.mixins import ScheduleModel, TimeUnit
+from stalker.models.mixins import DependencyTarget, ScheduleModel, TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -487,7 +487,9 @@ def test_dependency_target_argument_is_skipped(setup_task_dependency_db_test):
     data = setup_task_dependency_db_test
     data["kwargs"].pop("dependency_target")
     tdep = TaskDependency(**data["kwargs"])
-    assert tdep.dependency_target == defaults.task_dependency_targets[0]
+    assert tdep.dependency_target == DependencyTarget.to_target(
+        defaults.task_dependency_targets[0]
+    )
 
 
 def test_dependency_target_argument_is_none(setup_task_dependency_db_test):
@@ -495,7 +497,9 @@ def test_dependency_target_argument_is_none(setup_task_dependency_db_test):
     data = setup_task_dependency_db_test
     data["kwargs"]["dependency_target"] = None
     tdep = TaskDependency(**data["kwargs"])
-    assert tdep.dependency_target == defaults.task_dependency_targets[0]
+    assert tdep.dependency_target == DependencyTarget.to_target(
+        defaults.task_dependency_targets[0]
+    )
 
 
 def test_dependency_target_attribute_is_none(setup_task_dependency_db_test):
@@ -503,7 +507,9 @@ def test_dependency_target_attribute_is_none(setup_task_dependency_db_test):
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
     tdep.dependency_target = None
-    assert tdep.dependency_target == defaults.task_dependency_targets[0]
+    assert tdep.dependency_target == DependencyTarget.to_target(
+        defaults.task_dependency_targets[0]
+    )
 
 
 def test_dependency_target_argument_is_not_a_str_instance(
@@ -516,8 +522,8 @@ def test_dependency_target_argument_is_not_a_str_instance(
         TaskDependency(**data["kwargs"])
 
     assert str(cm.value) == (
-        "TaskDependency.dependency_target should be a string with a value one of "
-        "['onend', 'onstart'], not int: '0'"
+        "target should be a DependencyTarget enum value or one of ['OnStart', "
+        "'OnEnd', 'onstart', 'onend'], not int: '0'"
     )
 
 
@@ -531,8 +537,8 @@ def test_dependency_target_attribute_is_not_a_str_instance(
         tdep.dependency_target = 0
 
     assert str(cm.value) == (
-        "TaskDependency.dependency_target should be a string with a value one of "
-        "['onend', 'onstart'], not int: '0'"
+        "target should be a DependencyTarget enum value or one of ['OnStart', "
+        "'OnEnd', 'onstart', 'onend'], not int: '0'"
     )
 
 
@@ -545,9 +551,9 @@ def test_dependency_target_argument_value_is_not_in_the_enum_list(
     with pytest.raises(ValueError) as cm:
         TaskDependency(**data["kwargs"])
 
-    assert (
-        str(cm.value) == "TaskDependency.dependency_target should be one of ['onend', "
-        "'onstart'], not 'not in the list'"
+    assert str(cm.value) == (
+        "target should be a DependencyTarget enum value or one of ['OnStart', "
+        "'OnEnd', 'onstart', 'onend'], not 'not in the list'"
     )
 
 
@@ -560,27 +566,46 @@ def test_dependency_target_attribute_value_is_not_in_the_enum_list(
     with pytest.raises(ValueError) as cm:
         tdep.dependency_target = "not in the list"
 
-    assert (
-        str(cm.value) == "TaskDependency.dependency_target should be one of ['onend', "
-        "'onstart'], not 'not in the list'"
+    assert str(cm.value) == (
+        "target should be a DependencyTarget enum value or one of ['OnStart', "
+        "'OnEnd', 'onstart', 'onend'], not 'not in the list'"
     )
 
 
+@pytest.mark.parametrize(
+    "target",
+    [
+        "onstart",
+        "onend",
+        DependencyTarget.OnStart,
+        DependencyTarget.OnEnd,
+    ],
+)
 def test_dependency_target_argument_is_working_as_expected(
-    setup_task_dependency_db_test,
+    setup_task_dependency_db_test, target
 ):
     """dependency_target arg is passed okay to the dependency_target attr on init."""
     data = setup_task_dependency_db_test
+    data["kwargs"]["dependency_target"] = target
     tdep = TaskDependency(**data["kwargs"])
-    assert tdep.dependency_target == "onend"
+    assert tdep.dependency_target == DependencyTarget.to_target(target)
 
 
+@pytest.mark.parametrize(
+    "target",
+    [
+        "onstart",
+        "onend",
+        DependencyTarget.OnStart,
+        DependencyTarget.OnEnd,
+    ],
+)
 def test_dependency_target_attribute_is_working_as_expected(
-    setup_task_dependency_db_test,
+    setup_task_dependency_db_test, target
 ):
     """dependency_target attribute is working as expected."""
     data = setup_task_dependency_db_test
     tdep = TaskDependency(**data["kwargs"])
-    onstart = "onstart"
+    onstart = target
     tdep.dependency_target = onstart
-    assert tdep.dependency_target == onstart
+    assert tdep.dependency_target == DependencyTarget.to_target(onstart)

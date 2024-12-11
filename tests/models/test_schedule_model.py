@@ -133,6 +133,6 @@ def test_to_model_model_is_not_a_valid_str():
         ["lEnGtH", ScheduleModel.Length],
     ],
 )
-def test_schedule_model_to_model_is_working_properly(model_name, model):
+def test_to_model_is_working_properly(model_name, model):
     """ScheduleModel can parse schedule model names."""
     assert ScheduleModel.to_model(model_name) == model

@@ -54,6 +54,8 @@ from stalker.models.entity import Entity
 from stalker.models.mixins import (
     DAGMixin,
     DateRangeMixin,
+    DependencyTarget,
+    DependencyTargetDecorator,
     ReferenceMixin,
     ScheduleConstraint,
     ScheduleMixin,
@@ -280,12 +282,12 @@ class TimeLog(Entity, DateRangeMixin):
                 raise_violation_error = False
                 violation_date = None
 
-                if dependency_target == "onend":
+                if dependency_target == DependencyTarget.OnEnd:
                     # time log cannot start before the end date of this task
                     if self.start < dep_task.end:
                         raise_violation_error = True
                         violation_date = dep_task.end
-                elif dependency_target == "onstart":
+                elif dependency_target == DependencyTarget.OnStart:
                     if self.start < dep_task.start:
                         raise_violation_error = True
                         violation_date = dep_task.start
@@ -3216,18 +3218,19 @@ class TaskDependency(Base, ScheduleMixin):
         primaryjoin="Task.task_id==TaskDependency.task_id",
     )
 
-    dependency_target: Mapped[str] = mapped_column(
-        Enum(*defaults.task_dependency_targets, name="TaskDependencyTarget"),
+    dependency_target: Mapped[DependencyTarget] = mapped_column(
+        DependencyTargetDecorator(),
         nullable=False,
         doc="""The dependency target of the relation. The default value is
         "onend", which will create a dependency between two tasks so that the
         depending task will start after the task that it is depending on is
         finished.
 
-        The dependency_target attribute is updated to "onstart" when a task has
-        a revision and needs to work together with its depending tasks.
+        The dependency_target attribute is updated to
+        :attr:`.DependencyTarget.OnStart` when a task has a revision and needs
+        to work together with its depending tasks.
         """,
-        default=defaults.task_dependency_targets[0],
+        default=DependencyTarget.OnStart,
     )
 
     gap_timing: Mapped[Optional[float]] = synonym(
@@ -3324,46 +3327,25 @@ class TaskDependency(Base, ScheduleMixin):
         return dependency
 
     @validates("dependency_target")
-    def _validate_dependency_target(self, key: str, dependency_target: str) -> str:
+    def _validate_dependency_target(
+        self, key: str, dependency_target: Union[None, str, DependencyTarget]
+    ) -> DependencyTarget:
         """Validate the given dependency_target value.
 
         Args:
             key (str): The name of the validated column.
-            dependency_target (str): The dependency_target value to be validated.
-
-        Raises:
-            TypeError: If the dependency_target value is not None and not a
-                string.
-            ValueError: If the dependency_target is not one of ["onend",
-                "onstart"].
+            dependency_target (Union[None, str, DependencyTarget]): The
+                dependency_target value to be validated.
 
         Returns:
-            str: The validated dependency_target value.
+            DependencyTarget: The validated dependency_target value.
         """
         from stalker import defaults
 
         if dependency_target is None:
             dependency_target = defaults.task_dependency_targets[0]
 
-        if not isinstance(dependency_target, str):
-            raise TypeError(
-                "{}.dependency_target should be a string with a value one of "
-                "{}, not {}: '{}'".format(
-                    self.__class__.__name__,
-                    defaults.task_dependency_targets,
-                    dependency_target.__class__.__name__,
-                    dependency_target,
-                )
-            )
-
-        if dependency_target not in defaults.task_dependency_targets:
-            raise ValueError(
-                "{}.dependency_target should be one of {}, not '{}'".format(
-                    self.__class__.__name__,
-                    defaults.task_dependency_targets,
-                    dependency_target,
-                )
-            )
+        dependency_target = DependencyTarget.to_target(dependency_target)
 
         return dependency_target
 

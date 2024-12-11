@@ -451,6 +451,89 @@ class ScheduleModelDecorator(TypeDecorator):
         return ScheduleModel.to_model(value)
 
 
+class DependencyTarget(PythonEnum):
+    """The dependency target enum."""
+
+    OnStart = "onstart"
+    OnEnd = "onend"
+
+    def __str__(self) -> str:
+        """Return the string representation.
+
+        Returns:
+            str: The string representation.
+        """
+        return str(self.value)
+
+    @classmethod
+    def to_target(cls, target: Union[str, "DependencyTarget"]) -> "DependencyTarget":
+        """Convert the given target value to a DependencyTarget enum.
+
+        Args:
+            target (Union[str, DependencyTarget]): The value to convert to a
+                DependencyTarget.
+
+        Raises:
+            TypeError: Input value type is invalid.
+            ValueError: Input value is invalid.
+
+        Returns:
+            DependencyTarget: The enum.
+        """
+        if not isinstance(target, (str, DependencyTarget)):
+            raise TypeError(
+                "target should be a DependencyTarget enum value or one of {}, "
+                "not {}: '{}'".format(
+                    [t.name for t in cls] + [t.value for t in cls],
+                    target.__class__.__name__,
+                    target,
+                )
+            )
+        if isinstance(target, str):
+            target_name_lut = dict([(t.name.lower(), t.name) for t in cls])
+            target_name_lut.update(dict([(t.value.lower(), t.name) for t in cls]))
+            target_lower_case = target.lower()
+            if target_lower_case not in target_name_lut:
+                raise ValueError(
+                    "target should be a DependencyTarget enum value or one of {}, "
+                    "not '{}'".format(
+                        [m.name for m in cls] + [t.value for t in cls], target
+                    )
+                )
+
+            return cls.__members__[target_name_lut[target_lower_case]]
+
+        return target
+
+
+class DependencyTargetDecorator(TypeDecorator):
+    """Store DependencyTarget as an enum and restore as DependencyTarget."""
+
+    impl = Enum(*[m.value for m in DependencyTarget], name="TaskDependencyTarget")
+
+    def process_bind_param(self, value, dialect) -> str:
+        """Return the str value of the DependencyTarget.
+
+        Args:
+            value (DependencyTarget): The DependencyTarget value.
+            dialect (str): The name of the dialect.
+
+        Returns:
+            str: The value of the DependencyTarget.
+        """
+        # just return the value
+        return value.value
+
+    def process_result_value(self, value: str, dialect: str) -> DependencyTarget:
+        """Return a DependencyTarget.
+
+        Args:
+            value (str): The string value to convert to DependencyTarget.
+            dialect (str): The name of the dialect.
+        """
+        return DependencyTarget.to_target(value)
+
+
 class TargetEntityTypeMixin(object):
     """Adds target_entity_type attribute to mixed in class.
 

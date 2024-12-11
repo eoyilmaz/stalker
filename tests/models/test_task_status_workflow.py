@@ -21,7 +21,7 @@ from stalker import (
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import StatusError
-from stalker.models.mixins import ScheduleModel, TimeUnit
+from stalker.models.mixins import DependencyTarget, ScheduleModel, TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -2766,11 +2766,11 @@ def test_request_revision_in_cmpl_leaf_task_cmpl_dependent_task_dependency_targe
     assert tdep_t5 is not None
     assert tdep_t6 is not None
     assert tdep_t8 is not None
-    assert tdep_t3.dependency_target == "onstart"
-    assert tdep_t4.dependency_target == "onstart"
-    assert tdep_t5.dependency_target == "onstart"
-    assert tdep_t6.dependency_target == "onstart"
-    assert tdep_t8.dependency_target == "onstart"
+    assert tdep_t3.dependency_target == DependencyTarget.OnStart
+    assert tdep_t4.dependency_target == DependencyTarget.OnStart
+    assert tdep_t5.dependency_target == DependencyTarget.OnStart
+    assert tdep_t6.dependency_target == DependencyTarget.OnStart
+    assert tdep_t8.dependency_target == DependencyTarget.OnStart
 
 
 # CMPL: dependent task status update CMPL -> DREV
@@ -3142,13 +3142,25 @@ def test_request_revision_in_deeper_dependency_setup(
 
     # now request a revision to the first task (test_task6)
     # and expect all of the task dependency targets to be turned
-    # in to "onstart"
+    # in to DependencyTarget.OnStart
     data["test_task6"].request_revision(data["test_user1"])
 
-    assert data["test_task6"].task_depends_on[0].dependency_target == "onend"
-    assert data["test_task3"].task_depends_on[0].dependency_target == "onstart"
-    assert data["test_task8"].task_depends_on[0].dependency_target == "onstart"
-    assert data["test_task9"].task_depends_on[0].dependency_target == "onstart"
+    assert (
+        data["test_task6"].task_depends_on[0].dependency_target
+        == DependencyTarget.OnEnd
+    )
+    assert (
+        data["test_task3"].task_depends_on[0].dependency_target
+        == DependencyTarget.OnStart
+    )
+    assert (
+        data["test_task8"].task_depends_on[0].dependency_target
+        == DependencyTarget.OnStart
+    )
+    assert (
+        data["test_task9"].task_depends_on[0].dependency_target
+        == DependencyTarget.OnStart
+    )
 
 
 # PREV: Review instances statuses are updated
