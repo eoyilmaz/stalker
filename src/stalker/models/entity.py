@@ -213,7 +213,7 @@ class SimpleEntity(Base):
         String(64), nullable=True, default=""
     )
 
-    stalker_version: Mapped[str] = mapped_column(String(256))
+    stalker_version: Mapped[Optional[str]] = mapped_column(String(256))
 
     def __init__(
         self,
