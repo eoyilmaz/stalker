@@ -23,7 +23,7 @@ from stalker import Project
 from stalker import Task
 from stalker import TimeLog
 from stalker.db.session import DBSession
-from stalker.models.mixins import TimeUnit
+from stalker.models.mixins import ScheduleModel, TimeUnit
 
 
 @pytest.fixture(scope="function")
@@ -157,7 +157,7 @@ def setup_tsk_juggler_scheduler_db_tests(setup_postgresql_db):
             data["test_user4"],
             data["test_user5"],
         ],
-        schedule_model=0,
+        schedule_model=ScheduleModel.Effort,
         schedule_timing=50,
         schedule_unit=TimeUnit.Hour,
     )
@@ -173,7 +173,7 @@ def setup_tsk_juggler_scheduler_db_tests(setup_postgresql_db):
             data["test_user5"],
         ],
         depends_on=[data["test_task1"]],
-        schedule_model=0,
+        schedule_model=ScheduleModel.Effort,
         schedule_timing=60,
         schedule_unit=TimeUnit.Hour,
         priority=800,

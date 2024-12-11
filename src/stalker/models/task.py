@@ -57,6 +57,7 @@ from stalker.models.mixins import (
     ReferenceMixin,
     ScheduleConstraint,
     ScheduleMixin,
+    ScheduleModel,
     TimeUnit,
     TimeUnitDecorator,
     StatusMixin,
@@ -485,15 +486,17 @@ class Task(
     information per task and leave the start and end date calculation to
     TaskJuggler.
 
-    The default :attr:`.schedule_model` for Stalker tasks is 'effort`, the
-    default :attr:`.schedule_unit` is ``hour`` and the default value of
-    :attr:`.schedule_timing` is defined by the
+    The default :attr:`.schedule_model` for Stalker tasks is
+    `ScheduleModel.Effort`, the default :attr:`TimeUnit.Hour` and the default
+    value of :attr:`.schedule_timing` is defined by the
     :attr:`stalker.config.Config.timing_resolution`. So for a config where the
     ``timing_resolution`` is set to 1 hour the schedule_timing is 1.
 
-    It is also possible to use the ``length`` or ``duration`` values for
-    :attr:`.schedule_model` (set it to 'effort', 'length' or 'duration' to get
-    the desired scheduling model).
+    It is also possible to use :attr:`.ScheduleModel.Length`` or
+    :attr:`.ScheduleModel.duration` values for
+    :attr:`.schedule_model` (set it to :attr:`ScheduleModel.Effort`,
+    :attr:`.ScheduleModel.Length` or :attr:`.ScheduleModel.Duration` to get the
+    desired scheduling model).
 
     To convert a Task instance to a TaskJuggler compatible string use the
     :attr:`.to_tjp`` attribute. It will try to create a good representation of
@@ -1154,7 +1157,7 @@ class Task(
         end: Optional[datetime.datetime] = None,
         schedule_timing: float = 1.0,
         schedule_unit: TimeUnit = TimeUnit.Hour,
-        schedule_model: Optional[str] = None,
+        schedule_model: Optional[ScheduleModel] = None,
         schedule_constraint: Optional[ScheduleConstraint] = ScheduleConstraint.NONE,
         bid_timing: Optional[Union[int, float]] = None,
         bid_unit: Optional[TimeUnit] = None,
@@ -2242,7 +2245,7 @@ class Task(
                     self.update_schedule_info()
                 return self._total_logged_seconds
 
-            if self.schedule_model == "effort":
+            if self.schedule_model == ScheduleModel.Effort:
                 logger.debug("effort based task detected!")
                 try:
                     sql = """
@@ -2266,7 +2269,7 @@ class Task(
                     return seconds
             else:
                 now = datetime.datetime.now(pytz.utc)
-                if self.schedule_model == "duration":
+                if self.schedule_model == ScheduleModel.Duration:
                     # directly return the difference between
                     # min(now - start, end - start)
                     logger.debug(
@@ -2274,7 +2277,7 @@ class Task(
                         "calculating schedule_info from duration of the task"
                     )
                     daily_working_hours = 86400.0
-                elif self.schedule_model == "length":
+                elif self.schedule_model == ScheduleModel.Length:
                     # directly return the difference between
                     # min(now - start, end - start)
                     # but use working days
@@ -3186,7 +3189,7 @@ class TaskDependency(Base, ScheduleMixin):
     from stalker import defaults
 
     __default_schedule_attr_name__ = "gap"  # used in docstring of ScheduleMixin
-    __default_schedule_models__ = defaults.task_dependency_gap_models
+    __default_schedule_model__ = ScheduleModel.Length
     __default_schedule_timing__ = 0
     __default_schedule_unit__ = TimeUnit.Hour
 
@@ -3242,9 +3245,10 @@ class TaskDependency(Base, ScheduleMixin):
 
     gap_model: Mapped[str] = synonym(
         "schedule_model",
-        doc="""An enumeration value one of ["length", "duration"]. The value of
-        this attribute defines if the :attr:`.gap` value is in *Work Time* or
-        *Calendar Time*. The default value is "length" so the gap value defines
+        doc="""An enumeration value one of [:attr:`.ScheduleModel.Length`,
+        :attr:`.ScheduleModel.Duration`]. The value of this attribute defines
+        if the :attr:`.gap` value is in *Work Time* or *Calendar Time*. The
+        default value is :attr:`.ScheduleModel.Length` so the gap value defines
         a time interval in work time.
         """,
     )
@@ -3256,7 +3260,7 @@ class TaskDependency(Base, ScheduleMixin):
         dependency_target: Optional[str] = None,
         gap_timing: Optional[Union[float, int]] = 0,
         gap_unit: Optional[TimeUnit] = TimeUnit.Hour,
-        gap_model: Optional[str] = "length",
+        gap_model: Optional[ScheduleModel] = ScheduleModel.Length,
     ) -> None:
         ScheduleMixin.__init__(
             self,
