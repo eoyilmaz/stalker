@@ -1543,7 +1543,7 @@ class WorkingHoursMixin(object):
         self.working_hours = working_hours
 
     @declared_attr
-    def working_hours_id(cls) -> Mapped[int]:
+    def working_hours_id(cls) -> Mapped[Optional[int]]:
         """Create the working_hours_id attribute as a declared attribute.
 
         Returns:
@@ -1552,7 +1552,7 @@ class WorkingHoursMixin(object):
         return mapped_column("working_hours_id", Integer, ForeignKey("WorkingHours.id"))
 
     @declared_attr
-    def working_hours(cls) -> Mapped["WorkingHours"]:
+    def working_hours(cls) -> Mapped[Optional["WorkingHours"]]:
         """Create the working_hours attribute as a declared attribute.
 
         Returns:
