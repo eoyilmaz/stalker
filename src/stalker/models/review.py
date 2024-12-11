@@ -12,7 +12,13 @@ from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.link import Link
-from stalker.models.mixins import ProjectMixin, ScheduleMixin, StatusMixin, TimeUnit
+from stalker.models.mixins import (
+    DependencyTarget,
+    ProjectMixin,
+    ScheduleMixin,
+    StatusMixin,
+    TimeUnit,
+)
 from stalker.models.status import Status
 from stalker.utils import walk_hierarchy
 
@@ -382,15 +388,15 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
             dependency.update_status_with_dependent_statuses()
             if dependency.status.code in ["HREV", "PREV", "DREV", "OH", "STOP"]:
                 # for tasks that are still be able to continue to work,
-                # change the dependency_target to "onstart" to allow
-                # the two of the tasks to work together and still let the
-                # TJ to be able to schedule the tasks correctly
+                # change the dependency_target to DependencyTarget.OnStart
+                # to allow the two of the tasks to work together and still let
+                # the TJ to be able to schedule the tasks correctly
                 with DBSession.no_autoflush:
                     task_dependencies = TaskDependency.query.filter_by(
                         depends_on=dependency
                     ).all()
                 for task_dependency in task_dependencies:
-                    task_dependency.dependency_target = "onstart"
+                    task_dependency.dependency_target = DependencyTarget.OnStart
 
             # also update the status of parents of dependencies
             dependency.update_parent_statuses()

@@ -28,7 +28,7 @@ from stalker import (
     defaults,
 )
 from stalker.db.session import DBSession
-from stalker.models.mixins import TimeUnit
+from stalker.models.mixins import DependencyTarget, TimeUnit
 
 
 class DummyScheduler(SchedulerBase):
@@ -930,7 +930,7 @@ def test_schedule_will_schedule_the_tasks_with_the_given_scheduler(
     data["test_studio"].end = datetime.datetime(2013, 7, 30, 0, 0, tzinfo=pytz.utc)
 
     # just to be sure that it is not creating any issue on schedule
-    data["test_task25"].task_depends_on[0].dependency_target = "onstart"
+    data["test_task25"].task_depends_on[0].dependency_target = DependencyTarget.OnStart
     data["test_task25"].resources = [data["test_user2"]]
 
     data["test_studio"].scheduler = tj_scheduler

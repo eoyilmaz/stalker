@@ -34,6 +34,7 @@ from stalker.db.session import DBSession
 from stalker.exceptions import CircularDependencyError
 from stalker.models.mixins import (
     DateRangeMixin,
+    DependencyTarget,
     ScheduleConstraint,
     ScheduleModel,
     TimeUnit,
@@ -2945,13 +2946,13 @@ def test_to_tjp_attr_is_working_as_expected_for_a_leaf_task_with_dependency_deta
 
     # modify dependency attributes
     tdep1 = new_task2.task_depends_on[0]
-    tdep1.dependency_target = "onstart"
+    tdep1.dependency_target = DependencyTarget.OnStart
     tdep1.gap_timing = 2
     tdep1.gap_unit = TimeUnit.Day
     tdep1.gap_model = ScheduleModel.Length
 
     tdep2 = new_task2.task_depends_on[1]
-    tdep1.dependency_target = "onstart"
+    tdep1.dependency_target = DependencyTarget.OnStart
     tdep2.gap_timing = 4
     tdep2.gap_unit = TimeUnit.Day
     tdep2.gap_model = ScheduleModel.Duration
@@ -3029,13 +3030,13 @@ def test_to_tjp_attr_is_working_okay_for_a_leaf_task_with_custom_allocation_stra
 
     # modify dependency attributes
     tdep1 = new_task2.task_depends_on[0]
-    tdep1.dependency_target = "onstart"
+    tdep1.dependency_target = DependencyTarget.OnStart
     tdep1.gap_timing = 2
     tdep1.gap_unit = TimeUnit.Day
     tdep1.gap_model = ScheduleModel.Length
 
     tdep2 = new_task2.task_depends_on[1]
-    tdep1.dependency_target = "onstart"
+    tdep1.dependency_target = DependencyTarget.OnStart
     tdep2.gap_timing = 4
     tdep2.gap_unit = TimeUnit.Day
     tdep2.gap_model = ScheduleModel.Duration
