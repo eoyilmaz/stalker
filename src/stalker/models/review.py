@@ -11,13 +11,12 @@ from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.entity import Entity, SimpleEntity
+from stalker.models.enum import DependencyTarget, TimeUnit
 from stalker.models.link import Link
 from stalker.models.mixins import (
-    DependencyTarget,
     ProjectMixin,
     ScheduleMixin,
     StatusMixin,
-    TimeUnit,
 )
 from stalker.models.status import Status
 from stalker.utils import walk_hierarchy

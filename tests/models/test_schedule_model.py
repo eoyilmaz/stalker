@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from stalker.models.mixins import ScheduleModel
+from stalker.models.enum import ScheduleModel
 
 
 @pytest.mark.parametrize(

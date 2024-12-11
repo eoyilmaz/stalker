@@ -9,7 +9,8 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 import stalker
 from stalker import ScheduleMixin, SimpleEntity, defaults
-from stalker.models.mixins import ScheduleModel, TimeUnit
+from stalker.models.enum import TimeUnit
+from stalker.models.enum import ScheduleModel
 
 
 class MixedInClass(SimpleEntity, ScheduleMixin):

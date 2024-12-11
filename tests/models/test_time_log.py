@@ -15,7 +15,8 @@ from sqlalchemy.exc import IntegrityError
 from stalker import Project, Repository, Status, StatusList, Task, TimeLog, User
 from stalker.db.session import DBSession
 from stalker.exceptions import DependencyViolationError, OverBookedError, StatusError
-from stalker.models.mixins import DependencyTarget, TimeUnit
+from stalker.models.enum import TimeUnit
+from stalker.models.enum import DependencyTarget
 
 
 @pytest.fixture(scope="function")

@@ -13,7 +13,8 @@ from stalker import Task
 from stalker import TaskDependency
 from stalker import User
 from stalker.db.session import DBSession
-from stalker.models.mixins import DependencyTarget, ScheduleModel, TimeUnit
+from stalker.models.enum import ScheduleModel, TimeUnit
+from stalker.models.enum import DependencyTarget
 
 
 @pytest.fixture(scope="function")

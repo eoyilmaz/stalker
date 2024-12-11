@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from stalker.models.mixins import DependencyTarget
+from stalker.models.enum import DependencyTarget
 
 
 @pytest.mark.parametrize(

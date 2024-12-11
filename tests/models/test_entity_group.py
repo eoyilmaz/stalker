@@ -14,7 +14,7 @@ from stalker import (
     Type,
     User,
 )
-from stalker.models.mixins import TimeUnit
+from stalker.models.enum import TimeUnit
 
 
 @pytest.fixture(scope="function")

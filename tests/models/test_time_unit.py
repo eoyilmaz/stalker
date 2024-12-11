@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from stalker.models.mixins import TimeUnit
+from stalker.models.enum import TimeUnit
 
 
 @pytest.mark.parametrize(
