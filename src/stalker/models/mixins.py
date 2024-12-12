@@ -469,7 +469,8 @@ class StatusMixin(object):
 
             # check if the entity_type matches to the
             # StatusList.target_entity_type
-            if self.__class__.__name__ != status_list.target_entity_type:
+            super_names = [mro.__name__ for mro in self.__class__.__mro__]
+            if status_list.target_entity_type not in super_names:
                 raise TypeError(
                     "The given StatusLists' target_entity_type is "
                     f"{status_list.target_entity_type}, "

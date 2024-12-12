@@ -24,6 +24,20 @@ class StatMixClass(SimpleEntity, StatusMixin):
         StatusMixin.__init__(self, **kwargs)
 
 
+class StatMixDerivedClass(StatMixClass):
+    """A class deriving from StatMixClass.
+
+    With the new approach it should be possible to use the StatusLists created
+    for the StatMixClass.
+    """
+
+    __tablename__ = "StatMixDerivedClasses"
+    __mapper_args__ = {"polymorphic_identity": "StatMixDerivedClass"}
+    StatMixDerivedClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("StatMixClasses.id"), primary_key=True
+    )
+
+
 @pytest.fixture(scope="function")
 def status_mixin_tests():
     """Set up the tests for the StatusMixin class.
@@ -96,9 +110,7 @@ def test_status_list_argument_is_not_a_status_list_instance(status_mixin_tests):
     )
 
 
-def test_status_list_attribute_set_to_something_other_than_status_list(
-    status_mixin_tests,
-):
+def test_status_list_attr_is_not_a_status_list(status_mixin_tests):
     """TypeError is raised if status_list is not a StatusList."""
     data = status_mixin_tests
     with pytest.raises(TypeError) as cm:
@@ -110,7 +122,34 @@ def test_status_list_attribute_set_to_something_other_than_status_list(
     )
 
 
-def test_status_list_argument_suitable_for_the_current_class(status_mixin_tests):
+def test_status_list_arg_is_not_suitable_for_the_current_class(status_mixin_tests):
+    """TypeError is raised if the Status.target_entity_type is not compatible."""
+    data = status_mixin_tests
+    # create a new status list suitable for another class with different
+    # entity_type
+
+    new_status_list = StatusList(
+        name="Sequence Statuses",
+        statuses=[
+            Status(name="On Hold", code="OH"),
+            Status(name="Complete", code="CMPLT"),
+        ],
+        target_entity_type="Sequence",
+    )
+
+    data["kwargs"]["status_list"] = new_status_list
+    data["kwargs"].pop("status")
+    with pytest.raises(TypeError) as cm:
+        _ = StatMixClass(**data["kwargs"])
+
+    assert (
+        str(cm.value)
+        == "The given StatusLists' target_entity_type is Sequence, whereas "
+        "the entity_type of this object is StatMixClass"
+    )
+
+
+def test_status_list_attr_is_not_suitable_for_the_current_class(status_mixin_tests):
     """TypeError is raised if the Status.target_entity_type is not compatible."""
     data = status_mixin_tests
     # create a new status list suitable for another class with different
@@ -135,6 +174,16 @@ def test_status_list_argument_suitable_for_the_current_class(status_mixin_tests)
     )
 
 
+def test_status_list_arg_is_suitable_for_the_super(status_mixin_tests):
+    """It is possible to use a StatusList that is suitable for a super."""
+    data = status_mixin_tests
+    # use the status list suitable for the super class
+    # this should not raise a TypeError
+    assert data["kwargs"]["status_list"].target_entity_type != "StatMixDerivedClass"
+    obj = StatMixDerivedClass(**data["kwargs"])
+    assert obj.status_list == data["kwargs"]["status_list"]
+
+
 def test_status_list_attribute_is_working_as_expected(status_mixin_tests):
     """status_list attribute is working as expected."""
     data = status_mixin_tests
@@ -147,9 +196,8 @@ def test_status_list_attribute_is_working_as_expected(status_mixin_tests):
         target_entity_type="StatMixClass",
     )
 
-    # this shouldn't raise any error
+    # this shouldn't raise any errors
     data["test_mixed_obj"].status_list = new_suitable_list
-
     assert data["test_mixed_obj"].status_list == new_suitable_list
 
 

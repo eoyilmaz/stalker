@@ -124,7 +124,6 @@ def setup_asset_tests(setup_postgresql_db):
         "description": "This is a test Asset object",
         "project": data["project1"],
         "type": data["asset_type1"],
-        "status": 0,
         "responsible": [data["test_user1"]],
     }
     data["asset1"] = Asset(**data["kwargs"])
@@ -321,3 +320,49 @@ def test_template_variables_for_asset_itself(setup_asset_tests):
         "task": data["asset1"],
         "type": data["asset_type1"],
     }
+
+
+def test_assets_can_use_task_status_list():
+    """It is possible to use TaskStatus lists with Assets."""
+    # users
+    test_user1 = User(
+        name="User1", login="user1", password="12345", email="user1@user1.com"
+    )
+    # statuses
+    status_wip = Status(code="WIP", name="Work In Progress")
+    status_cmpl = Status(code="CMPL", name="Complete")
+
+    # Just create a StatusList for Tasks
+    task_status_list = StatusList(
+        statuses=[status_wip, status_cmpl], target_entity_type="Task"
+    )
+    project_status_list = StatusList(
+        statuses=[status_wip, status_cmpl], target_entity_type="Project"
+    )
+
+    # types
+    commercial_project_type = Type(
+        name="Commercial Project",
+        code="commproj",
+        target_entity_type="Project",
+    )
+    asset_type1 = Type(name="Character", code="char", target_entity_type="Asset")
+    # project
+    project1 = Project(
+        name="Test Project1",
+        code="tp1",
+        type=commercial_project_type,
+        status_list=project_status_list,
+    )
+    # this should now be possible
+    test_asset = Asset(
+        name="Test Asset",
+        code="ta",
+        description="This is a test Asset object",
+        project=project1,
+        type=asset_type1,
+        status_list=task_status_list,
+        status=status_wip,
+        responsible=[test_user1],
+    )
+    assert test_asset.status_list == task_status_list
