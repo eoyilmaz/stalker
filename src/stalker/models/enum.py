@@ -27,7 +27,9 @@ class ScheduleConstraint(IntEnum):
     __str__ = __repr__
 
     @classmethod
-    def to_constraint(cls, constraint: Union[int, str, "ScheduleConstraint"]) -> "ScheduleConstraint":
+    def to_constraint(
+        cls, constraint: Union[int, str, "ScheduleConstraint"]
+    ) -> "ScheduleConstraint":
         """Validate and return type enum from an input int or str value.
 
         Args:

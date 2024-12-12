@@ -3,7 +3,18 @@
 
 import pytest
 
-from stalker import Entity, Link, Project, Repository, Sequence, Task, Type
+from stalker import (
+    Entity,
+    Link,
+    Project,
+    Repository,
+    Sequence,
+    Status,
+    StatusList,
+    Task,
+    Type,
+    User,
+)
 from stalker.db.session import DBSession
 
 
@@ -243,3 +254,45 @@ def test__hash__is_working_as_expected(setup_sequence_db_tests):
     result = hash(data["test_sequence"])
     assert isinstance(result, int)
     assert result == data["test_sequence"].__hash__()
+
+
+def test_sequences_can_use_task_status_list():
+    """It is possible to use TaskStatus lists with Shots."""
+    # users
+    test_user1 = User(
+        name="User1", login="user1", password="12345", email="user1@user1.com"
+    )
+    # statuses
+    status_wip = Status(code="WIP", name="Work In Progress")
+    status_cmpl = Status(code="CMPL", name="Complete")
+
+    # Just create a StatusList for Tasks
+    task_status_list = StatusList(
+        statuses=[status_wip, status_cmpl], target_entity_type="Task"
+    )
+    project_status_list = StatusList(
+        statuses=[status_wip, status_cmpl], target_entity_type="Project"
+    )
+
+    # types
+    commercial_project_type = Type(
+        name="Commercial Project",
+        code="commproj",
+        target_entity_type="Project",
+    )
+    # project
+    project1 = Project(
+        name="Test Project1",
+        code="tp1",
+        type=commercial_project_type,
+        status_list=project_status_list,
+    )
+    # sequence
+    test_seq1 = Sequence(
+        name="Test Sequence",
+        code="tseq",
+        project=project1,
+        status_list=task_status_list,
+        responsible=[test_user1],
+    )
+    assert test_seq1.status_list == task_status_list

@@ -18,6 +18,7 @@ from stalker import (
     StatusList,
     Task,
     Type,
+    User,
 )
 from stalker.db.session import DBSession
 
@@ -1542,3 +1543,44 @@ def test_template_variables_include_sequence_for_shots(setup_shot_db_tests):
     assert "sequence" in template_variables
     assert data["test_shot"].sequence is not None
     assert template_variables["sequence"] == data["test_shot"].sequence
+
+
+def test_shots_can_use_task_status_list():
+    """It is possible to use TaskStatus lists with Shots."""
+    # users
+    test_user1 = User(
+        name="User1", login="user1", password="12345", email="user1@user1.com"
+    )
+    # statuses
+    status_wip = Status(code="WIP", name="Work In Progress")
+    status_cmpl = Status(code="CMPL", name="Complete")
+
+    # Just create a StatusList for Tasks
+    task_status_list = StatusList(
+        statuses=[status_wip, status_cmpl], target_entity_type="Task"
+    )
+    project_status_list = StatusList(
+        statuses=[status_wip, status_cmpl], target_entity_type="Project"
+    )
+
+    # types
+    commercial_project_type = Type(
+        name="Commercial Project",
+        code="commproj",
+        target_entity_type="Project",
+    )
+    # project
+    project1 = Project(
+        name="Test Project1",
+        code="tp1",
+        type=commercial_project_type,
+        status_list=project_status_list,
+    )
+    # shots
+    test_shot1 = Shot(
+        code="TestSH001",
+        project=project1,
+        status_list=task_status_list,
+        responsible=[test_user1],
+    )
+    assert test_shot1.status_list == task_status_list

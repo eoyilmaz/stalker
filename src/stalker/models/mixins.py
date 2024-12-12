@@ -431,6 +431,8 @@ class StatusMixin(object):
         """
         from stalker.models.status import StatusList
 
+        super_names = [mro.__name__ for mro in self.__class__.__mro__]
+
         if status_list is None:
             # check if there is a db setup and try to get the appropriate
             # StatusList from the database
@@ -440,8 +442,8 @@ class StatusMixin(object):
                 try:
                     # try to get a StatusList with the target_entity_type is
                     # matching the class name
-                    status_list = StatusList.query.filter_by(
-                        target_entity_type=self.__class__.__name__
+                    status_list = StatusList.query.filter(
+                        StatusList.target_entity_type.in_(super_names)
                     ).first()
                 except (UnboundExecutionError, OperationalError):
                     # it is not mapped just skip it
@@ -469,7 +471,7 @@ class StatusMixin(object):
 
             # check if the entity_type matches to the
             # StatusList.target_entity_type
-            if self.__class__.__name__ != status_list.target_entity_type:
+            if status_list.target_entity_type not in super_names:
                 raise TypeError(
                     "The given StatusLists' target_entity_type is "
                     f"{status_list.target_entity_type}, "
