@@ -233,7 +233,7 @@ def test_reference_mixin_initialization(setup_asset_tests):
 def test_status_mixin_initialization(setup_asset_tests):
     """StatusMixin part is initialized correctly."""
     data = setup_asset_tests
-    status_list = StatusList.query.filter_by(target_entity_type="Asset").first()
+    status_list = StatusList.query.filter_by(target_entity_type="Task").first()
     data["kwargs"]["code"] = "SH12314"
     data["kwargs"]["status"] = 0
     data["kwargs"]["status_list"] = status_list

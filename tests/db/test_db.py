@@ -276,40 +276,8 @@ def test_variant_status_list_initialization(setup_postgresql_db):
     variant_status_list = StatusList.query.filter(
         StatusList.target_entity_type == "Variant"
     ).first()
-    assert isinstance(variant_status_list, StatusList)
-    assert variant_status_list.name == "Variant Statuses"
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(variant_status_list.statuses) == len(expected_status_names)
-    db_status_names = map(lambda x: x.name, variant_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, variant_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
-    # check if the created_by and updated_by attributes are correctly set
-    # to the admin
-    admin = get_admin_user()
-    assert all(status.created_by == admin for status in variant_status_list.statuses)
-    assert all(status.updated_by == admin for status in variant_status_list.statuses)
+    # we do not create a specific StatusList for Variant's anymore
+    assert variant_status_list is None
 
 
 def test_register_creates_suitable_permissions(setup_postgresql_db):
@@ -496,290 +464,51 @@ def test_task_status_list_initialization(setup_postgresql_db):
 def test_asset_status_list_initialization(setup_postgresql_db):
     """Asset statuses are correctly created."""
     asset_status_list = (
-        StatusList.query.filter(StatusList.name == "Asset Statuses")
-        .filter(StatusList.target_entity_type == "Asset")
-        .first()
+        StatusList.query.filter(StatusList.target_entity_type == "Asset").first()
     )
-    assert isinstance(asset_status_list, StatusList)
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(asset_status_list.statuses) == len(expected_status_names)
-    db_status_names = map(lambda x: x.name, asset_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, asset_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
+    # we do not generate a specific StatusList for Assets anymore
+    # as Task specific StatusLists can be used.
+    assert asset_status_list is None
 
 
 def test_shot_status_list_initialization(setup_postgresql_db):
     """Shot statuses are correctly created."""
     shot_status_list = (
-        StatusList.query.filter(StatusList.name == "Shot Statuses")
-        .filter(StatusList.target_entity_type == "Shot")
-        .first()
+        StatusList.query.filter(StatusList.target_entity_type == "Shot").first()
     )
-    assert isinstance(shot_status_list, StatusList)
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(shot_status_list.statuses) == len(expected_status_names)
-    db_status_names = map(lambda x: x.name, shot_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, shot_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
+    # we do not generate a specific StatusList for Shots anymore
+    # as Task specific StatusLists can be used.
+    assert shot_status_list is None
 
 
 def test_sequence_status_list_initialization(setup_postgresql_db):
     """Sequence statuses are correctly created."""
     sequence_status_list = (
-        StatusList.query.filter(StatusList.name == "Sequence Statuses")
-        .filter(StatusList.target_entity_type == "Sequence")
-        .first()
+        StatusList.query.filter(StatusList.target_entity_type == "Sequence").first()
     )
-    assert isinstance(sequence_status_list, StatusList)
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(sequence_status_list.statuses) == len(expected_status_names)
-    db_status_names = map(lambda x: x.name, sequence_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, sequence_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
-    # check if the created_by and updated_by attributes are correctly set
-    # to admin
-    admin = get_admin_user()
-    assert all(status.created_by == admin for status in sequence_status_list.statuses)
-    assert all(status.updated_by == admin for status in sequence_status_list.statuses)
+    # we do not generate a specific StatusList for Sequences anymore
+    # as Task specific StatusLists can be used.
+    assert sequence_status_list is None
 
 
 def test_scene_status_list_initialization(setup_postgresql_db):
     """Scene statuses are correctly created."""
     scene_status_list = (
-        StatusList.query.filter(StatusList.name == "Scene Statuses")
-        .filter(StatusList.target_entity_type == "Scene")
-        .first()
+        StatusList.query.filter(StatusList.target_entity_type == "Scene").first()
     )
-    assert isinstance(scene_status_list, StatusList)
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(scene_status_list.statuses) == len(expected_status_names)
-    db_status_names = map(lambda x: x.name, scene_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, scene_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
-    # check if the created_by and updated_by attributes are correctly set
-    # to admin
-    admin = get_admin_user()
-    assert all(status.created_by == admin for status in scene_status_list.statuses)
-    assert all(status.updated_by == admin for status in scene_status_list.statuses)
+    # we do not generate a specific StatusList for Scenes anymore
+    # as Task specific StatusLists can be used.
+    assert scene_status_list is None
 
 
-def test_asset_status_list_initialization_when_there_is_an_asset_status_list(
-    setup_postgresql_db,
-):
-    """Asset statuses created if a StatusList for Sequence exists."""
-    asset_status_list = StatusList.query.filter(
-        StatusList.name == "Asset Statuses"
-    ).first()
-    assert isinstance(asset_status_list, StatusList)
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(asset_status_list.statuses) == len(expected_status_names)
-    db_status_names = map(lambda x: x.name, asset_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, asset_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
-    # check if the created_by and updated_by attributes are correctly set
-    # to the admin
-    admin = get_admin_user()
-    for status in asset_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
-
-
-def test_shot_status_list_initialization_when_there_is_a_shot_status_list(
-    setup_postgresql_db,
-):
-    """Shot statuses created if there is a StatusList for Shot exist."""
-    shot_status_list = StatusList.query.filter(
-        StatusList.name == "Shot Statuses"
-    ).first()
-    assert isinstance(shot_status_list, StatusList)
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(shot_status_list.statuses) == len(expected_status_names)
-    db_status_names = map(lambda x: x.name, shot_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, shot_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
-    # check if the created_by and updated_by attributes are correctly set
-    # to the admin
-    admin = get_admin_user()
-    for status in shot_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
-
-
-def test_sequence_status_list_initialization_when_there_is_a_sequence_status_list(
-    setup_postgresql_db,
-):
-    """Sequence statuses correctly created if a StatusList for Sequence exists."""
-    sequence_status_list = StatusList.query.filter(
-        StatusList.name == "Sequence Statuses"
-    ).first()
-    assert isinstance(sequence_status_list, StatusList)
-    expected_status_names = [
-        "Waiting For Dependency",
-        "Ready To Start",
-        "Work In Progress",
-        "Pending Review",
-        "Has Revision",
-        "Dependency Has Revision",
-        "On Hold",
-        "Stopped",
-        "Completed",
-    ]
-    expected_status_codes = [
-        "WFD",
-        "RTS",
-        "WIP",
-        "PREV",
-        "HREV",
-        "DREV",
-        "OH",
-        "STOP",
-        "CMPL",
-    ]
-    assert len(sequence_status_list.statuses) == len(expected_status_names)
-
-    db_status_names = map(lambda x: x.name, sequence_status_list.statuses)
-    db_status_codes = map(lambda x: x.code, sequence_status_list.statuses)
-    assert sorted(expected_status_names) == sorted(db_status_names)
-    assert sorted(expected_status_codes) == sorted(db_status_codes)
-
-    # check if the created_by and updated_by attributes are correctly set
-    # to the admin
-    admin = get_admin_user()
-    for status in sequence_status_list.statuses:
-        assert status.created_by == admin
-        assert status.updated_by == admin
+def test_variant_status_list_initialization(setup_postgresql_db):
+    """Variant statuses are correctly created."""
+    variant_status_list = (
+        StatusList.query.filter(StatusList.target_entity_type == "Variant").first()
+    )
+    # we do not generate a specific StatusList for Variant anymore
+    # as Task specific StatusLists can be used.
+    assert variant_status_list is None
 
 
 def test_review_status_list_initialization(setup_postgresql_db):
@@ -4127,7 +3856,10 @@ def test_persistence_of_task(setup_postgresql_db):
     assert sorted(tasks, key=lambda x: x.name) == sorted(
         task1_db.tasks, key=lambda x: x.name
     )
-    assert [child_task1, child_task2] == tasks
+    assert len([child_task1, child_task2]) == len(tasks)
+    assert sorted([child_task1, child_task2], key=lambda x: x.name) == sorted(
+        tasks, key=lambda x: x.name
+    )
     assert task1_db.type == type_
     assert task1_db.updated_by == updated_by
     assert task1_db.versions == versions

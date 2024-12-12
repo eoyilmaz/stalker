@@ -4798,9 +4798,10 @@ def test_percent_complete_attr_is_not_using_any_time_logs_for_a_duration_task(
     new_task.computed_start = now + td(days=1)
     new_task.computed_end = now + td(days=2)
 
+    resource1 = new_task.resources[0]
     _ = TimeLog(
         task=new_task,
-        resource=new_task.resources[0],
+        resource=resource1,
         start=now + td(days=1),
         end=now + td(days=2),
     )
@@ -4833,9 +4834,11 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
     DBSession.add(parent_task)
 
     new_task.time_logs = []
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
         task=new_task,
-        resource=new_task.resources[0],
+        resource=resource1,
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
@@ -4845,7 +4848,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task(
 
     tlog2 = TimeLog(
         task=new_task,
-        resource=new_task.resources[1],
+        resource=resource2,
         start=now - td(hours=4),
         end=now + td(hours=1),
     )
@@ -4887,9 +4890,11 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
     DBSession.add(parent_task)
 
     new_task.time_logs = []
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
         task=new_task,
-        resource=new_task.resources[0],
+        resource=resource1,
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
@@ -4898,7 +4903,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
 
     tlog2 = TimeLog(
         task=new_task,
-        resource=new_task.resources[1],
+        resource=resource2,
         start=now - td(hours=4),
         end=now + td(hours=1),
     )
@@ -4941,9 +4946,11 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
     parent_task = Task(**kwargs)
 
     new_task.time_logs = []
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
         task=new_task,
-        resource=new_task.resources[0],
+        resource=resource1,
         start=now - td(hours=4),
         end=now - td(hours=2),
     )
@@ -4953,7 +4960,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_container_task_with_
 
     tlog2 = TimeLog(
         task=new_task,
-        resource=new_task.resources[1],
+        resource=resource2,
         start=now - td(hours=4),
         end=now + td(hours=1),
     )
@@ -5135,8 +5142,12 @@ def test_percent_complete_attr_is_working_as_expected_for_a_leaf_task(
     now = dt.now(pytz.utc)
 
     new_task.time_logs = []
+    # we can't use new_task.resources list directly between commits,
+    # as apparently the order is changing after a TimeLog is created
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
-        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
     )
     DBSession.add(tlog1)
     DBSession.commit()
@@ -5144,7 +5155,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_leaf_task(
     assert tlog1 in new_task.time_logs
 
     tlog2 = TimeLog(
-        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+        task=new_task, resource=resource2, start=now, end=now + td(hours=12)
     )
     DBSession.add(tlog2)
     DBSession.commit()
@@ -5255,8 +5266,12 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs(setup_task_db_tests):
     td = datetime.timedelta
     now = dt.now(pytz.utc)
     new_task.time_logs = []
+
+    # apparently the new_task.resources order is changing between commits.
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
-        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
     )
     DBSession.add(tlog1)
     DBSession.commit()
@@ -5264,7 +5279,7 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs(setup_task_db_tests):
     assert tlog1 in new_task.time_logs
 
     tlog2 = TimeLog(
-        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+        task=new_task, resource=resource2, start=now, end=now + td(hours=12)
     )
     DBSession.add(tlog2)
     DBSession.commit()
@@ -5289,14 +5304,16 @@ def test_total_logged_seconds_calls_update_schedule_info(
     parent_task = Task(**kwargs)
     new_task.parent = parent_task
     new_task.time_logs = []
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
-        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
     )
     DBSession.add(tlog1)
     DBSession.commit()
     assert tlog1 in new_task.time_logs
     tlog2 = TimeLog(
-        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+        task=new_task, resource=resource2, start=now, end=now + td(hours=12)
     )
     DBSession.add(tlog2)
     DBSession.commit()
@@ -5326,8 +5343,11 @@ def test_update_schedule_info_on_a_container_of_containers_task(
     new_task.parent = parent_task
     parent_task.parent = root_task
     new_task.time_logs = []
+    # apparently the new_task.resources order is changing between commits.
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
-        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
     )
     DBSession.add(new_task)
     DBSession.add(parent_task)
@@ -5336,7 +5356,7 @@ def test_update_schedule_info_on_a_container_of_containers_task(
     DBSession.commit()
     assert tlog1 in new_task.time_logs
     tlog2 = TimeLog(
-        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+        task=new_task, resource=resource2, start=now, end=now + td(hours=12)
     )
     DBSession.add(tlog2)
     DBSession.commit()
@@ -5372,14 +5392,17 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children(
     parent_task = Task(**kwargs)
     new_task.parent = parent_task
     new_task.time_logs = []
+    # apparently the new_task.resources order is changing between commits.
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
     tlog1 = TimeLog(
-        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
     )
     DBSession.add(tlog1)
     DBSession.commit()
     assert tlog1 in new_task.time_logs
     tlog2 = TimeLog(
-        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+        task=new_task, resource=resource2, start=now, end=now + td(hours=12)
     )
     DBSession.add(tlog2)
     DBSession.commit()
@@ -5436,9 +5459,14 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_deeper(
     parent_task1.parent = parent_task2
     assert parent_task2.total_logged_seconds == 10 * 3600
 
+    # we can't use new_task.resources list directly between commits,
+    # as apparently the order is changing after a TimeLog is created
+    resource1 = new_task.resources[0]
+    resource2 = new_task.resources[1]
+
     new_task.time_logs = []
     tlog2 = TimeLog(
-        task=new_task, resource=new_task.resources[0], start=now, end=now + td(hours=8)
+        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
     )
     DBSession.add(tlog2)
     DBSession.commit()
@@ -5449,7 +5477,7 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_deeper(
     assert parent_task2.total_logged_seconds == 18 * 3600
 
     tlog3 = TimeLog(
-        task=new_task, resource=new_task.resources[1], start=now, end=now + td(hours=12)
+        task=new_task, resource=resource2, start=now, end=now + td(hours=12)
     )
     DBSession.add(tlog3)
     DBSession.commit()
@@ -5477,8 +5505,9 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
     new_task = Task(**kwargs)
 
     # create a time_log of 2 hours
+    resource1 = new_task.resources[0]
     _ = TimeLog(
-        task=new_task, start=now, duration=td(hours=2), resource=new_task.resources[0]
+        task=new_task, start=now, duration=td(hours=2), resource=resource1
     )
     # check
     assert (
@@ -5496,7 +5525,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
         task=new_task,
         start=now + td(hours=2),
         end=now + td(days=5),
-        resource=new_task.resources[0],
+        resource=resource1,
     )
     # check
     assert (
@@ -5509,7 +5538,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
         task=new_task,
         start=now + td(days=5),
         duration=td(hours=2),
-        resource=new_task.resources[0],
+        resource=resource1,
     )
     assert (
         new_task.remaining_seconds
@@ -5526,7 +5555,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
         task=new_task,
         start=now + td(days=6),
         duration=td(hours=2),
-        resource=new_task.resources[0],
+        resource=resource1,
     )
     new_task.time_logs.append(tlog4)
 
@@ -5541,7 +5570,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
         task=new_task,
         start=now + td(days=7),
         duration=td(weeks=1),
-        resource=new_task.resources[0],
+        resource=resource1,
     )
     new_task.time_logs.append(tlog5)
 
@@ -5562,7 +5591,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
         task=new_task,
         start=now + td(days=15),
         duration=td(days=30),
-        resource=new_task.resources[0],
+        resource=resource1,
     )
     new_task.time_logs.append(tlog6)
 
@@ -5583,7 +5612,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
         task=new_task,
         start=now + td(days=55),
         duration=td(days=30),
-        resource=new_task.resources[0],
+        resource=resource1,
     )
     new_task.time_logs.append(tlog8)
     # check

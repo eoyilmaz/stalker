@@ -97,7 +97,7 @@ def status_mixin_tests():
     return data
 
 
-def test_status_list_argument_is_not_a_status_list_instance(status_mixin_tests):
+def test_status_list_arg_is_not_a_status_list_instance(status_mixin_tests):
     """TypeError is raised if status_list arg is not a StatusList."""
     data = status_mixin_tests
     data["kwargs"]["status_list"] = 100
@@ -184,7 +184,7 @@ def test_status_list_arg_is_suitable_for_the_super(status_mixin_tests):
     assert obj.status_list == data["kwargs"]["status_list"]
 
 
-def test_status_list_attribute_is_working_as_expected(status_mixin_tests):
+def test_status_list_attr_is_working_as_expected(status_mixin_tests):
     """status_list attribute is working as expected."""
     data = status_mixin_tests
     new_suitable_list = StatusList(
@@ -201,7 +201,7 @@ def test_status_list_attribute_is_working_as_expected(status_mixin_tests):
     assert data["test_mixed_obj"].status_list == new_suitable_list
 
 
-def test_status_argument_set_to_none(status_mixin_tests):
+def test_status_arg_set_to_none(status_mixin_tests):
     """first in the status_list attribute is used if the status arg is None."""
     data = status_mixin_tests
     data["kwargs"]["status"] = None
@@ -209,14 +209,14 @@ def test_status_argument_set_to_none(status_mixin_tests):
     assert new_obj.status == new_obj.status_list[0]
 
 
-def test_status_attribute_set_to_none(status_mixin_tests):
+def test_status_attr_set_to_none(status_mixin_tests):
     """first in the status_list is used if status attribute is set to None."""
     data = status_mixin_tests
     data["test_mixed_obj"].status = None
     assert data["test_mixed_obj"].status == data["test_mixed_obj"].status_list[0]
 
 
-def test_status_argument_is_not_a_status_instance_or_integer(status_mixin_tests):
+def test_status_arg_is_not_a_status_instance_or_integer(status_mixin_tests):
     """TypeError is raised if status arg is not a Status or int."""
     data = status_mixin_tests
     data["kwargs"]["status"] = "0"
@@ -230,7 +230,7 @@ def test_status_argument_is_not_a_status_instance_or_integer(status_mixin_tests)
     )
 
 
-def test_status_attribute_set_to_a_value_other_than_a_status_or_integer(
+def test_status_attr_is_not_a_status_or_integer(
     status_mixin_tests,
 ):
     """TypeError is raised if status attribute is set to not Status nor int."""
@@ -245,7 +245,7 @@ def test_status_attribute_set_to_a_value_other_than_a_status_or_integer(
     )
 
 
-def test_status_attribute_is_set_to_a_status_which_is_not_in_the_status_list(
+def test_status_attr_is_set_to_a_status_which_is_not_in_the_status_list(
     status_mixin_tests,
 ):
     """ValueError is raised if Status is not in the related StatusList."""
@@ -260,7 +260,7 @@ def test_status_attribute_is_set_to_a_status_which_is_not_in_the_status_list(
     )
 
 
-def test_status_argument_is_working_as_expected_with_status_instances(
+def test_status_arg_is_working_as_expected_with_status_instances(
     status_mixin_tests,
 ):
     """status attribute value is set correctly with Status arg value."""
@@ -271,7 +271,7 @@ def test_status_argument_is_working_as_expected_with_status_instances(
     assert new_obj.status == test_value
 
 
-def test_status_attribute_is_working_as_expected_with_status_instances(
+def test_status_attr_is_working_as_expected_with_status_instances(
     status_mixin_tests,
 ):
     """status attribute is working as expected with Status instances."""
@@ -281,7 +281,7 @@ def test_status_attribute_is_working_as_expected_with_status_instances(
     assert data["test_mixed_obj"].status == test_value
 
 
-def test_status_argument_is_working_as_expected_with_integers(status_mixin_tests):
+def test_status_arg_is_working_as_expected_with_integers(status_mixin_tests):
     """status attribute value is set correctly with int arg value."""
     data = status_mixin_tests
     data["kwargs"]["status"] = 1
@@ -290,7 +290,7 @@ def test_status_argument_is_working_as_expected_with_integers(status_mixin_tests
     assert new_obj.status == test_value
 
 
-def test_status_attribute_is_working_as_expected_with_integers(status_mixin_tests):
+def test_status_attr_is_working_as_expected_with_integers(status_mixin_tests):
     """status attribute is working as expected with integers."""
     data = status_mixin_tests
     test_value = 1
@@ -300,7 +300,7 @@ def test_status_attribute_is_working_as_expected_with_integers(status_mixin_test
     )
 
 
-def test_status_argument_is_an_integer_but_out_of_range(status_mixin_tests):
+def test_status_arg_is_an_integer_but_out_of_range(status_mixin_tests):
     """ValueError is raised if the status argument is out of range."""
     data = status_mixin_tests
     data["kwargs"]["status"] = 10
@@ -313,7 +313,7 @@ def test_status_argument_is_an_integer_but_out_of_range(status_mixin_tests):
     )
 
 
-def test_status_attribute_set_to_an_integer_but_out_of_range(status_mixin_tests):
+def test_status_attr_set_to_an_integer_but_out_of_range(status_mixin_tests):
     """ValueError is raised if the status attribute is set to out of range int."""
     data = status_mixin_tests
     with pytest.raises(ValueError) as cm:
@@ -325,7 +325,7 @@ def test_status_attribute_set_to_an_integer_but_out_of_range(status_mixin_tests)
     )
 
 
-def test_status_argument_is_a_negative_integer(status_mixin_tests):
+def test_status_arg_is_a_negative_integer(status_mixin_tests):
     """ValueError will be raised if the status argument is a negative int."""
     data = status_mixin_tests
     data["kwargs"]["status"] = -10
@@ -335,7 +335,7 @@ def test_status_argument_is_a_negative_integer(status_mixin_tests):
     assert str(cm.value) == "StatMixClass.status must be a non-negative integer"
 
 
-def test_status_attribute_set_to_an_negative_integer(status_mixin_tests):
+def test_status_attr_set_to_an_negative_integer(status_mixin_tests):
     """ValueError is raised if the status attribute is set to a negative int."""
     data = status_mixin_tests
     with pytest.raises(ValueError) as cm:
@@ -356,6 +356,16 @@ class StatusListAutoAddClass(SimpleEntity, StatusMixin):
     def __init__(self, **kwargs):
         super(SimpleEntity, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
+
+
+class StatusListAutoAddDerivedClass(StatusListAutoAddClass):
+    """A class derived from StatusListAutoAddClass for testing purposes."""
+
+    __tablename__ = "StatusListAutoAddDerivedClass"
+    __mapper_args__ = {"polymorphic_identity": "StatusListAutoAddDerivedClass"}
+    statusListAutoAddClass_id: Mapped[int] = mapped_column(
+        "id", ForeignKey("StatusListAutoAddClass.id"), primary_key=True
+    )
 
 
 class StatusListNoAutoAddClass(SimpleEntity, StatusMixin):
@@ -431,7 +441,7 @@ def setup_status_mixin_db_tests(setup_postgresql_db):
     return data
 
 
-def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(
+def test_status_list_arg_is_skipped_and_there_is_a_db_setup(
     setup_status_mixin_db_tests,
 ):
     """no error raised, status_list is filled with StatusList instance, with db."""
@@ -460,7 +470,7 @@ def test_status_list_attribute_is_skipped_and_there_is_a_db_setup(
     assert test_status_list_auto_add_class.status_list == test_status_list
 
 
-def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitable_status_list(
+def test_status_list_arg_is_skipped_and_there_is_a_db_setup_but_no_suitable_status_list(
     setup_status_mixin_db_tests,
 ):
     """TypeError is raised no suitable StatusList in the database."""
@@ -494,7 +504,7 @@ def test_status_list_attribute_is_skipped_and_there_is_a_db_setup_but_no_suitabl
     )
 
 
-def test_status_list_argument_is_none(setup_status_mixin_db_tests):
+def test_status_list_arg_is_none(setup_status_mixin_db_tests):
     """TypeError is raised if trying to initialize status_list with None."""
     data = setup_status_mixin_db_tests
     data["kwargs"]["status_list"] = None
@@ -510,7 +520,7 @@ def test_status_list_argument_is_none(setup_status_mixin_db_tests):
     )
 
 
-def test_status_list_argument_skipped(setup_status_mixin_db_tests):
+def test_status_list_arg_skipped(setup_status_mixin_db_tests):
     """TypeError is raised if status_list argument is skipped."""
     data = setup_status_mixin_db_tests
     data["kwargs"].pop("status_list")
@@ -526,7 +536,7 @@ def test_status_list_argument_skipped(setup_status_mixin_db_tests):
     )
 
 
-def test_status_list_attribute_set_to_none(setup_status_mixin_db_tests):
+def test_status_list_attr_set_to_none(setup_status_mixin_db_tests):
     """TypeError is raised if trying to set the status_list to None."""
     data = setup_status_mixin_db_tests
     with pytest.raises(TypeError) as cm:
@@ -539,3 +549,28 @@ def test_status_list_attribute_set_to_none(setup_status_mixin_db_tests):
         "(StatusList.target_entity_type=StatMixClass) with the "
         "'status_list' argument"
     )
+
+
+def test_status_list_is_found_automatically_for_derived_class(
+    setup_status_mixin_db_tests,
+):
+    """StatusList can be found automatically for StatusListAutoAddDerivedClass."""
+    data = setup_status_mixin_db_tests
+    status_list = StatusList(
+        name="Test Status List",
+        target_entity_type="StatusListAutoAddClass",
+        statuses=[
+            data["test_status1"],
+            data["test_status2"],
+            data["test_status3"],
+            data["test_status4"],
+            data["test_status5"],
+        ],
+    )
+    DBSession.save(status_list)
+    assert status_list.target_entity_type == "StatusListAutoAddClass"
+
+    assert StatusListAutoAddClass in StatusListAutoAddDerivedClass.__mro__
+
+    test_obj = StatusListAutoAddDerivedClass()
+    assert test_obj.status_list == status_list

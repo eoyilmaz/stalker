@@ -22,8 +22,8 @@ class ExtendedScopedSession(scoped_session):
             data (Union[list, stalker.models.entity.SimpleEntity]): Either a single or
                 a list of :class:`stalker.models.entity.SimpleEntity` or derivatives.
         """
-        if data:
-            if hasattr(data, "__getitem__"):
+        if data is not None:
+            if isinstance(data, list):
                 self.add_all(data)
             else:
                 self.add(data)
