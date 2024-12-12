@@ -72,7 +72,8 @@ from sqlalchemy.exc import (
     ProgrammingError,
 )
 
-from stalker.models.mixins import ScheduleConstraint, ScheduleModel, TimeUnit
+from stalker.models.enum import ScheduleConstraint, TimeUnit
+from stalker.models.enum import ScheduleModel
 from tests.utils import create_random_db, get_admin_user, tear_down_db
 
 logger = log.get_logger(__name__)

@@ -32,12 +32,14 @@ from stalker import (
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import CircularDependencyError
-from stalker.models.mixins import (
-    DateRangeMixin,
+from stalker.models.enum import (
     DependencyTarget,
     ScheduleConstraint,
     ScheduleModel,
     TimeUnit,
+)
+from stalker.models.mixins import (
+    DateRangeMixin,
 )
 
 

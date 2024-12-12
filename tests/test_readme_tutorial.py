@@ -15,7 +15,7 @@ from stalker import (
     User,
     Version,
 )
-from stalker.models.mixins import TimeUnit
+from stalker.models.enum import TimeUnit
 
 
 def test_readme_tutorial_code(setup_sqlite3):

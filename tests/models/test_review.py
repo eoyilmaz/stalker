@@ -10,7 +10,7 @@ import pytz
 
 from stalker import Project, Repository, Review, Status, Structure, Task, User, Version
 from stalker.db.session import DBSession
-from stalker.models.mixins import TimeUnit
+from stalker.models.enum import TimeUnit
 
 
 @pytest.fixture(scope="function")

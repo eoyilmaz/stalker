@@ -28,7 +28,8 @@ from stalker import (
     defaults,
 )
 from stalker.db.session import DBSession
-from stalker.models.mixins import DependencyTarget, TimeUnit
+from stalker.models.enum import TimeUnit
+from stalker.models.enum import DependencyTarget
 
 
 class DummyScheduler(SchedulerBase):

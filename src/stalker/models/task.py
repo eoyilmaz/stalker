@@ -51,17 +51,19 @@ from stalker.log import get_logger
 from stalker.models.auth import User
 from stalker.models.budget import Good
 from stalker.models.entity import Entity
-from stalker.models.mixins import (
-    DAGMixin,
-    DateRangeMixin,
+from stalker.models.enum import (
     DependencyTarget,
     DependencyTargetDecorator,
-    ReferenceMixin,
     ScheduleConstraint,
-    ScheduleMixin,
     ScheduleModel,
     TimeUnit,
     TimeUnitDecorator,
+)
+from stalker.models.mixins import (
+    DAGMixin,
+    DateRangeMixin,
+    ReferenceMixin,
+    ScheduleMixin,
     StatusMixin,
 )
 from stalker.models.review import Review

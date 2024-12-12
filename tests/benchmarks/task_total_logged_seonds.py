@@ -28,7 +28,8 @@ from stalker.config import Config
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 
-from stalker.models.mixins import ScheduleModel, TimeUnit
+from stalker.models.enum import TimeUnit
+from stalker.models.enum import ScheduleModel
 from tests.utils import create_random_db, drop_db, get_server_details_from_url
 
 log.logging_level = logging.INFO
