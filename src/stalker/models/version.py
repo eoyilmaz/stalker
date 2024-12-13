@@ -14,6 +14,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym, validat
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
+from stalker.models.enum import TraversalDirection
 from stalker.models.link import Link
 from stalker.models.mixins import DAGMixin
 from stalker.models.review import Review
@@ -640,11 +641,15 @@ class Version(Link, DAGMixin):
             "_".join(map(lambda x: x.nice_name, self.naming_parents))
         )
 
-    def walk_inputs(self, method: int = 0) -> Generator[None, "Version", None]:
+    def walk_inputs(
+        self,
+        method: Union[int, str, TraversalDirection] = TraversalDirection.DepthFirst,
+    ) -> Generator[None, "Version", None]:
         """Walk the inputs of this version instance.
 
         Args:
-            method (int): The walk method, 0=Depth First, 1=Breadth First.
+            method (Union[int, str, TraversalDirection]): The walk method defined by
+                the :class:`.TraversalDirection` enum.
 
         Yields:
             Version: Yield the Version instances.

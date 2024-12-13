@@ -58,6 +58,7 @@ from stalker.models.enum import (
     ScheduleModel,
     TimeUnit,
     TimeUnitDecorator,
+    TraversalDirection,
 )
 from stalker.models.mixins import (
     DAGMixin,
@@ -2528,11 +2529,16 @@ class Task(
             .all()
         )
 
-    def walk_dependencies(self, method: int = 1) -> Generator[None, "Task", None]:
+    def walk_dependencies(
+        self,
+        method: Union[int, str, TraversalDirection] = TraversalDirection.BreadthFirst,
+    ) -> Generator[None, "Task", None]:
         """Walk the dependencies of this task.
 
         Args:
-            method (int): The walk method, 0: Depth First, 1: Breadth First.
+            method (Union[int, str, TraversalDirection]): The walk method
+                defined by the :class:`.TraversalDirection` enum value. Default
+                is :attr:`.TraversalDirection.BreadthFirst`.
 
         Yields:
             Task: Yields Task instances.

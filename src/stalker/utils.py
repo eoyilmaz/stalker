@@ -2,11 +2,12 @@
 """Utilities are situated here."""
 import calendar
 from datetime import datetime, timedelta
-from typing import Any, Generator
+from typing import Any, Generator, Union
 
 import pytz
 
 from stalker.exceptions import CircularDependencyError
+from stalker.models.enum import TraversalDirection
 
 
 def make_plural(name: str) -> str:
@@ -32,31 +33,36 @@ def make_plural(name: str) -> str:
     return plural_name
 
 
-def walk_hierarchy(entity: Any, attr: str, method: int = 0) -> Generator[Any, Any, Any]:
+def walk_hierarchy(
+    entity: Any, attr: str, method: Union[int, str, TraversalDirection] = 0
+) -> Generator[Any, Any, Any]:
     """Walk the entity hierarchy over the given attribute and yield the entities found.
 
     It doesn't check for cycle, so if the attribute is not acyclic then this
     function will not find an exit point.
 
-    The default mode is Depth First Search (DFS), to walk with Breadth First
-    Search (BFS) set the direction to 1.
+    The default method is Depth First Search (DFS), to walk with Breadth First
+    Search (BFS) set the direction to :attr:`.TraversalDirection.BreadthFirst`.
 
     Args:
         entity (Any): Starting Entity.
         attr (str): The attribute name to walk over.
-        method (int): 0:Depth first or 1:Breadth First
+        method (Union[int, str, TraversalDirection]): Use TraversalDirection enum
+            values, or one of the values listed here ["DepthFirst",
+            "BreadthFirst", 0, 1].
 
     Yields:
         Any: List any entities found while traversing the hierarchy.
     """
     entity_to_visit = [entity]
-    if not method:  # Depth First Search (DFS)
+    method = TraversalDirection.to_direction(method)
+    if method == TraversalDirection.DepthFirst:
         while len(entity_to_visit):
             current_entity = entity_to_visit.pop(0)
             for child in reversed(getattr(current_entity, attr)):
                 entity_to_visit.insert(0, child)
             yield current_entity
-    else:  # Breadth First Search (BFS)
+    else:  # TraversalDirection.BreadthFirst
         while len(entity_to_visit):
             current_entity = entity_to_visit.pop(0)
             entity_to_visit.extend(getattr(current_entity, attr))
