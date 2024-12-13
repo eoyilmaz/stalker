@@ -226,7 +226,7 @@ class ScheduleModel(Enum):
             raise TypeError(
                 "model should be a ScheduleModel enum value or one of {}, "
                 "not {}: '{}'".format(
-                    [u.name.title() for u in cls] + [u.value for u in cls],
+                    [m.name.title() for m in cls] + [m.value for m in cls],
                     model.__class__.__name__,
                     model,
                 )
@@ -322,7 +322,7 @@ class DependencyTarget(Enum):
                 raise ValueError(
                     "target should be a DependencyTarget enum value or one of {}, "
                     "not '{}'".format(
-                        [m.name for m in cls] + [t.value for t in cls], target
+                        [t.name for t in cls] + [t.value for t in cls], target
                     )
                 )
 
@@ -357,3 +357,64 @@ class DependencyTargetDecorator(TypeDecorator):
             dialect (str): The name of the dialect.
         """
         return DependencyTarget.to_target(value)
+
+
+class TraversalDirection(IntEnum):
+    """The traversal direction enum."""
+
+    DepthFirst = 0
+    BreadthFirst = 1
+
+    def __repr__(self) -> str:
+        """Return the enum name for str().
+
+        Returns:
+            str: The name as the string representation of this
+                ScheduleConstraint.
+        """
+        return self.name if self.name != "NONE" else "None"
+
+    __str__ = __repr__
+
+    @classmethod
+    def to_direction(
+        cls, direction: Union[int, str, "TraversalDirection"]
+    ) -> "TraversalDirection":
+        """Convert the given direction value to a TraversalDirection enum.
+
+        Args:
+            direction (Union[int, str, TraversalDirection]): The value to
+                convert to a TraversalDirection.
+
+        Raises:
+            TypeError: Input value type is invalid.
+            ValueError: Input value is invalid.
+
+        Returns:
+            TraversalDirection: The enum.
+        """
+        if not isinstance(direction, (int, str, TraversalDirection)):
+            raise TypeError(
+                "direction should be a TraversalDirection enum value "
+                "or one of {}, not {}: '{}'".format(
+                    [d.name for d in cls] + [d.value for d in cls],
+                    direction.__class__.__name__,
+                    direction,
+                )
+            )
+        if isinstance(direction, str):
+            direction_name_lut = dict([(d.name.lower(), d.name) for d in cls])
+            direction_name_lut.update(dict([(d.value, d.name) for d in cls]))
+            direction_lower_case = direction.lower()
+            if direction_lower_case not in direction_name_lut:
+                raise ValueError(
+                    "direction should be a TraversalDirection enum value or "
+                    "one of {}, not '{}'".format(
+                        [d.name for d in cls] + [d.value for d in cls],
+                        direction,
+                    )
+                )
+
+            return cls.__members__[direction_name_lut[direction_lower_case]]
+
+        return direction

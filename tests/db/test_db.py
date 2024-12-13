@@ -463,9 +463,9 @@ def test_task_status_list_initialization(setup_postgresql_db):
 
 def test_asset_status_list_initialization(setup_postgresql_db):
     """Asset statuses are correctly created."""
-    asset_status_list = (
-        StatusList.query.filter(StatusList.target_entity_type == "Asset").first()
-    )
+    asset_status_list = StatusList.query.filter(
+        StatusList.target_entity_type == "Asset"
+    ).first()
     # we do not generate a specific StatusList for Assets anymore
     # as Task specific StatusLists can be used.
     assert asset_status_list is None
@@ -473,9 +473,9 @@ def test_asset_status_list_initialization(setup_postgresql_db):
 
 def test_shot_status_list_initialization(setup_postgresql_db):
     """Shot statuses are correctly created."""
-    shot_status_list = (
-        StatusList.query.filter(StatusList.target_entity_type == "Shot").first()
-    )
+    shot_status_list = StatusList.query.filter(
+        StatusList.target_entity_type == "Shot"
+    ).first()
     # we do not generate a specific StatusList for Shots anymore
     # as Task specific StatusLists can be used.
     assert shot_status_list is None
@@ -483,9 +483,9 @@ def test_shot_status_list_initialization(setup_postgresql_db):
 
 def test_sequence_status_list_initialization(setup_postgresql_db):
     """Sequence statuses are correctly created."""
-    sequence_status_list = (
-        StatusList.query.filter(StatusList.target_entity_type == "Sequence").first()
-    )
+    sequence_status_list = StatusList.query.filter(
+        StatusList.target_entity_type == "Sequence"
+    ).first()
     # we do not generate a specific StatusList for Sequences anymore
     # as Task specific StatusLists can be used.
     assert sequence_status_list is None
@@ -493,9 +493,9 @@ def test_sequence_status_list_initialization(setup_postgresql_db):
 
 def test_scene_status_list_initialization(setup_postgresql_db):
     """Scene statuses are correctly created."""
-    scene_status_list = (
-        StatusList.query.filter(StatusList.target_entity_type == "Scene").first()
-    )
+    scene_status_list = StatusList.query.filter(
+        StatusList.target_entity_type == "Scene"
+    ).first()
     # we do not generate a specific StatusList for Scenes anymore
     # as Task specific StatusLists can be used.
     assert scene_status_list is None
@@ -503,9 +503,9 @@ def test_scene_status_list_initialization(setup_postgresql_db):
 
 def test_variant_status_list_initialization(setup_postgresql_db):
     """Variant statuses are correctly created."""
-    variant_status_list = (
-        StatusList.query.filter(StatusList.target_entity_type == "Variant").first()
-    )
+    variant_status_list = StatusList.query.filter(
+        StatusList.target_entity_type == "Variant"
+    ).first()
     # we do not generate a specific StatusList for Variant anymore
     # as Task specific StatusLists can be used.
     assert variant_status_list is None

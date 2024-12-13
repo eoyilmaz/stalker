@@ -770,8 +770,7 @@ def test_depends_attr_does_not_allow_simple_cyclic_dependencies(setup_task_tests
         task_a.depends_on = [task_b]
 
     assert (
-        str(cm.value)
-        == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates "
+        str(cm.value) == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) are in "
         'a circular dependency in their "depends_on" attribute'
     )
 
@@ -803,7 +802,7 @@ def test_depends_attr_does_not_allow_cyclic_dependencies(setup_task_tests):
         task_a.depends_on = [task_c]
 
     assert (
-        str(cm.value) == "<taskC (Task)> (Task) and <taskA (Task)> (Task) creates a "
+        str(cm.value) == "<taskC (Task)> (Task) and <taskA (Task)> (Task) are in a "
         'circular dependency in their "depends_on" attribute'
     )
 
@@ -842,7 +841,7 @@ def test_depends_attr_does_not_allow_more_deeper_cyclic_dependencies(
         task_a.depends_on = [task_d]
 
     assert (
-        str(cm.value) == "<taskD (Task)> (Task) and <taskA (Task)> (Task) creates a "
+        str(cm.value) == "<taskD (Task)> (Task) and <taskA (Task)> (Task) are in a "
         'circular dependency in their "depends_on" attribute'
     )
 
@@ -903,8 +902,7 @@ def test_depends_arg_does_not_allow_one_of_the_parents_of_the_task(setup_task_te
         task_b.depends_on = [task_a]
 
     assert (
-        str(cm.value)
-        == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates "
+        str(cm.value) == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) are in "
         'a circular dependency in their "children" attribute'
     )
 
@@ -912,8 +910,7 @@ def test_depends_arg_does_not_allow_one_of_the_parents_of_the_task(setup_task_te
         task_b.depends_on = [task_c]
 
     assert (
-        str(cm.value)
-        == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates "
+        str(cm.value) == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) are in "
         'a circular dependency in their "children" attribute'
     )
 
@@ -1808,8 +1805,7 @@ def test_parent_attr_creates_a_cycle(setup_task_tests):
         new_task1.parent = new_task2
 
     assert (
-        str(cm.value)
-        == "<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates "
+        str(cm.value) == "<Modeling (Task)> (Task) and <New Task (Task)> (Task) are in "
         'a circular dependency in their "children" attribute'
     )
 
@@ -1821,8 +1817,7 @@ def test_parent_attr_creates_a_cycle(setup_task_tests):
         new_task1.parent = new_task3
 
     assert (
-        str(cm.value)
-        == "<Modeling (Task)> (Task) and <New Task (Task)> (Task) creates "
+        str(cm.value) == "<Modeling (Task)> (Task) and <New Task (Task)> (Task) are in "
         'a circular dependency in their "children" attribute'
     )
 
@@ -1872,8 +1867,7 @@ def test_parent_arg_do_not_allow_a_dependent_task_to_be_parent(setup_task_tests)
         Task(**kwargs)
 
     assert (
-        str(cm.value)
-        == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates "
+        str(cm.value) == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) are in "
         'a circular dependency in their "children" attribute'
     )
 
@@ -1896,8 +1890,7 @@ def test_parent_attr_do_not_allow_a_dependent_task_to_be_parent(
         task_d.parent = task_a
 
     assert (
-        str(cm.value)
-        == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) creates "
+        str(cm.value) == "<Modeling (Task)> (Task) and <Modeling (Task)> (Task) are in "
         'a circular dependency in their "depends_on" attribute'
     )
 
@@ -2443,8 +2436,8 @@ def test_parent_attr_checks_cycle_on_self(setup_task_tests):
         task1.parent = task1
 
     assert (
-        str(cm.value) == "<Set Day (Task)> (Task) and <Set Day (Task)> (Task) creates "
-        'a circular dependency in their "children" attribute'
+        str(cm.value) == "<Set Day (Task)> (Task) and <Set Day (Task)> (Task) "
+        'are in a circular dependency in their "children" attribute'
     )
 
 
@@ -5146,9 +5139,7 @@ def test_percent_complete_attr_is_working_as_expected_for_a_leaf_task(
     # as apparently the order is changing after a TimeLog is created
     resource1 = new_task.resources[0]
     resource2 = new_task.resources[1]
-    tlog1 = TimeLog(
-        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
-    )
+    tlog1 = TimeLog(task=new_task, resource=resource1, start=now, end=now + td(hours=8))
     DBSession.add(tlog1)
     DBSession.commit()
 
@@ -5270,9 +5261,7 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs(setup_task_db_tests):
     # apparently the new_task.resources order is changing between commits.
     resource1 = new_task.resources[0]
     resource2 = new_task.resources[1]
-    tlog1 = TimeLog(
-        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
-    )
+    tlog1 = TimeLog(task=new_task, resource=resource1, start=now, end=now + td(hours=8))
     DBSession.add(tlog1)
     DBSession.commit()
 
@@ -5306,9 +5295,7 @@ def test_total_logged_seconds_calls_update_schedule_info(
     new_task.time_logs = []
     resource1 = new_task.resources[0]
     resource2 = new_task.resources[1]
-    tlog1 = TimeLog(
-        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
-    )
+    tlog1 = TimeLog(task=new_task, resource=resource1, start=now, end=now + td(hours=8))
     DBSession.add(tlog1)
     DBSession.commit()
     assert tlog1 in new_task.time_logs
@@ -5346,9 +5333,7 @@ def test_update_schedule_info_on_a_container_of_containers_task(
     # apparently the new_task.resources order is changing between commits.
     resource1 = new_task.resources[0]
     resource2 = new_task.resources[1]
-    tlog1 = TimeLog(
-        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
-    )
+    tlog1 = TimeLog(task=new_task, resource=resource1, start=now, end=now + td(hours=8))
     DBSession.add(new_task)
     DBSession.add(parent_task)
     DBSession.add(root_task)
@@ -5395,9 +5380,7 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children(
     # apparently the new_task.resources order is changing between commits.
     resource1 = new_task.resources[0]
     resource2 = new_task.resources[1]
-    tlog1 = TimeLog(
-        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
-    )
+    tlog1 = TimeLog(task=new_task, resource=resource1, start=now, end=now + td(hours=8))
     DBSession.add(tlog1)
     DBSession.commit()
     assert tlog1 in new_task.time_logs
@@ -5465,9 +5448,7 @@ def test_total_logged_seconds_is_the_sum_of_all_time_logs_of_children_deeper(
     resource2 = new_task.resources[1]
 
     new_task.time_logs = []
-    tlog2 = TimeLog(
-        task=new_task, resource=resource1, start=now, end=now + td(hours=8)
-    )
+    tlog2 = TimeLog(task=new_task, resource=resource1, start=now, end=now + td(hours=8))
     DBSession.add(tlog2)
     DBSession.commit()
 
@@ -5506,9 +5487,7 @@ def test_remaining_seconds_is_working_as_expected(setup_task_db_tests):
 
     # create a time_log of 2 hours
     resource1 = new_task.resources[0]
-    _ = TimeLog(
-        task=new_task, start=now, duration=td(hours=2), resource=resource1
-    )
+    _ = TimeLog(task=new_task, start=now, duration=td(hours=2), resource=resource1)
     # check
     assert (
         new_task.remaining_seconds

@@ -5,6 +5,7 @@ See docs for more information.
 """
 from stalker.version import __version__  # noqa: F401
 from stalker import config, log  # noqa: I100
+
 if True:
     defaults: config.Config = config.Config()
 from stalker.models.asset import Asset

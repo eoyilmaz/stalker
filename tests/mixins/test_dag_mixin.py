@@ -118,7 +118,7 @@ def test_parent_attribute_creates_a_cycle(dag_mixin_test_case):
         str(cm.value) == "<Test DAG Mixin (DAGMixinFooMixedInClass)> "
         "(DAGMixinFooMixedInClass) and "
         "<Test DAG Mixin (DAGMixinFooMixedInClass)> "
-        "(DAGMixinFooMixedInClass) creates a circular dependency in "
+        "(DAGMixinFooMixedInClass) are in a circular dependency in "
         'their "children" attribute'
     )
 

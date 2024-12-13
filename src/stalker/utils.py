@@ -82,7 +82,7 @@ def check_circular_dependency(entity: Any, other_entity: Any, attr_name: str) ->
         if e is other_entity:
             raise CircularDependencyError(
                 "{entity_name} ({entity_class}) and "
-                "{other_entity_name} ({other_entity_class}) creates a "
+                "{other_entity_name} ({other_entity_class}) are in a "
                 'circular dependency in their "{attr_name}" attribute'.format(
                     entity_name=entity,
                     entity_class=entity.__class__.__name__,
