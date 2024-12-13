@@ -49,6 +49,7 @@ from stalker.models.enum import (
     ScheduleModelDecorator,
     TimeUnit,
     TimeUnitDecorator,
+    TraversalDirection,
 )
 from stalker.utils import check_circular_dependency, make_plural, walk_hierarchy
 
@@ -1983,11 +1984,16 @@ class DAGMixin(object):
         parents.reverse()
         return parents
 
-    def walk_hierarchy(self, method=0) -> Generator[None, Self, None]:
+    def walk_hierarchy(
+        self,
+        method: Union[int, str, TraversalDirection] = TraversalDirection.DepthFirst,
+    ) -> Generator[None, Self, None]:
         """Walk the hierarchy of this task.
 
         Args:
-            method (int): The walk method, 0: Depth First, 1: Breadth First.
+            method (Union[int, str, TraversalDirection]): The walk method
+                defined by the :class:`.TraversalDirection` enum value. The
+                default is :attr:`.TraversalDirection.DepthFirst`.
 
         Yields:
             Task: The child Task.

@@ -11,7 +11,7 @@ from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.entity import Entity, SimpleEntity
-from stalker.models.enum import DependencyTarget, TimeUnit
+from stalker.models.enum import DependencyTarget, TimeUnit, TraversalDirection
 from stalker.models.link import Link
 from stalker.models.mixins import (
     ProjectMixin,
@@ -382,7 +382,9 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         from stalker import TaskDependency
 
         # update dependent task statuses
-        for dependency in walk_hierarchy(self.task, "dependent_of", method=1):
+        for dependency in walk_hierarchy(
+            self.task, "dependent_of", method=TraversalDirection.BreadthFirst
+        ):
             logger.debug(f"current TaskDependency object: {dependency}")
             dependency.update_status_with_dependent_statuses()
             if dependency.status.code in ["HREV", "PREV", "DREV", "OH", "STOP"]:

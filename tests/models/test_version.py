@@ -801,7 +801,7 @@ def test_parent_attribute_will_not_allow_circular_dependencies(setup_version_db_
 
     assert (
         str(cm.value) == "<tp_SH001_Task1_v001 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
+        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -825,7 +825,7 @@ def test_parent_attribute_will_not_allow_deeper_circular_dependencies(
 
     assert (
         str(cm.value) == "<tp_SH001_Task1_v001 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
+        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -907,7 +907,7 @@ def test_children_attribute_will_not_allow_circular_dependencies(
 
     assert (
         str(cm.value) == "<tp_SH001_Task1_v003 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
+        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -937,7 +937,7 @@ def test_children_attribute_will_not_allow_deeper_circular_dependencies(
 
     assert (
         str(cm.value) == "<tp_SH001_Task1_v004 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
+        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -2119,7 +2119,7 @@ def test_children_attribute_will_not_allow_circular_dependencies_2(
 
     assert (
         str(cm.value) == "<tp_SH001_Task1_v003 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
+        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -2143,7 +2143,7 @@ def test_children_attribute_will_not_allow_deeper_circular_dependencies_2(
 
     assert (
         str(cm.value) == "<tp_SH001_Task1_v004 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) creates a "
+        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
