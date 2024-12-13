@@ -34,7 +34,9 @@ def make_plural(name: str) -> str:
 
 
 def walk_hierarchy(
-    entity: Any, attr: str, method: Union[int, str, TraversalDirection] = 0
+    entity: Any,
+    attr: str,
+    method: Union[int, str, TraversalDirection] = TraversalDirection.DepthFirst,
 ) -> Generator[Any, Any, Any]:
     """Walk the entity hierarchy over the given attribute and yield the entities found.
 
@@ -47,9 +49,10 @@ def walk_hierarchy(
     Args:
         entity (Any): Starting Entity.
         attr (str): The attribute name to walk over.
-        method (Union[int, str, TraversalDirection]): Use TraversalDirection enum
-            values, or one of the values listed here ["DepthFirst",
-            "BreadthFirst", 0, 1].
+        method (Union[int, str, TraversalDirection]): Use TraversalDirection
+            enum values, or one of the values listed here ["DepthFirst",
+            "BreadthFirst", 0, 1]. The default is
+            :attr:`.TraversalDirection.DepthFirst`.
 
     Yields:
         Any: List any entities found while traversing the hierarchy.
