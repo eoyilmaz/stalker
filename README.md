@@ -1,4 +1,9 @@
-|license| |pyversion| |pypiversion| |wheel| [![Stalker Tests](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml/badge.svg)](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml)
+|license| |pyversion| |pypiversion| |wheel|
+
+
+[![license](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)][http://www.gnu.org/licenses/lgpl-3.0]
+
+[![Stalker Tests](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml/badge.svg)](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml)
 
 .. |license| image:: https://img.shields.io/badge/License-LGPL%20v3-blue.svg
      :target: http://www.gnu.org/licenses/lgpl-3.0
