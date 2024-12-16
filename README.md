@@ -35,11 +35,11 @@ Stalker has the following features:
 
 Stalker is mainly build over the following OpenSource libraries:
 
- * Python
- * SQLAlchemy and Alembic
- * PostgreSQL
- * Jinja2
- * TaskJuggler
+ * [Python](https://www.python.org)
+ * [PostgreSQL](https://www.postgresql.org/)
+ * [SQLAlchemy](https://www.sqlalchemy.org/)
+ * [Jinja2](https://jinja.palletsprojects.com/en/stable/)
+ * [TaskJuggler](https://taskjuggler.org/)
 
 As Stalker is a Python library and doesn't supply any graphical UI you can use
 other tools like [Stalker Pyramid](https://github.com/eoyilmaz/stalker_pyramid)
