@@ -1,25 +1,8 @@
-|license| |pyversion| |pypiversion| |wheel|
-
-
-[![license](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)][http://www.gnu.org/licenses/lgpl-3.0]
-
-[![Stalker Tests](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml/badge.svg)](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml)
-
-.. |license| image:: https://img.shields.io/badge/License-LGPL%20v3-blue.svg
-     :target: http://www.gnu.org/licenses/lgpl-3.0
-     :alt: License
-
-.. |pyversion| image:: https://img.shields.io/pypi/pyversions/stalker.svg
-     :target: https://pypi.python.org/pypi/stalker
-     :alt: Supported Python versions
-
-.. |pypiversion| image:: https://img.shields.io/pypi/v/stalker.svg
-     :target: https://pypi.python.org/pypi/stalker
-     :alt: PyPI Version
-
-.. |wheel| image:: https://img.shields.io/pypi/wheel/stalker.svg
-     :target: https://pypi.python.org/pypi/stalker
-     :alt: Wheel Support
+[![license](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0)
+[![Supported Python versions](https://img.shields.io/pypi/pyversions/stalker.svg)](https://pypi.python.org/pypi/stalker)
+[![PyPI Version](https://img.shields.io/pypi/v/stalker.svg)](https://pypi.python.org/pypi/stalker)
+[![Wheel Support](https://img.shields.io/pypi/wheel/stalker.svg)](https://pypi.python.org/pypi/stalker)
+[![Tests](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml/badge.svg)](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml)
 
 =====
 About
