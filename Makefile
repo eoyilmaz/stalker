@@ -3,7 +3,7 @@ PACKAGE_NAME=stalker
 NUM_CPUS = $(shell nproc ||  grep -c '^processor' /proc/cpuinfo)
 SETUP_PY_FLAGS = --use-distutils
 VERSION := $(shell cat VERSION)
-VERSION_FILE=$(CURDIR)/VERSION
+VERSION_FILE=$(CURDIR)/src/stalker/VERSION
 VIRTUALENV_DIR:=.venv
 SYSTEM_PYTHON?=python3
 
