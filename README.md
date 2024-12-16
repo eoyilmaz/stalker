@@ -1,8 +1,8 @@
 [![license](https://img.shields.io/badge/License-LGPL%20v3-blue.svg)](http://www.gnu.org/licenses/lgpl-3.0)
 [![Supported Python versions](https://img.shields.io/pypi/pyversions/stalker.svg)](https://pypi.python.org/pypi/stalker)
+[![Unit Tests](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml/badge.svg)](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml)
 [![PyPI Version](https://img.shields.io/pypi/v/stalker.svg)](https://pypi.python.org/pypi/stalker)
-[![Wheel Support](https://img.shields.io/pypi/wheel/stalker.svg)](https://pypi.python.org/pypi/stalker)
-[![Tests](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml/badge.svg)](https://github.com/eoyilmaz/stalker/actions/workflows/pytest.yml)
+[![PyPI Downloads](https://static.pepy.tech/badge/stalker)](https://pepy.tech/projects/stalker)
 
 =====
 About
