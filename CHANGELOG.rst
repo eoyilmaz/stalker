@@ -22,9 +22,9 @@ Stalker Changes
 * Added `tox` config to run the test with Python 3.8 to 3.13.
 * Increased test coverage to 99.76%.
 * Updated documentation theme to `furo`.
-* Renamed OSX to macOS where ever it is mentioned.
+* Renamed `OSX` to `macOS` where ever it is mentioned.
 * `Scene` is now deriving from `Task`.
-* `Shot.sequences` is now `Shot.sequences` and it is many-to-one.
+* `Shot.sequences` is now `Shot.sequence` and it is many-to-one.
 * `Shot.scenes` is now `Shot.scene` and it is many-to-one.
 * Added the `Variant` class to allow variants to be approved and managed
   individually.
@@ -36,12 +36,14 @@ Stalker Changes
 * `Version._template_variables()` now finds the related `Asset`, `Shot` and
   `Sequence` values and passes them in the returned dictionary.
 * All the enum values handled with arbitrary string lists or integer values are
-  now enum classes. As a result we now have `ScheduleConstraint`, `TimeUnit`,
-  `ScheduleModel`, `DependencyTarget`, `TraversalDirection` enum classes which
-  are removing the need of using fiddly strings as enum values.
+  now proper enum classes. As a result we now have `ScheduleConstraint`,
+  `TimeUnit`, `ScheduleModel`, `DependencyTarget`, `TraversalDirection`
+  enum classes which are removing the need of using fiddly strings as enum
+  values.
 * `StatusList`s that are created for super classes can now be used with the
-  derived classes, i.e. a status list created specifically for Task can now be
-  used with Asset, Shot Sequence and Scenes and any future Task derivatives.
+  derived classes, i.e. a status list created specifically for `Task` can now
+  be used with `Asset`, `Shot`, `Sequence` and `Scenes` and any future `Task`
+  derivatives.
 
 0.2.27
 ======
