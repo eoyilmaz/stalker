@@ -665,7 +665,7 @@ def test_thumbnail_arg_is_not_a_file_instance(setup_simple_entity_tests):
         SimpleEntity(**data["kwargs"])
 
     assert str(cm.value) == (
-        "SimpleEntity.thumbnail should be a stalker.models.link.File instance, "
+        "SimpleEntity.thumbnail should be a stalker.models.file.File instance, "
         "not str: 'not a File'"
     )
 
@@ -677,7 +677,7 @@ def test_thumbnail_attr_is_not_a_file_instance(setup_simple_entity_tests):
         data["test_simple_entity"].thumbnail = "not a File"
 
     assert str(cm.value) == (
-        "SimpleEntity.thumbnail should be a stalker.models.link.File instance, "
+        "SimpleEntity.thumbnail should be a stalker.models.file.File instance, "
         "not str: 'not a File'"
     )
 

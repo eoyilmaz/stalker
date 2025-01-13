@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 
 if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.auth import User
-    from stalker.models.link import File
+    from stalker.models.file import File
     from stalker.models.note import Note
     from stalker.models.tag import Tag
     from stalker.models.type import Type
@@ -637,7 +637,7 @@ class SimpleEntity(Base):
             if not isinstance(thumb, File):
                 raise TypeError(
                     f"{self.__class__.__name__}.thumbnail should be a "
-                    "stalker.models.link.File instance, "
+                    "stalker.models.file.File instance, "
                     f"not {thumb.__class__.__name__}: '{thumb}'"
                 )
         return thumb

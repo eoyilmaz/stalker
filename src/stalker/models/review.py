@@ -12,7 +12,7 @@ from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.enum import DependencyTarget, TimeUnit, TraversalDirection
-from stalker.models.link import File
+from stalker.models.file import File
 from stalker.models.mixins import (
     ProjectMixin,
     ScheduleMixin,
@@ -510,7 +510,7 @@ class DailyFile(Base):
     )
     file: Mapped[File] = relationship(
         primaryjoin="DailyFile.file_id==File.file_id",
-        doc="""stalker.models.link.File instances related to the Daily instance.
+        doc="""stalker.models.file.File instances related to the Daily instance.
 
         Attach the same :class:`.File` instances that are linked as an output
         to a certain :class:`.Version` s instance to this attribute.
@@ -558,7 +558,7 @@ class DailyFile(Base):
         if file is not None and not isinstance(file, File):
             raise TypeError(
                 f"{self.__class__.__name__}.file should be an instance of "
-                "stalker.models.link.File instance, "
+                "stalker.models.file.File instance, "
                 f"not {file.__class__.__name__}: '{file}'"
             )
 

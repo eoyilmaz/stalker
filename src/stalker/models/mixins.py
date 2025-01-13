@@ -58,7 +58,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.auth import Permission
     from stalker.models.project import Project
     from stalker.models.status import Status, StatusList
-    from stalker.models.link import File
+    from stalker.models.file import File
     from stalker.models.studio import WorkingHours
 
 
@@ -1042,7 +1042,7 @@ class ProjectMixin(object):
 class ReferenceMixin(object):
     """Adds reference capabilities to the mixed in class.
 
-    References are :class:`stalker.models.link.File` instances or anything
+    References are :class:`stalker.models.file.File` instances or anything
     derived from it, which adds information to the attached objects. The aim of
     the References are generally to give more info to direct the evolution of
     the object.
@@ -1099,13 +1099,13 @@ class ReferenceMixin(object):
         Returns:
             File: The validated reference value.
         """
-        from stalker.models.link import File
+        from stalker.models.file import File
 
         # all the items should be instance of stalker.models.entity.Entity
         if not isinstance(reference, File):
             raise TypeError(
                 f"All the items in the {self.__class__.__name__}.references should "
-                "be stalker.models.link.File instances, "
+                "be stalker.models.file.File instances, "
                 f"not {reference.__class__.__name__}: '{reference}'"
             )
         return reference

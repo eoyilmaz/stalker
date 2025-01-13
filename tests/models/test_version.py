@@ -592,7 +592,7 @@ def test_inputs_argument_is_not_a_list_of_file_instances(setup_version_db_tests)
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.File instances, not int: '132'"
+        "stalker.models.file.File instances, not int: '132'"
     )
 
 
@@ -605,7 +605,7 @@ def test_inputs_attribute_is_not_a_list_of_file_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.File instances, not int: '132'"
+        "stalker.models.file.File instances, not int: '132'"
     )
 
 
@@ -656,7 +656,7 @@ def test_outputs_argument_is_not_a_list_of_file_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.File instances, not int: '132'"
+        "stalker.models.file.File instances, not int: '132'"
     )
 
 
@@ -669,7 +669,7 @@ def test_outputs_attribute_is_not_a_list_of_file_instances(setup_version_db_test
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.File instances, not int: '132'"
+        "stalker.models.file.File instances, not int: '132'"
     )
 
 

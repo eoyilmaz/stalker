@@ -114,7 +114,7 @@ def test_references_attribute_accepting_only_lists_of_file_instances(
 
     assert str(cm.value) == (
         "All the items in the RefMixFooClass.references should be "
-        "stalker.models.link.File instances, not int: '1'"
+        "stalker.models.file.File instances, not int: '1'"
     )
 
 
@@ -126,7 +126,7 @@ def test_references_attribute_elements_accepts_files_only(setup_reference_mixin_
 
     assert str(cm.value) == (
         "All the items in the RefMixFooClass.references should be "
-        "stalker.models.link.File instances, not Entity: '<Test Entity 1 (Entity)>'"
+        "stalker.models.file.File instances, not Entity: '<Test Entity 1 (Entity)>'"
     )
 
 

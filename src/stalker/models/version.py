@@ -15,7 +15,7 @@ from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.enum import TraversalDirection
-from stalker.models.link import File
+from stalker.models.file import File
 from stalker.models.mixins import DAGMixin
 from stalker.models.review import Review
 from stalker.models.task import Task
@@ -417,7 +417,7 @@ class Version(File, DAGMixin):
         if not isinstance(input_, File):
             raise TypeError(
                 "All elements in {}.inputs should be all "
-                "stalker.models.link.File instances, not {}: '{}'".format(
+                "stalker.models.file.File instances, not {}: '{}'".format(
                     self.__class__.__name__, input_.__class__.__name__, input_
                 )
             )
@@ -441,7 +441,7 @@ class Version(File, DAGMixin):
         if not isinstance(output, File):
             raise TypeError(
                 "All elements in {}.outputs should be all "
-                "stalker.models.link.File instances, not {}: '{}'".format(
+                "stalker.models.file.File instances, not {}: '{}'".format(
                     self.__class__.__name__, output.__class__.__name__, output
                 )
             )

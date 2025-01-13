@@ -22,7 +22,7 @@ from stalker.models.client import Client, ClientUser
 from stalker.models.department import Department, DepartmentUser
 from stalker.models.entity import Entity, EntityGroup, SimpleEntity
 from stalker.models.format import ImageFormat
-from stalker.models.link import File
+from stalker.models.file import File
 from stalker.models.message import Message
 from stalker.models.mixins import (
     ACLMixin,

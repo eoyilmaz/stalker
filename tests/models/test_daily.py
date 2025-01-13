@@ -161,7 +161,7 @@ def test_files_argument_is_not_a_list_instance(setup_daily_tests):
 
     assert (
         str(cm.value) == "DailyFile.file should be an instance of "
-        "stalker.models.link.File instance, not str: 'n'"
+        "stalker.models.file.File instance, not str: 'n'"
     )
 
 
@@ -177,7 +177,7 @@ def test_files_argument_is_not_a_list_of_file_instances(setup_daily_tests):
         )
 
     assert str(cm.value) == (
-        "DailyFile.file should be an instance of stalker.models.link.File instance, "
+        "DailyFile.file should be an instance of stalker.models.file.File instance, "
         "not str: 'not'"
     )
 
