@@ -20,7 +20,7 @@ def setup_structure_tests():
         name="Test Shot Template", target_entity_type="Shot", type=vers_type
     )
     data["reference_template"] = FilenameTemplate(
-        name="Test Reference Template", target_entity_type="Link", type=ref_type
+        name="Test Reference Template", target_entity_type="File", type=ref_type
     )
     data["test_templates"] = [
         data["asset_template"],

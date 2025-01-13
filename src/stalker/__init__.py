@@ -22,7 +22,7 @@ from stalker.models.client import Client, ClientUser
 from stalker.models.department import Department, DepartmentUser
 from stalker.models.entity import Entity, EntityGroup, SimpleEntity
 from stalker.models.format import ImageFormat
-from stalker.models.link import Link
+from stalker.models.link import File
 from stalker.models.message import Message
 from stalker.models.mixins import (
     ACLMixin,
@@ -46,7 +46,7 @@ from stalker.models.project import (
     ProjectUser,
 )
 from stalker.models.repository import Repository
-from stalker.models.review import Daily, DailyLink, Review
+from stalker.models.review import Daily, DailyFile, Review
 from stalker.models.scene import Scene
 from stalker.models.schedulers import SchedulerBase, TaskJugglerScheduler
 from stalker.models.sequence import Sequence
@@ -75,19 +75,19 @@ __all__ = [
     "CodeMixin",
     "DAGMixin",
     "Daily",
-    "DailyLink",
+    "DailyFile",
     "DateRangeMixin",
     "Department",
     "DepartmentUser",
     "Entity",
     "EntityGroup",
     "EntityType",
+    "File",
     "FilenameTemplate",
     "Good",
     "Group",
     "ImageFormat",
     "Invoice",
-    "Link",
     "LocalSession",
     "Message",
     "Note",

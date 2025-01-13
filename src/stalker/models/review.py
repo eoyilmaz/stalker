@@ -12,7 +12,7 @@ from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.entity import Entity, SimpleEntity
 from stalker.models.enum import DependencyTarget, TimeUnit, TraversalDirection
-from stalker.models.link import Link
+from stalker.models.link import File
 from stalker.models.mixins import (
     ProjectMixin,
     ScheduleMixin,
@@ -409,11 +409,11 @@ class Daily(Entity, StatusMixin, ProjectMixin):
     Dailies are sessions where outputs of a group of tasks are reviewed all
     together by the resources and responsible of those tasks.
 
-    The main purpose of a ``Daily`` is to gather a group of :class:`.Link`
+    The main purpose of a ``Daily`` is to gather a group of :class:`.File`
     instances and introduce a simple way of presenting them as a group.
 
     :class:`.Note` s created during a Daily session can be directly stored
-    both in the :class:`.Link` and the :class:`.Daily` instances and a *join*
+    both in the :class:`.File` and the :class:`.Daily` instances and a *join*
     will reveal which :class:`.Note` is created in which :class:`.Daily`.
     """
 
@@ -427,29 +427,29 @@ class Daily(Entity, StatusMixin, ProjectMixin):
         primary_key=True,
     )
 
-    links: Mapped[Optional[List[Link]]] = association_proxy(
-        "link_relations", "link", creator=lambda n: DailyLink(link=n)
+    files: Mapped[Optional[List[File]]] = association_proxy(
+        "file_relations", "file", creator=lambda n: DailyFile(file=n)
     )
 
-    link_relations: Mapped[Optional[List["DailyLink"]]] = relationship(
+    file_relations: Mapped[Optional[List["DailyFile"]]] = relationship(
         back_populates="daily",
         cascade="all, delete-orphan",
-        primaryjoin="Dailies.c.id==Daily_Links.c.daily_id",
+        primaryjoin="Dailies.c.id==Daily_Files.c.daily_id",
     )
 
     def __init__(
         self,
-        links: Optional[List[Link]] = None,
+        files: Optional[List[File]] = None,
         **kwargs: Dict[str, Any],
     ) -> None:
         super(Daily, self).__init__(**kwargs)
         StatusMixin.__init__(self, **kwargs)
         ProjectMixin.__init__(self, **kwargs)
 
-        if links is None:
-            links = []
+        if files is None:
+            files = []
 
-        self.links = links
+        self.files = files
 
     @property
     def versions(self) -> List["Version"]:
@@ -463,7 +463,7 @@ class Daily(Entity, StatusMixin, ProjectMixin):
 
         return (
             Version.query.join(Version.outputs)
-            .join(DailyLink)
+            .join(DailyFile)
             .join(Daily)
             .filter(Daily.id == self.id)
             .all()
@@ -483,47 +483,46 @@ class Daily(Entity, StatusMixin, ProjectMixin):
         return (
             Task.query.join(Task.versions)
             .join(Version.outputs)
-            .join(DailyLink)
+            .join(DailyFile)
             .join(Daily)
             .filter(Daily.id == self.id)
             .all()
         )
 
 
-class DailyLink(Base):
-    """The association object used in Daily-to-Link relation."""
+class DailyFile(Base):
+    """The association object used in Daily-to-File relation."""
 
-    __tablename__ = "Daily_Links"
+    __tablename__ = "Daily_Files"
 
     daily_id: Mapped[int] = mapped_column(
         ForeignKey("Dailies.id"),
         primary_key=True,
     )
     daily: Mapped[Daily] = relationship(
-        back_populates="link_relations",
-        primaryjoin="DailyLink.daily_id==Daily.daily_id",
+        back_populates="file_relations",
+        primaryjoin="DailyFile.daily_id==Daily.daily_id",
     )
 
-    link_id: Mapped[int] = mapped_column(
-        ForeignKey("Links.id"),
+    file_id: Mapped[int] = mapped_column(
+        ForeignKey("Files.id"),
         primary_key=True,
     )
-    link: Mapped[Link] = relationship(
-        primaryjoin="DailyLink.link_id==Link.link_id",
-        doc="""stalker.models.link.Link instances related to the Daily
-        instance.
+    file: Mapped[File] = relationship(
+        primaryjoin="DailyFile.file_id==File.file_id",
+        doc="""stalker.models.link.File instances related to the Daily instance.
 
-        Attach the same :class:`.Link` s that are linked as an output to a
-        certain :class:`.Version` s instance to this attribute.
+        Attach the same :class:`.File` instances that are linked as an output
+        to a certain :class:`.Version` s instance to this attribute.
 
         This attribute is an **association_proxy** so and the real attribute
-        that the data is related to is the :attr:`.link_relations` attribute.
+        that the data is related to is the :attr:`.file_relations` attribute.
 
-        You can use the :attr:`.link_relations` attribute to change the
-        ``rank`` attribute of the :class:`.DailyLink` instance (which is the
-        returned data), thus change the order of the ``Links``.
+        You can use the :attr:`.file_relations` attribute to change the
+        ``rank`` attribute of the :class:`.DailyFile` instance (which is the
+        returned data), thus change the order of the ``Files``.
 
-        This is done in that way to be able to store the order of the links in
+        This is done in that way to be able to store the order of the files in
         this Daily instance.
         """,
     )
@@ -532,38 +531,38 @@ class DailyLink(Base):
     rank: Mapped[Optional[int]] = mapped_column(default=0)
 
     def __init__(
-        self, daily: Optional[Daily] = None, link: Optional[Link] = None, rank: int = 0
+        self, daily: Optional[Daily] = None, file: Optional[File] = None, rank: int = 0
     ) -> None:
-        super(DailyLink, self).__init__()
+        super(DailyFile, self).__init__()
 
         self.daily = daily
-        self.link = link
+        self.file = file
         self.rank = rank
 
-    @validates("link")
-    def _validate_link(self, key: str, link: Union[None, Link]) -> Union[None, Link]:
-        """Validate the given link instance.
+    @validates("file")
+    def _validate_file(self, key: str, file: Union[None, File]) -> Union[None, File]:
+        """Validate the given file instance.
 
         Args:
             key (str): The name of the validated column.
-            link (Union[None, Link]): The like value to be validated.
+            file (Union[None, File]): The like value to be validated.
 
         Raises:
-            TypeError: When the given like value is not a Link instance.
+            TypeError: When the given like value is not a File instance.
 
         Returns:
-            Union[None, Link]: The validated Link instance.
+            Union[None, File]: The validated File instance.
         """
-        from stalker import Link
+        from stalker import File
 
-        if link is not None and not isinstance(link, Link):
+        if file is not None and not isinstance(file, File):
             raise TypeError(
-                f"{self.__class__.__name__}.link should be an instance of "
-                "stalker.models.link.Link instance, "
-                f"not {link.__class__.__name__}: '{link}'"
+                f"{self.__class__.__name__}.file should be an instance of "
+                "stalker.models.link.File instance, "
+                f"not {file.__class__.__name__}: '{file}'"
             )
 
-        return link
+        return file
 
     @validates("daily")
     def _validate_daily(

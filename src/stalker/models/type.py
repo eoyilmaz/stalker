@@ -26,14 +26,14 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
     The purpose of the :class:`.Type` class is just to define a new type for a
     specific :class:`.Entity`. For example, you can have a ``Character``
     :class:`.Asset` or you can have a ``Commercial`` :class:`.Project` or you
-    can define a :class:`.Link` as an ``Image`` etc., to create a new
+    can define a :class:`.File` as an ``Image`` etc., to create a new
     :class:`.Type` for various classes:
 
     ..code-block: Python
 
         Type(name="Character", target_entity_type="Asset")
         Type(name="Commercial", target_entity_type="Project")
-        Type(name="Image", target_entity_type="Link")
+        Type(name="Image", target_entity_type="File")
 
     or:
 
@@ -41,7 +41,7 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
 
         Type(name="Character", target_entity_type=Asset.entity_type)
         Type(name="Commercial", target_entity_type=Project.entity_type)
-        Type(name="Image", target_entity_type=Link.entity_type)
+        Type(name="Image", target_entity_type=File.entity_type)
 
     or even better:
 
@@ -49,7 +49,7 @@ class Type(Entity, TargetEntityTypeMixin, CodeMixin):
 
         Type(name="Character", target_entity_type=Asset)
         Type(name="Commercial", target_entity_type=Project)
-        Type(name="Image", target_entity_type=Link)
+        Type(name="Image", target_entity_type=File)
 
     By using :class:`.Type` s, one can able to sort and group same type of
     entities.

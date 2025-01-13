@@ -8,7 +8,7 @@ import pytest
 from stalker import (
     Asset,
     FilenameTemplate,
-    Link,
+    File,
     Project,
     Repository,
     Scene,
@@ -122,41 +122,41 @@ def setup_version_db_tests(setup_postgresql_db):
     DBSession.add(data["test_task1"])
     DBSession.commit()
 
-    # a Link for the input file
-    data["test_input_link1"] = Link(
-        name="Input Link 1",
+    # a File for the input file
+    data["test_input_file1"] = File(
+        name="Input File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
-    DBSession.add(data["test_input_link1"])
+    DBSession.add(data["test_input_file1"])
 
-    data["test_input_link2"] = Link(
-        name="Input Link 2",
+    data["test_input_file2"] = File(
+        name="Input File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
-    DBSession.add(data["test_input_link2"])
+    DBSession.add(data["test_input_file2"])
 
-    # a Link for the output file
-    data["test_output_link1"] = Link(
-        name="Output Link 1",
+    # a File for the output file
+    data["test_output_file1"] = File(
+        name="Output File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
-    DBSession.add(data["test_output_link1"])
+    DBSession.add(data["test_output_file1"])
 
-    data["test_output_link2"] = Link(
-        name="Output Link 2",
+    data["test_output_file2"] = File(
+        name="Output File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
-    DBSession.add(data["test_output_link2"])
+    DBSession.add(data["test_output_file2"])
     DBSession.commit()
 
     # now create a version for the Task
     data["kwargs"] = {
-        "inputs": [data["test_input_link1"], data["test_input_link2"]],
-        "outputs": [data["test_output_link1"], data["test_output_link2"]],
+        "inputs": [data["test_input_file1"], data["test_input_file2"]],
+        "outputs": [data["test_output_file1"], data["test_output_file2"]],
         "task": data["test_task1"],
         "created_with": "Houdini",
     }
@@ -582,8 +582,8 @@ def test_inputs_attribute_is_none(setup_version_db_tests):
     assert str(cm.value) == "Incompatible collection type: None is not list-like"
 
 
-def test_inputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the inputs attr is not a Link instance."""
+def test_inputs_argument_is_not_a_list_of_file_instances(setup_version_db_tests):
+    """TypeError raised if the inputs attr is not a File instance."""
     data = setup_version_db_tests
     test_value = [132, "231123"]
     data["kwargs"]["inputs"] = test_value
@@ -592,12 +592,12 @@ def test_inputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests)
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
+        "stalker.models.link.File instances, not int: '132'"
     )
 
 
-def test_inputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the inputs attr is set to something other than a Link."""
+def test_inputs_attribute_is_not_a_list_of_file_instances(setup_version_db_tests):
+    """TypeError raised if the inputs attr is set to something other than a File."""
     data = setup_version_db_tests
     test_value = [132, "231123"]
     with pytest.raises(TypeError) as cm:
@@ -605,7 +605,7 @@ def test_inputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
+        "stalker.models.link.File instances, not int: '132'"
     )
 
 
@@ -614,12 +614,12 @@ def test_inputs_attribute_is_working_as_expected(setup_version_db_tests):
     data = setup_version_db_tests
     data["kwargs"].pop("inputs")
     new_version = Version(**data["kwargs"])
-    assert data["test_input_link1"] not in new_version.inputs
-    assert data["test_input_link2"] not in new_version.inputs
+    assert data["test_input_file1"] not in new_version.inputs
+    assert data["test_input_file2"] not in new_version.inputs
 
-    new_version.inputs = [data["test_input_link1"], data["test_input_link2"]]
-    assert data["test_input_link1"] in new_version.inputs
-    assert data["test_input_link2"] in new_version.inputs
+    new_version.inputs = [data["test_input_file1"], data["test_input_file2"]]
+    assert data["test_input_file1"] in new_version.inputs
+    assert data["test_input_file2"] in new_version.inputs
 
 
 def test_outputs_argument_is_skipped(setup_version_db_tests):
@@ -646,8 +646,8 @@ def test_outputs_attribute_is_none(setup_version_db_tests):
     assert str(cm.value) == "Incompatible collection type: None is not list-like"
 
 
-def test_outputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the outputs attr is not a Link instance."""
+def test_outputs_argument_is_not_a_list_of_file_instances(setup_version_db_tests):
+    """TypeError raised if the outputs attr is not a File instance."""
     data = setup_version_db_tests
     test_value = [132, "231123"]
     data["kwargs"]["outputs"] = test_value
@@ -656,12 +656,12 @@ def test_outputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
+        "stalker.models.link.File instances, not int: '132'"
     )
 
 
-def test_outputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the outputs attr is not a Link instance."""
+def test_outputs_attribute_is_not_a_list_of_file_instances(setup_version_db_tests):
+    """TypeError raised if the outputs attr is not a File instance."""
     data = setup_version_db_tests
     test_value = [132, "231123"]
     with pytest.raises(TypeError) as cm:
@@ -669,7 +669,7 @@ def test_outputs_attribute_is_not_a_list_of_link_instances(setup_version_db_test
 
     assert (
         str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
+        "stalker.models.link.File instances, not int: '132'"
     )
 
 
@@ -678,12 +678,12 @@ def test_outputs_attribute_is_working_as_expected(setup_version_db_tests):
     data = setup_version_db_tests
     data["kwargs"].pop("outputs")
     new_version = Version(**data["kwargs"])
-    assert data["test_output_link1"] not in new_version.outputs
-    assert data["test_output_link2"] not in new_version.outputs
+    assert data["test_output_file1"] not in new_version.outputs
+    assert data["test_output_file2"] not in new_version.outputs
 
-    new_version.outputs = [data["test_output_link1"], data["test_output_link2"]]
-    assert data["test_output_link1"] in new_version.outputs
-    assert data["test_output_link2"] in new_version.outputs
+    new_version.outputs = [data["test_output_file1"], data["test_output_file2"]]
+    assert data["test_output_file1"] in new_version.outputs
+    assert data["test_output_file2"] in new_version.outputs
 
 
 def test_is_published_attribute_is_false_by_default(setup_version_db_tests):
@@ -2060,36 +2060,36 @@ def setup_version_tests():
         status_list=data["test_task_status_list"],
     )
 
-    # a Link for the input file
-    data["test_input_link1"] = Link(
-        name="Input Link 1",
+    # a File for the input file
+    data["test_input_file1"] = File(
+        name="Input File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
 
-    data["test_input_link2"] = Link(
-        name="Input Link 2",
+    data["test_input_file2"] = File(
+        name="Input File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
 
-    # a Link for the output file
-    data["test_output_link1"] = Link(
-        name="Output Link 1",
+    # a File for the output file
+    data["test_output_file1"] = File(
+        name="Output File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
 
-    data["test_output_link2"] = Link(
-        name="Output Link 2",
+    data["test_output_file2"] = File(
+        name="Output File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
 
     # now create a version for the Task
     data["kwargs"] = {
-        "inputs": [data["test_input_link1"], data["test_input_link2"]],
-        "outputs": [data["test_output_link1"], data["test_output_link2"]],
+        "inputs": [data["test_input_file1"], data["test_input_file2"]],
+        "outputs": [data["test_output_file1"], data["test_output_file2"]],
         "task": data["test_task1"],
         "created_with": "Houdini",
     }

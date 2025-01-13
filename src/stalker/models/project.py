@@ -173,7 +173,7 @@ class Project(Entity, ReferenceMixin, StatusMixin, DateRangeMixin, CodeMixin):
     Deleting a :class:`.Project` instance will cascade the delete operation to
     all the :class:`.Task` s related to that particular Project and it will
     cascade the delete operation to :class:`.TimeLog` s, :class:`.Version` s,
-    :class:`.Link` s and :class:`.Review` s etc.. So one can delete a
+    :class:`.File` s and :class:`.Review` s etc.. So one can delete a
     :class:`.Project` instance without worrying about the non-project related
     data like :class:`.User` s or :class:`.Department` s to be deleted.
 

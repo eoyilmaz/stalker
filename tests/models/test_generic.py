@@ -20,7 +20,7 @@ from stalker.utils import make_plural, utc_to_local, local_to_utc
         ("template", "templates"),
         ("group", "groups"),
         ("format", "formats"),
-        ("link", "links"),
+        ("file", "files"),
         ("session", "sessions"),
         ("note", "notes"),
         ("permission", "permissions"),

@@ -15,7 +15,7 @@ from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.enum import TraversalDirection
-from stalker.models.link import Link
+from stalker.models.link import File
 from stalker.models.mixins import DAGMixin
 from stalker.models.review import Review
 from stalker.models.task import Task
@@ -25,7 +25,7 @@ from stalker.utils import walk_hierarchy
 logger = get_logger(__name__)
 
 
-class Version(Link, DAGMixin):
+class Version(File, DAGMixin):
     """Holds information about the versions created for a class:`.Task`.
 
     A :class:`.Version` instance holds information about the versions created
@@ -80,11 +80,11 @@ class Version(Link, DAGMixin):
             :attr:`.revision_number` under the same :class:`.Task` will be
             considered in the same version stream and version number attribute
             will be set accordingly. The default is 1.
-        inputs (List[Link]): A list o :class:`.Link` instances, holding the
+        inputs (List[File]): A list o :class:`.File` instances, holding the
             inputs of the current version. It could be a texture for a Maya
             file or an image sequence for Nuke, or anything those you can think
             as the input for the current Version.
-        outputs (List[Link]): A list of :class:`.Link` instances, holding the
+        outputs (List[File]): A list of :class:`.File` instances, holding the
             outputs of the current version. It could be the rendered image
             sequences out of Maya or Nuke, or it can be a Targa file which is
             the output of a Photoshop file, or anything that you can think as
@@ -105,7 +105,7 @@ class Version(Link, DAGMixin):
     __dag_cascade__ = "save-update, merge"
 
     version_id: Mapped[int] = mapped_column(
-        "id", ForeignKey("Links.id"), primary_key=True
+        "id", ForeignKey("Files.id"), primary_key=True
     )
 
     __id_column__ = "version_id"
@@ -132,23 +132,23 @@ class Version(Link, DAGMixin):
         """,
     )
 
-    inputs: Mapped[Optional[List[Link]]] = relationship(
+    inputs: Mapped[Optional[List[File]]] = relationship(
         secondary="Version_Inputs",
         primaryjoin="Versions.c.id==Version_Inputs.c.version_id",
-        secondaryjoin="Version_Inputs.c.link_id==Links.c.id",
+        secondaryjoin="Version_Inputs.c.file_id==Files.c.id",
         doc="""The inputs of the current version.
 
-        It is a list of :class:`.Link` instances.
+        It is a list of :class:`.File` instances.
         """,
     )
 
-    outputs: Mapped[Optional[List[Link]]] = relationship(
+    outputs: Mapped[Optional[List[File]]] = relationship(
         secondary="Version_Outputs",
         primaryjoin="Versions.c.id==Version_Outputs.c.version_id",
-        secondaryjoin="Version_Outputs.c.link_id==Links.c.id",
+        secondaryjoin="Version_Outputs.c.file_id==Files.c.id",
         doc="""The outputs of the current version.
 
-        It is a list of :class:`.Link` instances.
+        It is a list of :class:`.File` instances.
         """,
     )
 
@@ -162,8 +162,8 @@ class Version(Link, DAGMixin):
     def __init__(
         self,
         task: Optional[Task] = None,
-        inputs: Optional[List["Version"]] = None,
-        outputs: Optional[List["Version"]] = None,
+        inputs: Optional[List["File"]] = None,
+        outputs: Optional[List["File"]] = None,
         parent: Optional["Version"] = None,
         full_path: Optional[str] = None,
         created_with: Optional[str] = None,
@@ -406,18 +406,18 @@ class Version(Link, DAGMixin):
 
         Args:
             key (str): The name of the validated column.
-            input_ (Link): The input value to be validated.
+            input_ (File): The input value to be validated.
 
         Raises:
-            TypeError: If the input is not a :class:`.Link` instance.
+            TypeError: If the input is not a :class:`.File` instance.
 
         Returns:
-            Link: The validated input value.
+            File: The validated input value.
         """
-        if not isinstance(input_, Link):
+        if not isinstance(input_, File):
             raise TypeError(
                 "All elements in {}.inputs should be all "
-                "stalker.models.link.Link instances, not {}: '{}'".format(
+                "stalker.models.link.File instances, not {}: '{}'".format(
                     self.__class__.__name__, input_.__class__.__name__, input_
                 )
             )
@@ -425,23 +425,23 @@ class Version(Link, DAGMixin):
         return input_
 
     @validates("outputs")
-    def _validate_outputs(self, key, output) -> Link:
+    def _validate_outputs(self, key, output) -> File:
         """Validate the given output value.
 
         Args:
             key (str): The name of the validated column.
-            output (Link): The output value to be validated.
+            output (File): The output value to be validated.
 
         Raises:
-            TypeError: If the output is not a :class:`.Link` instance.
+            TypeError: If the output is not a :class:`.File` instance.
 
         Returns:
-            Link: The validated output value.
+            File: The validated output value.
         """
-        if not isinstance(output, Link):
+        if not isinstance(output, File):
             raise TypeError(
                 "All elements in {}.outputs should be all "
-                "stalker.models.link.Link instances, not {}: '{}'".format(
+                "stalker.models.link.File instances, not {}: '{}'".format(
                     self.__class__.__name__, output.__class__.__name__, output
                 )
             )
@@ -465,8 +465,8 @@ class Version(Link, DAGMixin):
         """Update the path variables.
 
         Raises:
-            RuntimeError: If no Version related FilenameTemplate is found in the related
-                Project.structure.
+            RuntimeError: If no Version related FilenameTemplate is found in
+                the related `Project.structure`.
         """
         kwargs = self._template_variables()
 
@@ -672,9 +672,9 @@ Version_Inputs = Table(
     Base.metadata,
     Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
     Column(
-        "link_id",
+        "file_id",
         Integer,
-        ForeignKey("Links.id", onupdate="CASCADE", ondelete="CASCADE"),
+        ForeignKey("Files.id", onupdate="CASCADE", ondelete="CASCADE"),
         primary_key=True,
     ),
 )
@@ -684,5 +684,5 @@ Version_Outputs = Table(
     "Version_Outputs",
     Base.metadata,
     Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
-    Column("link_id", Integer, ForeignKey("Links.id"), primary_key=True),
+    Column("file_id", Integer, ForeignKey("Files.id"), primary_key=True),
 )

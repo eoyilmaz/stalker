@@ -32,9 +32,9 @@ def test_primary_cls_name_is_none(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             None,  # "TestEntity",
-            "Link",
+            "File",
             "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -50,9 +50,9 @@ def test_primary_cls_name_is_not_a_string(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             1234,  # "TestEntity",
-            "Link",
+            "File",
             "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -68,9 +68,9 @@ def test_primary_cls_name_is_empty_string(setup_test_class):
     with pytest.raises(ValueError) as cm:
         create_secondary_table(
             "",  # "TestEntity",
-            "Link",
+            "File",
             "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -85,9 +85,9 @@ def test_secondary_cls_name_is_none(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             "TestEntity",
-            None,  # "Link",
+            None,  # "File",
             "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -103,9 +103,9 @@ def test_secondary_cls_name_is_not_a_string(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             "TestEntity",
-            1234,  # "Link",
+            1234,  # "File",
             "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -121,9 +121,9 @@ def test_secondary_cls_name_is_empty_string(setup_test_class):
     with pytest.raises(ValueError) as cm:
         create_secondary_table(
             "TestEntity",
-            "",  # "Link",
+            "",  # "File",
             "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -137,12 +137,12 @@ def test_secondary_cls_name_is_converted_to_plural(setup_test_class):
     """secondary_cls_name is converted to plural."""
     return_value = create_secondary_table(
         "TestEntity",
-        "Link",
+        "File",
         "TestEntities",
-        "Links",
+        "Files",
         None,  # "TestEntity_References"
     )
-    assert return_value.name == "TestEntity_Links"
+    assert return_value.name == "TestEntity_Files"
 
 
 def test_primary_cls_table_name_is_none(setup_test_class):
@@ -151,9 +151,9 @@ def test_primary_cls_table_name_is_none(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             "TestEntity",
-            "Link",
+            "File",
             None,  # "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -169,9 +169,9 @@ def test_primary_cls_table_name_is_not_a_string(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             "TestEntity",
-            "Link",
+            "File",
             1234,  # "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -187,9 +187,9 @@ def test_primary_cls_table_name_is_empty_string(setup_test_class):
     with pytest.raises(ValueError) as cm:
         create_secondary_table(
             "TestEntity",
-            "Link",
+            "File",
             "",  # "TestEntities",
-            "Links",
+            "Files",
             "TestEntity_References",
         )
 
@@ -205,9 +205,9 @@ def test_secondary_cls_table_name_is_none(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             "TestEntity",
-            "Link",
+            "File",
             "TestEntities",
-            None,  # "Links",
+            None,  # "Files",
             "TestEntity_References",
         )
 
@@ -223,9 +223,9 @@ def test_secondary_cls_table_name_is_not_a_string(setup_test_class):
     with pytest.raises(TypeError) as cm:
         create_secondary_table(
             "TestEntity",
-            "Link",
+            "File",
             "TestEntities",
-            1234,  # "Links",
+            1234,  # "Files",
             "TestEntity_References",
         )
 
@@ -241,9 +241,9 @@ def test_secondary_cls_table_name_is_empty_string(setup_test_class):
     with pytest.raises(ValueError) as cm:
         create_secondary_table(
             "TestEntity",
-            "Link",
+            "File",
             "TestEntities",
-            "",  # "Links",
+            "",  # "Files",
             "TestEntity_References",
         )
 
@@ -257,12 +257,12 @@ def test_secondary_table_name_can_be_none(setup_test_class):
     """secondary_table_name can be None."""
     return_value = create_secondary_table(
         "TestEntity",
-        "Link",
+        "File",
         "TestEntities",
-        "Links",
+        "Files",
         None,  # "TestEntity_References"
     )
-    assert return_value.name == "TestEntity_Links"
+    assert return_value.name == "TestEntity_Files"
 
 
 def test_secondary_table_name_is_not_a_str(setup_test_class):
@@ -270,9 +270,9 @@ def test_secondary_table_name_is_not_a_str(setup_test_class):
     with pytest.raises(TypeError) as cm:
         _ = create_secondary_table(
             "TestEntity",
-            "Link",
+            "File",
             "TestEntities",
-            "Links",
+            "Files",
             1234,  # "TestEntity_References"
         )
     assert str(cm.value) == (
@@ -286,24 +286,24 @@ def test_secondary_table_name_is_an_empty_str(setup_test_class):
     """secondary_table_name is an empty string generates new name from class names."""
     return_value = create_secondary_table(
         "TestEntity",
-        "Link",
+        "File",
         "TestEntities",
-        "Links",
+        "Files",
         "",  # "TestEntity_References"
     )
-    assert return_value.name == "TestEntity_Links"
+    assert return_value.name == "TestEntity_Files"
 
 
 def test_secondary_table_name_already_exists_in_base_metadata(setup_test_class):
     """secondary_table_name already exists will use that table."""
     assert "TestEntity_References" not in Base.metadata
     return_value_1 = create_secondary_table(
-        "TestEntity", "Link", "TestEntities", "Links", "TestEntity_References"
+        "TestEntity", "File", "TestEntities", "Files", "TestEntity_References"
     )
     assert "TestEntity_References" in Base.metadata
     # should not generate any errors
     return_value_2 = create_secondary_table(
-        "TestEntity", "Link", "TestEntities", "Links", "TestEntity_References"
+        "TestEntity", "File", "TestEntities", "Files", "TestEntity_References"
     )
     # and return the same table
     assert return_value_2.name == "TestEntity_References"
@@ -313,6 +313,6 @@ def test_secondary_table_name_already_exists_in_base_metadata(setup_test_class):
 def test_returns_a_table(setup_test_class):
     """create_secondary_table returns a table."""
     return_value = create_secondary_table(
-        "TestEntity", "Link", "TestEntities", "Links", "TestEntity_References"
+        "TestEntity", "File", "TestEntities", "Files", "TestEntity_References"
     )
     assert isinstance(return_value, Table)

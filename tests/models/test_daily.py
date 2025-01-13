@@ -5,8 +5,8 @@ import pytest
 
 from stalker import (
     Daily,
-    DailyLink,
-    Link,
+    DailyFile,
+    File,
     Project,
     Repository,
     Status,
@@ -88,17 +88,17 @@ def setup_daily_tests():
     data["test_version3"] = Version(task=data["test_task1"])
     data["test_version4"] = Version(task=data["test_task2"])
 
-    data["test_link1"] = Link(original_filename="test_render1.jpg")
-    data["test_link2"] = Link(original_filename="test_render2.jpg")
-    data["test_link3"] = Link(original_filename="test_render3.jpg")
-    data["test_link4"] = Link(original_filename="test_render4.jpg")
+    data["test_file1"] = File(original_filename="test_render1.jpg")
+    data["test_file2"] = File(original_filename="test_render2.jpg")
+    data["test_file3"] = File(original_filename="test_render3.jpg")
+    data["test_file4"] = File(original_filename="test_render4.jpg")
 
     data["test_version1"].outputs = [
-        data["test_link1"],
-        data["test_link2"],
-        data["test_link3"],
+        data["test_file1"],
+        data["test_file2"],
+        data["test_file3"],
     ]
-    data["test_version4"].outputs = [data["test_link4"]]
+    data["test_version4"].outputs = [data["test_file4"]]
     return data
 
 
@@ -113,31 +113,31 @@ def test_daily_instance_creation(setup_daily_tests):
     assert isinstance(daily, Daily)
 
 
-def test_links_argument_is_skipped(setup_daily_tests):
-    """links attribute is an empty list if the links argument is skipped."""
+def test_files_argument_is_skipped(setup_daily_tests):
+    """files attribute is an empty list if the files argument is skipped."""
     data = setup_daily_tests
     daily = Daily(
         name="Test Daily",
         project=data["test_project"],
         status_list=data["daily_status_list"],
     )
-    assert daily.links == []
+    assert daily.files == []
 
 
-def test_links_argument_is_none(setup_daily_tests):
-    """links attribute is an empty list if the links argument is None."""
+def test_files_argument_is_none(setup_daily_tests):
+    """files attribute is an empty list if the files argument is None."""
     data = setup_daily_tests
     daily = Daily(
         name="Test Daily",
-        links=None,
+        files=None,
         project=data["test_project"],
         status_list=data["daily_status_list"],
     )
-    assert daily.links == []
+    assert daily.files == []
 
 
-def test_links_attribute_is_set_to_none(setup_daily_tests):
-    """TypeError is raised if the links attribute is set to None."""
+def test_files_attribute_is_set_to_none(setup_daily_tests):
+    """TypeError is raised if the files attribute is set to None."""
     data = setup_daily_tests
     daily = Daily(
         name="Test Daily",
@@ -145,67 +145,67 @@ def test_links_attribute_is_set_to_none(setup_daily_tests):
         status_list=data["daily_status_list"],
     )
     with pytest.raises(TypeError):
-        daily.links = None
+        daily.files = None
 
 
-def test_links_argument_is_not_a_list_instance(setup_daily_tests):
-    """TypeError is raised if the links argument is not a list."""
+def test_files_argument_is_not_a_list_instance(setup_daily_tests):
+    """TypeError is raised if the files argument is not a list."""
     data = setup_daily_tests
     with pytest.raises(TypeError) as cm:
         Daily(
             name="Test Daily",
-            links="not a list of Daily instances",
+            files="not a list of Daily instances",
             project=data["test_project"],
             status_list=data["daily_status_list"],
         )
 
     assert (
-        str(cm.value) == "DailyLink.link should be an instance of "
-        "stalker.models.link.Link instance, not str: 'n'"
+        str(cm.value) == "DailyFile.file should be an instance of "
+        "stalker.models.link.File instance, not str: 'n'"
     )
 
 
-def test_links_argument_is_not_a_list_of_link_instances(setup_daily_tests):
-    """TypeError is raised if the links argument is not a list of Link instances."""
+def test_files_argument_is_not_a_list_of_file_instances(setup_daily_tests):
+    """TypeError is raised if the files argument is not a list of File instances."""
     data = setup_daily_tests
     with pytest.raises(TypeError) as cm:
         Daily(
             name="Test Daily",
-            links=["not", 1, "list", "of", Daily, "instances"],
+            files=["not", 1, "list", "of", File, "instances"],
             project=data["test_project"],
             status_list=data["daily_status_list"],
         )
 
     assert str(cm.value) == (
-        "DailyLink.link should be an instance of stalker.models.link.Link instance, "
+        "DailyFile.file should be an instance of stalker.models.link.File instance, "
         "not str: 'not'"
     )
 
 
-def test_links_argument_is_working_as_expected(setup_daily_tests):
-    """links argument value is correctly passed to the links attribute."""
+def test_files_argument_is_working_as_expected(setup_daily_tests):
+    """files argument value is correctly passed to the files attribute."""
     data = setup_daily_tests
-    test_value = [data["test_link1"], data["test_link2"]]
+    test_value = [data["test_file1"], data["test_file2"]]
     daily = Daily(
         name="Test Daily",
-        links=test_value,
+        files=test_value,
         project=data["test_project"],
         status_list=data["daily_status_list"],
     )
-    assert daily.links == test_value
+    assert daily.files == test_value
 
 
-def test_links_attribute_is_working_as_expected(setup_daily_tests):
-    """links attribute is working as expected."""
+def test_files_attribute_is_working_as_expected(setup_daily_tests):
+    """files attribute is working as expected."""
     data = setup_daily_tests
     daily = Daily(
         name="Test Daily",
         project=data["test_project"],
         status_list=data["daily_status_list"],
     )
-    daily.links.append(data["test_link1"])
+    daily.files.append(data["test_file1"])
 
-    assert daily.links == [data["test_link1"]]
+    assert daily.files == [data["test_file1"]]
 
 
 def test_versions_attribute_is_read_only(setup_daily_tests):
@@ -288,52 +288,52 @@ def setup_daily_db_tests(setup_postgresql_db):
     DBSession.add(data["test_version4"])
     DBSession.commit()
 
-    data["test_link1"] = Link(original_filename="test_render1.jpg")
-    data["test_link2"] = Link(original_filename="test_render2.jpg")
-    data["test_link3"] = Link(original_filename="test_render3.jpg")
-    data["test_link4"] = Link(original_filename="test_render4.jpg")
+    data["test_file1"] = File(original_filename="test_render1.jpg")
+    data["test_file2"] = File(original_filename="test_render2.jpg")
+    data["test_file3"] = File(original_filename="test_render3.jpg")
+    data["test_file4"] = File(original_filename="test_render4.jpg")
     DBSession.add_all(
         [
-            data["test_link1"],
-            data["test_link2"],
-            data["test_link3"],
-            data["test_link4"],
+            data["test_file1"],
+            data["test_file2"],
+            data["test_file3"],
+            data["test_file4"],
         ]
     )
 
     data["test_version1"].outputs = [
-        data["test_link1"],
-        data["test_link2"],
-        data["test_link3"],
+        data["test_file1"],
+        data["test_file2"],
+        data["test_file3"],
     ]
-    data["test_version4"].outputs = [data["test_link4"]]
+    data["test_version4"].outputs = [data["test_file4"]]
     DBSession.commit()
     yield data
 
 
 def test_tasks_attribute_will_return_a_list_of_tasks(setup_daily_db_tests):
-    """tasks attribute is a list of Task instances related to the given links."""
+    """tasks attribute is a list of Task instances related to the given files."""
     data = setup_daily_db_tests
     daily = Daily(
         name="Test Daily",
         project=data["test_project"],
         status_list=data["daily_status_list"],
     )
-    daily.links = [data["test_link1"], data["test_link2"]]
+    daily.files = [data["test_file1"], data["test_file2"]]
     DBSession.add(daily)
     DBSession.commit()
     assert daily.tasks == [data["test_task1"]]
 
 
 def test_versions_attribute_will_return_a_list_of_versions(setup_daily_db_tests):
-    """versions attribute is a list of Version instances related to the given links."""
+    """versions attribute is a list of Version instances related to the given files."""
     data = setup_daily_db_tests
     daily = Daily(
         name="Test Daily",
         project=data["test_project"],
         status_list=data["daily_status_list"],
     )
-    daily.links = [data["test_link1"], data["test_link2"]]
+    daily.files = [data["test_file1"], data["test_file2"]]
     DBSession.add(daily)
     DBSession.commit()
     assert daily.versions == [data["test_version1"]]
@@ -341,16 +341,16 @@ def test_versions_attribute_will_return_a_list_of_versions(setup_daily_db_tests)
 
 def test_rank_argument_is_skipped():
     """rank attribute will use the default value is if skipped."""
-    dl = DailyLink()
+    dl = DailyFile()
     assert dl.rank == 0
 
 
 def test_daily_argument_is_not_a_daily_instance(setup_daily_tests):
     """TypeError is raised if the daily argument is not a Daily and not None."""
     with pytest.raises(TypeError) as cm:
-        DailyLink(daily="not a daily")
+        DailyFile(daily="not a daily")
 
     assert str(cm.value) == (
-        "DailyLink.daily should be an instance of stalker.models.review.Daily "
+        "DailyFile.daily should be an instance of stalker.models.review.Daily "
         "instance, not str: 'not a daily'"
     )

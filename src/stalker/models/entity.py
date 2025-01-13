@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 
 if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.auth import User
-    from stalker.models.link import Link
+    from stalker.models.link import File
     from stalker.models.note import Note
     from stalker.models.tag import Tag
     from stalker.models.type import Type
@@ -198,11 +198,11 @@ class SimpleEntity(Base):
     )
 
     thumbnail_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("Links.id", use_alter=True, name="z")
+        ForeignKey("Files.id", use_alter=True, name="z")
     )
 
-    thumbnail: Mapped[Optional["Link"]] = relationship(
-        primaryjoin="SimpleEntities.c.thumbnail_id==Links.c.id",
+    thumbnail: Mapped[Optional["File"]] = relationship(
+        primaryjoin="SimpleEntities.c.thumbnail_id==Files.c.id",
         post_update=True,
     )
 
@@ -225,7 +225,7 @@ class SimpleEntity(Base):
         updated_by: Optional["User"] = None,
         date_created: Optional[datetime] = None,
         date_updated: Optional[datetime] = None,
-        thumbnail: Optional["Link"] = None,
+        thumbnail: Optional["File"] = None,
         html_style: Optional[str] = "",
         html_class: Optional[str] = "",
         **kwargs: Optional[Dict[str, Any]],
@@ -617,26 +617,27 @@ class SimpleEntity(Base):
         return type_
 
     @validates("thumbnail")
-    def _validate_thumbnail(self, key: str, thumb: "Link") -> "Link":
+    def _validate_thumbnail(self, key: str, thumb: "File") -> "File":
         """Validate the given thumb value.
 
         Args:
             key (str): The name of the validated column.
-            thumb (Link): The thumb value to be validated.
+            thumb (File): The thumb value to be validated.
 
         Raises:
-            TypeError: If the given thumb value is not None and not a Link instance.
+            TypeError: If the given thumb value is not None and not a File
+                instance.
 
         Returns:
-            Union[None, Link]: The validated thumb value.
+            Union[None, File]: The validated thumb value.
         """
         if thumb is not None:
-            from stalker import Link
+            from stalker import File
 
-            if not isinstance(thumb, Link):
+            if not isinstance(thumb, File):
                 raise TypeError(
                     f"{self.__class__.__name__}.thumbnail should be a "
-                    "stalker.models.link.Link instance, "
+                    "stalker.models.link.File instance, "
                     f"not {thumb.__class__.__name__}: '{thumb}'"
                 )
         return thumb
@@ -682,8 +683,8 @@ class SimpleEntity(Base):
 
         if not isinstance(html_style, str):
             raise TypeError(
-                f"{self.__class__.__name__}.html_style should be a basestring "
-                f"instance, not {html_style.__class__.__name__}: '{html_style}'"
+                f"{self.__class__.__name__}.html_style should be a str, "
+                f"not {html_style.__class__.__name__}: '{html_style}'"
             )
         return html_style
 
@@ -706,8 +707,8 @@ class SimpleEntity(Base):
 
         if not isinstance(html_class, str):
             raise TypeError(
-                f"{self.__class__.__name__}.html_class should be a basestring "
-                f"instance, not {html_class.__class__.__name__}: '{html_class}'"
+                f"{self.__class__.__name__}.html_class should be a str, "
+                f"not {html_class.__class__.__name__}: '{html_class}'"
             )
         return html_class
 
