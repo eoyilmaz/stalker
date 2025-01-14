@@ -11,10 +11,10 @@ File Storage and Repository setup
 
 Contrary to a Source Code Management (SCM) System where revisions to a file is
 handled incrementally, Stalker handles file versions all together. Meaning
-that, all the versions that are created for individual tasks
-(:class:`.Version`) are individual files stored in a shared location accessible
-to everyone in your studio. This location is called a :class:`.Repository` in
-Stalker.
+that, all the files (:class:`.File`) that are created for individual versions
+(:class:`.Version`) of a task are individual files stored in a shared location
+accessible to everyone in your studio. This location is called a
+:class:`.Repository` in Stalker.
 
 Defining Repository Paths
 -------------------------
@@ -83,7 +83,7 @@ Structure" and assign it to our project:
 
    Starting with Stalker version 0.2.13, :class:`.Project` instances can be
    associated with multiple :class:`.Repository` instances. This allows for
-   more flexible file management, such as storing published versions on a
+   more flexible file management, such as storing published version files on a
    separate server or directing rendered outputs to a different location.
 
    While the following examples are simplified, future versions will showcase
@@ -93,13 +93,13 @@ Creating Filename Templates
 ---------------------------
 
 Next we create :class:`.FilenameTemplate` instances. These templates define how
-filenames and paths will be generated for :class:`.Version` instances
+filenames and paths will be generated for by :class:`.Version` instances
 associated with tasks.
 
 Here, we create a :class:`.FilenameTemplate` named "Task Template for
 Commercials" that uses `Jinja2`_ syntax for the ``path`` and ``filename``
-arguments. The :class:`.Version` class knows how to render these templates
-while calculating its ``path`` and ``filename`` attributes:
+arguments. The :class:`.Version.generate_path()` method knows how to render
+these templates to generate a ``pathlib.Path`` object:
 
 .. code-block:: python
 
@@ -109,7 +109,7 @@ while calculating its ``path`` and ``filename`` attributes:
         name='Task Template for Commercials',
         target_entity_type='Task',
         path='$REPO{{project.repository.code}}/{{project.code}}/{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}',
-        filename='{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}'
+        filename='{{version.nice_name}}_r{{"%02d"|format(version.revision_number)}}_v{{"%03d"|format(version.version_number)}}'
     )
 
   # Append the template to the project structure
@@ -132,8 +132,8 @@ Explanation of the Template:
 * ``{%- for p in parent_tasks -%}{{p.nice_name}}/{%- endfor -%}``: This loop
   iterates over parent tasks, creating subdirectories for each.
 
-* ``{{version.nice_name}}_v{{"%03d"|format(version.version_number)}}``: This
-  defines the filename format with version number padding.
+* ``{{version.nice_name}}_r{{"%02d"|format(version.revision_number)}}_v{{"%03d"|format(version.version_number)}}``: This
+  defines the filename format with revision and version numbers padded.
 
 Creating and Managing Versions
 ------------------------------
@@ -146,16 +146,20 @@ Now, let's create a :class:`.Version`` instance for the "comp" task:
 
     vers1 = Version(task=comp)
 
-    # Update paths using the template
-    vers1.update_paths()
+    # Generate a path using the template
+    path = vers1.generate_path()
 
-    print(vers1.path)                # '$REPO33/FC/SH001/comp'
-    print(vers1.filename)            # 'SH001_comp_Main_v001'
-    print(vers1.full_path)           # '$REPO33/FC/SH001/comp/SH001_comp_Main_v001'
+    print(path.parent)  # '$REPO33/FC/SH001/comp'
+    print(path.name)    # 'SH001_comp_r01_v001'
+    print(path)         # '$REPO33/FC/SH001/comp/SH001_comp_r01_v001'
 
     # Absolute paths with repository root based on your OS
-    print(vers1.absolute_path)       # '/mnt/M/commercials/FC/SH001/comp'
-    print(vers1.absolute_full_path)  # '/mnt/M/commercials/FC/SH001/comp/SH001_comp_Main_v001'
+    # unfortunately the Path object doesn't directly render environment variables
+    print(os.path.expandvars(path.parent))       # '/mnt/M/commercials/FC/SH001/comp'
+    print(os.path.expandvars(path))  # '/mnt/M/commercials/FC/SH001/comp/SH001_comp_r01_v001'
+
+    # Get the revision number (manually incremented)
+    print(vers1.revision_number)      # 1
 
     # Get version number (automatically incremented)
     print(vers1.version_number)      # 1
@@ -164,7 +168,7 @@ Now, let's create a :class:`.Version`` instance for the "comp" task:
     DBsession.commit()
 
 Stalker automatically generates a consistent path and filename for the version
-based on the template. 
+based on the template.
 
 Stalker eliminates the need for those cumbersome and confusing file naming
 conventions like ``Shot1_comp_Final``, ``Shot1_comp_Final_revised``,
@@ -192,16 +196,21 @@ identified.
 .. code-block:: python
 
     vers2 = Version(task=comp)
-    vers2.update_paths()
-
-    print(vers2.version_number)  # Output: 2
-    print(vers2.filename)        # Output: 'SH001_comp_Main_v002'
+    print(vers2.version_number)        # Output: 2
+    print(vers2.generate_path().name)  # Output: 'SH001_comp_r01_v002'
 
     vers3 = Version(task=comp)
-    vers3.update_paths()
+    print(vers3.version_number)        # Output: 3
+    print(vers3.generate_path().name)  # Output: 'SH001_comp_r01_v003'
 
-    print(vers3.version_number)  # Output: 3
-    print(vers3.filename)        # Output: 'SH001_comp_Main_v003'
+:attr:`.Version.revision_number` is not updated automatically and left for the
+user to update:
+
+.. code-block:: python
+
+    vers4 = Version(task=comp, revision_number=2)
+    print(vers4.version_number)        # Output: 4
+    print(vers4.generate_path().name)  # Output: 'SH001_comp_r02_v001'
 
 Querying Versions
 -----------------
@@ -213,17 +222,17 @@ using the :attr:`.Task.versions` attribute or by doing a database query.
 
     # using pure Python
     vers_from_python = comp.versions
-    # [<FC_SH001_comp_Main_v001 (Version)>,
-    #  <FC_SH001_comp_Main_v002 (Version)>,
-    #  <FC_SH001_comp_Main_v003 (Version)>]
+    # [<FC_SH001_comp_r01_v001 (Version)>,
+    #  <FC_SH001_comp_r01_v002 (Version)>,
+    #  <FC_SH001_comp_r01_v003 (Version)>]
 
     # # Using SQLAlchemy query
     vers_from_query = Version.query.filter_by(task=comp).all()
 
     # again returns
-    # [<FC_SH001_comp_Main_v001 (Version)>,
-    #  <FC_SH001_comp_Main_v002 (Version)>,
-    #  <FC_SH001_comp_Main_v003 (Version)>]
+    # [<FC_SH001_comp_r01_v001 (Version)>,
+    #  <FC_SH001_comp_r01_v002 (Version)>,
+    #  <FC_SH001_comp_r01_v003 (Version)>]
 
     # Both methods return a list of Version objects
     assert vers_from_python == vers_from_query
@@ -232,13 +241,16 @@ using the :attr:`.Task.versions` attribute or by doing a database query.
 
 .. note::
 
-   Stalker stores :attr:`.Version.path` and :att:`.Version.filename` attribute
-   values within the database, independent of your operating system. The
-   :attr:`.Version.absolute_path` and :attr:`.Version.absolute_full_path`
-   attributes provide OS-specific paths by combining the
-   :attr:`.Repository.path` with the database values momentarily.
+   Files related to :class:`.Version` instances can be created by instantiating
+   the :class:`.File` class. The :attr:`.File.full_path` can be set with the
+   value coming from the :meth:`.Version.generate_path()` method, which by
+   default will contain environment variables for the repository path and
+   Stalker will save the :att:`.File.full_path` attribute value in the database
+   without converting the environment variables so the paths will stay
+   operating system independent.
 
-You can define default directories within your project structure using custom templates.
+You can define default directories within your project structure using custom
+templates.
 
 .. code-block:: python
 
