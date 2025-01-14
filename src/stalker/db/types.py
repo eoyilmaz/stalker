@@ -70,7 +70,7 @@ class DateTimeUTC(TypeDecorator):
         """Process bind param.
 
         Args:
-            value (any): The value.
+            value (Any): The value.
             dialect (str): The dialect.
 
         Returns:
@@ -86,7 +86,7 @@ class DateTimeUTC(TypeDecorator):
         """Process result value.
 
         Args:
-            value (any): The value.
+            value (Any): The value.
             dialect (str): The dialect.
 
         Returns:

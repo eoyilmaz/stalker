@@ -1305,8 +1305,8 @@ class Task(
         """
         if not isinstance(time_log, TimeLog):
             raise TypeError(
-                "{}.time_logs should be all stalker.models.task.TimeLog instances, "
-                "not {}: '{}'".format(
+                "{}.time_logs should only contain instances of "
+                "stalker.models.task.TimeLog, not {}: '{}'".format(
                     self.__class__.__name__, time_log.__class__.__name__, time_log
                 )
             )
@@ -1336,8 +1336,8 @@ class Task(
         """
         if not isinstance(review, Review):
             raise TypeError(
-                "{}.reviews should be all stalker.models.review.Review "
-                "instances, not {}: '{}'".format(
+                "{}.reviews should only contain instances of "
+                "stalker.models.review.Review, not {}: '{}'".format(
                     self.__class__.__name__, review.__class__.__name__, review
                 )
             )
@@ -1366,8 +1366,8 @@ class Task(
         """
         if not isinstance(task_depends_on, TaskDependency):
             raise TypeError(
-                "All the items in the {}.task_depends_on should be a "
-                "TaskDependency instance, not {}: '{}'".format(
+                "{}.task_depends_on should only contain instances of "
+                "TaskDependency, not {}: '{}'".format(
                     self.__class__.__name__,
                     task_depends_on.__class__.__name__,
                     task_depends_on,
@@ -1776,9 +1776,11 @@ class Task(
         """
         if not isinstance(resource, User):
             raise TypeError(
-                "{}.resources should be a list of stalker.models.auth.User instances, "
-                "not {}: '{}'".format(
-                    self.__class__.__name__, resource.__class__.__name__, resource
+                "{}.resources should only contain instances of "
+                "stalker.models.auth.User, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    resource.__class__.__name__,
+                    resource,
                 )
             )
         return resource
@@ -1800,8 +1802,8 @@ class Task(
         """
         if not isinstance(resource, User):
             raise TypeError(
-                "{}.alternative_resources should be a list of stalker.models.auth.User "
-                "instances, not {}: '{}'".format(
+                "{}.alternative_resources should only contain instances of "
+                "stalker.models.auth.User, not {}: '{}'".format(
                     self.__class__.__name__,
                     resource.__class__.__name__,
                     resource,
@@ -1826,8 +1828,8 @@ class Task(
         """
         if not isinstance(resource, User):
             raise TypeError(
-                "{}.computed_resources should be a list of "
-                "stalker.models.auth.User instances, not {}: '{}'".format(
+                "{}.computed_resources should only contain instances of "
+                "stalker.models.auth.User, not {}: '{}'".format(
                     self.__class__.__name__, resource.__class__.__name__, resource
                 )
             )
@@ -1938,9 +1940,11 @@ class Task(
         """
         if not isinstance(watcher, User):
             raise TypeError(
-                "{}.watchers should be a list of stalker.models.auth.User "
-                "instances, not {}: '{}'".format(
-                    self.__class__.__name__, watcher.__class__.__name__, watcher
+                "{}.watchers should only contain instances of "
+                "stalker.models.auth.User, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    watcher.__class__.__name__,
+                    watcher,
                 )
             )
         return watcher
@@ -1965,9 +1969,11 @@ class Task(
 
         if not isinstance(version, Version):
             raise TypeError(
-                "{}.versions should only have stalker.models.version.Version "
-                "instances, and not {}: '{}'".format(
-                    self.__class__.__name__, version.__class__.__name__, version
+                "{}.versions should only contain instances of "
+                "stalker.models.version.Version, and not {}: '{}'".format(
+                    self.__class__.__name__,
+                    version.__class__.__name__,
+                    version,
                 )
             )
 
@@ -2482,9 +2488,11 @@ class Task(
         """
         if not isinstance(responsible, User):
             raise TypeError(
-                "{}.responsible should be a list of stalker.models.auth.User "
-                "instances, not {}: '{}'".format(
-                    self.__class__.__name__, responsible.__class__.__name__, responsible
+                "{}.responsible should only contain instances of "
+                "stalker.models.auth.User, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    responsible.__class__.__name__,
+                    responsible,
                 )
             )
         return responsible
@@ -3327,7 +3335,7 @@ class TaskDependency(Base, ScheduleMixin):
         # trust to the session for checking the depends_on attribute
         if dependency is not None and not isinstance(dependency, Task):
             raise TypeError(
-                "{}.depends_on can should be and instance of stalker.models.task.Task, "
+                "{}.depends_on should be and instance of stalker.models.task.Task, "
                 "not {}: '{}'".format(
                     self.__class__.__name__, dependency.__class__.__name__, dependency
                 )

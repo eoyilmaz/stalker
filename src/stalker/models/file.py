@@ -2,19 +2,23 @@
 """File related classes and utility functions are situated here."""
 
 import os
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from stalker.log import get_logger
 from stalker.models.entity import Entity
+from stalker.models.enum import TraversalDirection
+from stalker.models.mixins import ReferenceMixin
+from stalker.utils import walk_hierarchy
+
 
 logger = get_logger(__name__)
 
 
-class File(Entity):
-    """Holds data about external files or file sequences.
+class File(Entity, ReferenceMixin):
+    """Holds data about files or file sequences.
 
     Files are all about giving some external information to the current entity
     (external to the database, so it can be something on the
@@ -42,6 +46,12 @@ class File(Entity):
     Extension
         It is the extension part of the full_path. It also includes the
         extension separator ('.' for most of the file systems).
+
+    .. versionadded:: 1.1.0
+
+       Inputs or references can now be tracked per File instance through the
+       :attr:`.File.references` attribute. So, that all the references can be
+       tracked per individual file instance.
 
     Args:
         full_path (str): The full path to the File, it can be a path to a
@@ -71,15 +81,21 @@ class File(Entity):
         Text, doc="The full path of the url to the file."
     )
 
+    created_with: Mapped[Optional[str]] = mapped_column(String(256))
+
     def __init__(
         self,
         full_path: Optional[str] = "",
         original_filename: Optional[str] = "",
+        references: Optional[List["File"]] = None,
+        created_with: Optional[str] = None,
         **kwargs: Optional[Dict[str, Any]],
     ) -> None:
         super(File, self).__init__(**kwargs)
+        ReferenceMixin.__init__(self, references=references)
         self.full_path = full_path
         self.original_filename = original_filename
+        self.created_with = created_with
 
     @validates("full_path")
     def _validate_full_path(self, key: str, full_path: Union[None, str]) -> str:
@@ -100,11 +116,39 @@ class File(Entity):
 
         if not isinstance(full_path, str):
             raise TypeError(
-                f"{self.__class__.__name__}.full_path should be an instance of string, "
+                f"{self.__class__.__name__}.full_path should be a str, "
                 f"not {full_path.__class__.__name__}: '{full_path}'"
             )
 
         return self._format_path(full_path)
+
+    @validates("created_with")
+    def _validate_created_with(
+        self, key: str, created_with: Union[None, str]
+    ) -> Union[None, str]:
+        """Validate the given created_with value.
+
+        Args:
+            key (str): The name of the validated column.
+            created_with (str): The name of the application used to create this
+                File.
+
+        Raises:
+            TypeError: If the given created_with attribute is not None and not
+                a string.
+
+        Returns:
+            Union[None, str]: The validated created with value.
+        """
+        if created_with is not None and not isinstance(created_with, str):
+            raise TypeError(
+                "{}.created_with should be an instance of str, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    created_with.__class__.__name__,
+                    created_with,
+                )
+            )
+        return created_with
 
     @validates("original_filename")
     def _validate_original_filename(
@@ -131,8 +175,7 @@ class File(Entity):
 
         if not isinstance(original_filename, str):
             raise TypeError(
-                f"{self.__class__.__name__}.original_filename should be an instance of "
-                "string, "
+                f"{self.__class__.__name__}.original_filename should be a str, "
                 f"not {original_filename.__class__.__name__}: '{original_filename}'"
             )
 
@@ -180,7 +223,7 @@ class File(Entity):
 
         if not isinstance(path, str):
             raise TypeError(
-                f"{self.__class__.__name__}.path should be an instance of str, "
+                f"{self.__class__.__name__}.path should be a str, "
                 f"not {path.__class__.__name__}: '{path}'"
             )
 
@@ -215,7 +258,7 @@ class File(Entity):
 
         if not isinstance(filename, str):
             raise TypeError(
-                f"{self.__class__.__name__}.filename should be an instance of str, "
+                f"{self.__class__.__name__}.filename should be a str, "
                 f"not {filename.__class__.__name__}: '{filename}'"
             )
 
@@ -245,7 +288,7 @@ class File(Entity):
 
         if not isinstance(extension, str):
             raise TypeError(
-                f"{self.__class__.__name__}.extension should be an instance of str, "
+                f"{self.__class__.__name__}.extension should be a str, "
                 f"not {extension.__class__.__name__}: '{extension}'"
             )
 
@@ -254,6 +297,22 @@ class File(Entity):
                 extension = os.path.extsep + extension
 
         self.filename = os.path.splitext(self.filename)[0] + extension
+
+    def walk_references(
+        self,
+        method: Union[int, str, TraversalDirection] = TraversalDirection.DepthFirst,
+    ) -> Generator[None, "File", None]:
+        """Walk the references of this file.
+
+        Args:
+            method (Union[int, str, TraversalDirection]): The walk method
+                defined by the :class:`.TraversalDirection` enum.
+
+        Yields:
+            File: Yield the File instances.
+        """
+        for v in walk_hierarchy(self, "references", method=method):
+            yield v
 
     def __eq__(self, other: Any) -> bool:
         """Check if the other is equal to this File.

@@ -531,9 +531,6 @@ class StatusMixin(object):
             status = self.status_list[status]
 
         # check if the given status is in the status_list
-        # logger.debug(f'self.status_list: {self.status_list}')
-        # logger.debug(f'given status: {status}')
-
         if status not in self.status_list:
             raise ValueError(
                 f"The given Status instance for {self.__class__.__name__}.status is "
@@ -1069,17 +1066,25 @@ class ReferenceMixin(object):
         Returns:
             relationship: The relationship object related to the references attribute.
         """
+        primary_cls_name = f"{cls.__name__}"
+        secondary_cls_name = "Reference"
+        primary_cls_table_name = f"{cls.__tablename__}"
+        secondary_cls_table_name = "Files"
+        secondary_table_name = f"{cls.__name__}_References"
+
         # get secondary table
         secondary_table = create_secondary_table(
-            cls.__name__,
-            "File",
-            cls.__tablename__,
-            "Files",
-            f"{cls.__name__}_References",
+            primary_cls_name=primary_cls_name,
+            secondary_cls_name=secondary_cls_name,
+            primary_cls_table_name=primary_cls_table_name,
+            secondary_cls_table_name=secondary_cls_table_name,
+            secondary_table_name=secondary_table_name,
         )
         # return the relationship
         return relationship(
             secondary=secondary_table,
+            primaryjoin=f"{primary_cls_table_name}.c.id=={secondary_table_name}.c.{primary_cls_name.lower()}_id",
+            secondaryjoin=f"{secondary_table_name}.c.{secondary_cls_name.lower()}_id=={secondary_cls_table_name}.c.id",
             doc="""A list of :class:`.File` instances given as a reference for
             this entity.
             """,
@@ -1101,11 +1106,11 @@ class ReferenceMixin(object):
         """
         from stalker.models.file import File
 
-        # all the items should be instance of stalker.models.entity.Entity
+        # all items should be instance of stalker.models.entity.Entity
         if not isinstance(reference, File):
             raise TypeError(
-                f"All the items in the {self.__class__.__name__}.references should "
-                "be stalker.models.file.File instances, "
+                f"{self.__class__.__name__}.references should only contain "
+                "instances of stalker.models.file.File, "
                 f"not {reference.__class__.__name__}: '{reference}'"
             )
         return reference
@@ -1499,7 +1504,7 @@ class ScheduleMixin(object):
         self,
         key: str,
         schedule_constraint: Union[None, int, str],
-    ) -> int:
+    ) -> ScheduleConstraint:
         """Validate the given schedule_constraint value.
 
         Args:
@@ -1930,8 +1935,8 @@ class DAGMixin(object):
         """
         if not isinstance(child, self.__class__):
             raise TypeError(
-                "{cls}.children should be a list of {cls} (or derivative) "
-                "instances, not {child_cls}: '{child}'".format(
+                "{cls}.children should only contain instances of {cls} "
+                "(or derivative), not {child_cls}: '{child}'".format(
                     cls=self.__class__.__name__,
                     child_cls=child.__class__.__name__,
                     child=child,

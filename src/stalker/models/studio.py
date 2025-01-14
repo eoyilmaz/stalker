@@ -860,7 +860,7 @@ class WorkingHours(Entity):
         Raises:
             TypeError: If the given value is not a list.
             TypeError: If the immediate items in the list is not a list.
-            RuntimeError: If the length of the items in the given list is not 2.
+            TypeError: If the length of the items in the given list is not 2.
             TypeError: If the items in the lists inside the list are not integers.
             ValueError: If the integer values in the secondary lists are smaller than 0
                 or larger than 1440 (which is 24 * 60).

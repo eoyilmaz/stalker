@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Shot related functions and classes are situated here."""
 
-from typing import Any, Dict, List, Optional, TYPE_CHECKING, Union
+from typing import Any, Dict, Optional, TYPE_CHECKING, Union
 
-from sqlalchemy import Column, Float, ForeignKey, Integer, Table
+from sqlalchemy import Float, ForeignKey
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.orm import (
     Mapped,
@@ -14,7 +14,6 @@ from sqlalchemy.orm import (
     validates,
 )
 
-from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
 from stalker.models.format import ImageFormat

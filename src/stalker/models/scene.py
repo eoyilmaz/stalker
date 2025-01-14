@@ -7,8 +7,8 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
 from stalker.log import get_logger
-from stalker.models.task import Task
 from stalker.models.mixins import CodeMixin
+from stalker.models.task import Task
 
 if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.shot import Shot
@@ -77,8 +77,8 @@ class Scene(Task, CodeMixin):
 
         if not isinstance(shot, Shot):
             raise TypeError(
-                f"{self.__class__.__name__}.shots needs to be all "
-                "stalker.models.shot.Shot instances, "
+                f"{self.__class__.__name__}.shots should only contain "
+                "instances of stalker.models.shot.Shot, "
                 f"not {shot.__class__.__name__}: '{shot}'"
             )
         return shot

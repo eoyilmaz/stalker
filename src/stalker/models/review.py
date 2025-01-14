@@ -164,6 +164,7 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         """Validate the given task value.
 
         Args:
+            key (str): The name of the validated column.
             task (Union[None, Task]): The task value to be validated.
 
         Raises:
@@ -205,6 +206,13 @@ class Review(SimpleEntity, ScheduleMixin, StatusMixin):
         Args:
             key (str): The name of the validated column.
             version (Union[None, Version]): The version value to be validated.
+
+        Raises:
+            TypeError: If version is not a Version instance.
+            ValueError: If the version.task and the self.task is not matching.
+
+        Returns:
+            Union[None, Version]: The validated version value.
         """
         if version is None:
             return version
@@ -456,13 +464,13 @@ class Daily(Entity, StatusMixin, ProjectMixin):
         """Return the Version instances related to this Daily.
 
         Returns:
-             List[Task]: A list of :class:`.Version` instances that this Daily is
-                related to (through the outputs of the versions).
+            List[Task]: A list of :class:`.Version` instances that this Daily
+                is related to (through the files attribute of the versions).
         """
         from stalker.models.version import Version
 
         return (
-            Version.query.join(Version.outputs)
+            Version.query.join(Version.files)
             .join(DailyFile)
             .join(Daily)
             .filter(Daily.id == self.id)
@@ -474,15 +482,15 @@ class Daily(Entity, StatusMixin, ProjectMixin):
         """Return the Task's related this Daily instance.
 
         Returns:
-             List[Task]: A list of :class:`.Task` instances that this Daily is
-                related to (through the outputs of the versions)
+            List[Task]: A list of :class:`.Task` instances that this Daily is
+                related to (through the files attribute of the versions).
         """
         from stalker.models.version import Version
         from stalker.models.task import Task
 
         return (
             Task.query.join(Task.versions)
-            .join(Version.outputs)
+            .join(Version.files)
             .join(DailyFile)
             .join(Daily)
             .filter(Daily.id == self.id)

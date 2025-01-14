@@ -235,8 +235,8 @@ class PriceList(Entity):
         """
         if not isinstance(good, Good):
             raise TypeError(
-                f"{self.__class__.__name__}.goods should be a list of "
-                "stalker.model.budget.Good instances, "
+                f"{self.__class__.__name__}.goods should only contain "
+                "instances of stalker.model.budget.Good, "
                 f"not {good.__class__.__name__}: '{good}'"
             )
         return good
@@ -299,8 +299,9 @@ class Budget(Entity, ProjectMixin, DAGMixin, StatusMixin):
         """
         if not isinstance(entry, BudgetEntry):
             raise TypeError(
-                f"{self.__class__.__name__}.entries should be a list of BudgetEntry "
-                f"instances, not {entry.__class__.__name__}: '{entry}'"
+                f"{self.__class__.__name__}.entries should only contain "
+                "instances of BudgetEntry, "
+                f"not {entry.__class__.__name__}: '{entry}'"
             )
         return entry
 

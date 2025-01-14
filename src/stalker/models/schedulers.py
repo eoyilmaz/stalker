@@ -745,8 +745,8 @@ order by path_as_text"""  # noqa: B950
             projects = []
 
         msg = (
-            "{cls}.projects should be a list of "
-            "stalker.models.project.Project instances, not "
+            "{cls}.projects should only contain instances of "
+            "stalker.models.project.Project, not "
             "{projects_class}: '{projects}'"
         )
 

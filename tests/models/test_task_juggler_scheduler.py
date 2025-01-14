@@ -747,8 +747,8 @@ def test_projects_argument_is_not_a_list(setup_tsk_juggler_scheduler_db_tests):
         TaskJugglerScheduler(compute_resources=True, projects="not a list of projects")
 
     assert str(cm.value) == (
-        "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str: 'not a list of projects'"
+        "TaskJugglerScheduler.projects should only contain instances of "
+        "stalker.models.project.Project, not str: 'not a list of projects'"
     )
 
 
@@ -759,8 +759,8 @@ def test_projects_attribute_is_not_a_list(setup_tsk_juggler_scheduler_db_tests):
         tjp.projects = "not a list of projects"
 
     assert str(cm.value) == (
-        "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str: 'not a list of projects'"
+        "TaskJugglerScheduler.projects should only contain instances of "
+        "stalker.models.project.Project, not str: 'not a list of projects'"
     )
 
 
@@ -772,8 +772,8 @@ def test_projects_argument_is_not_a_list_of_all_projects():
         )
 
     assert str(cm.value) == (
-        "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str: 'not'"
+        "TaskJugglerScheduler.projects should only contain instances of "
+        "stalker.models.project.Project, not str: 'not'"
     )
 
 
@@ -783,9 +783,9 @@ def test_projects_attribute_is_not_list_of_all_projects():
     with pytest.raises(TypeError) as cm:
         tjp.projects = ["not", 1, [], "of", "projects"]
 
-    assert (
-        str(cm.value) == "TaskJugglerScheduler.projects should be a list of "
-        "stalker.models.project.Project instances, not str: 'not'"
+    assert str(cm.value) == (
+        "TaskJugglerScheduler.projects should only contain instances of "
+        "stalker.models.project.Project, not str: 'not'"
     )
 
 

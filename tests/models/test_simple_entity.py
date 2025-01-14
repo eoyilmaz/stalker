@@ -730,9 +730,7 @@ def test_html_style_arg_is_not_a_string(setup_simple_entity_tests):
     data["kwargs"]["html_style"] = 123
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
-    assert str(cm.value) == (
-        "SimpleEntity.html_style should be a str, not int: '123'"
-    )
+    assert str(cm.value) == ("SimpleEntity.html_style should be a str, not int: '123'")
 
 
 def test_html_style_attr_is_not_set_to_a_string(setup_simple_entity_tests):
@@ -792,9 +790,7 @@ def test_html_class_arg_is_not_a_string(setup_simple_entity_tests):
     data["kwargs"]["html_class"] = 123
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
-    assert str(cm.value) == (
-        "SimpleEntity.html_class should be a str, not int: '123'"
-    )
+    assert str(cm.value) == ("SimpleEntity.html_class should be a str, not int: '123'")
 
 
 def test_html_class_attr_is_not_set_to_a_string(setup_simple_entity_tests):

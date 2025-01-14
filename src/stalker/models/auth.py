@@ -284,7 +284,7 @@ class Group(Entity, ACLMixin):
 
     Args:
         name (str): The name of this group.
-        users list: A list of :class:`.User` instances, holding the desired
+        users list: A list of :class:`.User` instances holding the desired
             users in this group.
     """
 
@@ -333,9 +333,9 @@ class Group(Entity, ACLMixin):
         """
         if not isinstance(user, User):
             raise TypeError(
-                f"{self.__class__.__name__}.users attribute must all be "
-                "stalker.models.auth.User "
-                f"instances, not {user.__class__.__name__}: '{user}'"
+                f"{self.__class__.__name__}.users should only contain "
+                "instances of stalker.models.auth.User, "
+                f"not {user.__class__.__name__}: '{user}'"
             )
 
         return user

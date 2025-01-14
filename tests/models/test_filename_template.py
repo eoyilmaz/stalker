@@ -352,12 +352,10 @@ def test_naming_case(setup_postgresql_db):
     DBSession.commit()
 
     v = Version(task=maya)
-    v.update_paths()
-    v.extension = ".ma"
     DBSession.add(v)
     DBSession.commit()
-
-    assert v.filename == "ep101_s001c001_fxA_v01.ma"
+    path = v.generate_path(extension=".ma")
+    assert path.name == "ep101_s001c001_fxA_v01.ma"
 
 
 def test__hash__is_working_as_expected(setup_filename_template_tests):

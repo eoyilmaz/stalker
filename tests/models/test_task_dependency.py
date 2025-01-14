@@ -166,7 +166,7 @@ def test_depends_on_argument_is_not_a_task_instance(setup_task_dependency_db_tes
         TaskDependency(**data["kwargs"])
 
     assert (
-        str(cm.value) == "TaskDependency.depends_on can should be and instance of "
+        str(cm.value) == "TaskDependency.depends_on should be and instance of "
         "stalker.models.task.Task, not str: 'Not a Task instance'"
     )
 
@@ -179,7 +179,7 @@ def test_depends_on_attribute_is_not_a_task_instance(setup_task_dependency_db_te
         new_dep.depends_on = "not a task"
 
     assert (
-        str(cm.value) == "TaskDependency.depends_on can should be and instance of "
+        str(cm.value) == "TaskDependency.depends_on should be and instance of "
         "stalker.models.task.Task, not str: 'not a task'"
     )
 

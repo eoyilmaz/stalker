@@ -113,8 +113,8 @@ def test_references_attribute_accepting_only_lists_of_file_instances(
         data["test_foo_obj"].references = test_value
 
     assert str(cm.value) == (
-        "All the items in the RefMixFooClass.references should be "
-        "stalker.models.file.File instances, not int: '1'"
+        "RefMixFooClass.references should only contain instances of "
+        "stalker.models.file.File, not int: '1'"
     )
 
 
@@ -125,8 +125,8 @@ def test_references_attribute_elements_accepts_files_only(setup_reference_mixin_
         data["test_foo_obj"].references = [data["test_entity1"], data["test_entity2"]]
 
     assert str(cm.value) == (
-        "All the items in the RefMixFooClass.references should be "
-        "stalker.models.file.File instances, not Entity: '<Test Entity 1 (Entity)>'"
+        "RefMixFooClass.references should only contain instances of "
+        "stalker.models.file.File, not Entity: '<Test Entity 1 (Entity)>'"
     )
 
 

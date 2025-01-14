@@ -2,36 +2,37 @@
 """Version related functions and classes are situated here."""
 
 import os
-import re
-from typing import Any, Dict, Generator, List, Optional, Union
+from pathlib import Path
+from typing import Any, Dict, List, Optional
 
 import jinja2
 
-from sqlalchemy import Column, ForeignKey, Integer, String, Table
+from sqlalchemy import Column, ForeignKey, Integer, Table
 from sqlalchemy.exc import OperationalError, UnboundExecutionError
 from sqlalchemy.orm import Mapped, mapped_column, relationship, synonym, validates
 
 from stalker.db.declarative import Base
 from stalker.db.session import DBSession
 from stalker.log import get_logger
-from stalker.models.enum import TraversalDirection
+from stalker.models.entity import Entity
 from stalker.models.file import File
 from stalker.models.mixins import DAGMixin
 from stalker.models.review import Review
 from stalker.models.task import Task
-from stalker.utils import walk_hierarchy
 
 
 logger = get_logger(__name__)
 
 
-class Version(File, DAGMixin):
+class Version(Entity, DAGMixin):
     """Holds information about the versions created for a class:`.Task`.
 
     A :class:`.Version` instance holds information about the versions created
-    related to a class:`.Task`. So if one creates a new version for a file or a
-    sequences of files for a :class:`.Task` then the information can be hold in
-    the :class:`.Version` instance.
+    related for a class:`.Task`. This is not directly related to the stored
+    files, but instead holds the information about the incremental change
+    itself (i.e who has created it, when it is created, the revision and
+    version numbers etc.). All the related files are stored in the
+    :attr:`.Version.files` attribute.
 
     .. versionadded: 0.2.13
 
@@ -67,6 +68,20 @@ class Version(File, DAGMixin):
        organized alongside revisions or big changes, without relying on the now
        removed `variant_name` attribute.
 
+    .. versionadded: 1.1.0
+
+       Version class is not deriving from File class anymore. So they are not
+       directly related to any file. And the File relation is stored in the new
+       :attr:`.Version.files` attribute.
+
+    .. versionadded: 1.1.0
+
+       Added the `files` attribute, which replaces the `outputs` attribute and
+       the `inputs` attribute is moved to the :class:`.File` class as the
+       `references` attribute, which makes much more sense as individual files
+       may reference different `Files` so storing the `references` in `Version`
+       doesn't make much sense.
+
     Args:
         revision_number (Optional[int]): A positive non-zero integer number
             holding the major version counter. This can be set with an
@@ -80,15 +95,10 @@ class Version(File, DAGMixin):
             :attr:`.revision_number` under the same :class:`.Task` will be
             considered in the same version stream and version number attribute
             will be set accordingly. The default is 1.
-        inputs (List[File]): A list o :class:`.File` instances, holding the
-            inputs of the current version. It could be a texture for a Maya
-            file or an image sequence for Nuke, or anything those you can think
-            as the input for the current Version.
-        outputs (List[File]): A list of :class:`.File` instances, holding the
-            outputs of the current version. It could be the rendered image
-            sequences out of Maya or Nuke, or it can be a Targa file which is
-            the output of a Photoshop file, or anything that you can think as
-            the output which is created out of this Version.
+        files (List[File]): A list of :class:`.File` instances that are created
+            for this :class:`.Version` instance. This can be different
+            representations (i.e. base, Alembic, USD, ASS, RS etc.) of the same
+            data.
         task (Task): A :class:`.Task` instance showing the owner of this
             Version.
         parent (Version): A :class:`.Version` instance which is the parent of
@@ -105,7 +115,7 @@ class Version(File, DAGMixin):
     __dag_cascade__ = "save-update, merge"
 
     version_id: Mapped[int] = mapped_column(
-        "id", ForeignKey("Files.id"), primary_key=True
+        "id", ForeignKey("Entities.id"), primary_key=True
     )
 
     __id_column__ = "version_id"
@@ -132,21 +142,11 @@ class Version(File, DAGMixin):
         """,
     )
 
-    inputs: Mapped[Optional[List[File]]] = relationship(
-        secondary="Version_Inputs",
-        primaryjoin="Versions.c.id==Version_Inputs.c.version_id",
-        secondaryjoin="Version_Inputs.c.file_id==Files.c.id",
-        doc="""The inputs of the current version.
-
-        It is a list of :class:`.File` instances.
-        """,
-    )
-
-    outputs: Mapped[Optional[List[File]]] = relationship(
-        secondary="Version_Outputs",
-        primaryjoin="Versions.c.id==Version_Outputs.c.version_id",
-        secondaryjoin="Version_Outputs.c.file_id==Files.c.id",
-        doc="""The outputs of the current version.
+    files: Mapped[Optional[List[File]]] = relationship(
+        secondary="Version_Files",
+        primaryjoin="Versions.c.id==Version_Files.c.version_id",
+        secondaryjoin="Version_Files.c.file_id==Files.c.id",
+        doc="""The files related to the current version.
 
         It is a list of :class:`.File` instances.
         """,
@@ -157,16 +157,13 @@ class Version(File, DAGMixin):
     )
 
     is_published: Mapped[Optional[bool]] = mapped_column(default=False)
-    created_with: Mapped[Optional[str]] = mapped_column(String(256))
 
     def __init__(
         self,
         task: Optional[Task] = None,
-        inputs: Optional[List["File"]] = None,
-        outputs: Optional[List["File"]] = None,
+        files: Optional[List[File]] = None,
         parent: Optional["Version"] = None,
         full_path: Optional[str] = None,
-        created_with: Optional[str] = None,
         revision_number: Optional[int] = None,
         **kwargs: Dict[str, Any],
     ) -> None:
@@ -181,18 +178,12 @@ class Version(File, DAGMixin):
             revision_number = 1
         self.revision_number = revision_number
         self.version_number = None
-        if inputs is None:
-            inputs = []
 
-        if outputs is None:
-            outputs = []
+        if files is None:
+            files = []
 
-        self.inputs = inputs
-        self.outputs = outputs
-
+        self.files = files
         self.is_published = False
-
-        self.created_with = created_with
 
     def __repr__(self) -> str:
         """Return the str representation of the Version.
@@ -245,7 +236,11 @@ class Version(File, DAGMixin):
         return self._revision_number
 
     def _revision_number_setter(self, revision_number: int):
-        """Set the revision attribute value."""
+        """Set the revision attribute value.
+
+        Args:
+            revision_number (int): The new revision number value.
+        """
         revision_number = self._validate_revision_number(revision_number)
 
         is_updating_revision_number = False
@@ -392,61 +387,37 @@ class Version(File, DAGMixin):
 
         if not isinstance(task, Task):
             raise TypeError(
-                "{}.task should be a stalker.models.task.Task instance, "
-                "not {}: '{}'".format(
+                "{}.task should be a Task, Asset, Shot, Scene, Sequence or "
+                "Variant instance, not {}: '{}'".format(
                     self.__class__.__name__, task.__class__.__name__, task
                 )
             )
 
         return task
 
-    @validates("inputs")
-    def _validate_inputs(self, key, input_):
-        """Validate the given input value.
+    @validates("files")
+    def _validate_files(self, key: str, file: File) -> File:
+        """Validate the given file value.
 
         Args:
             key (str): The name of the validated column.
-            input_ (File): The input value to be validated.
+            file (File): The file value to be validated.
 
         Raises:
-            TypeError: If the input is not a :class:`.File` instance.
+            TypeError: If the file is not a :class:`.File` instance.
 
         Returns:
-            File: The validated input value.
+            File: The validated file value.
         """
-        if not isinstance(input_, File):
+        if not isinstance(file, File):
             raise TypeError(
-                "All elements in {}.inputs should be all "
-                "stalker.models.file.File instances, not {}: '{}'".format(
-                    self.__class__.__name__, input_.__class__.__name__, input_
+                "{}.files should only contain instances of "
+                "stalker.models.file.File, not {}: '{}'".format(
+                    self.__class__.__name__, file.__class__.__name__, file
                 )
             )
 
-        return input_
-
-    @validates("outputs")
-    def _validate_outputs(self, key, output) -> File:
-        """Validate the given output value.
-
-        Args:
-            key (str): The name of the validated column.
-            output (File): The output value to be validated.
-
-        Raises:
-            TypeError: If the output is not a :class:`.File` instance.
-
-        Returns:
-            File: The validated output value.
-        """
-        if not isinstance(output, File):
-            raise TypeError(
-                "All elements in {}.outputs should be all "
-                "stalker.models.file.File instances, not {}: '{}'".format(
-                    self.__class__.__name__, output.__class__.__name__, output
-                )
-            )
-
-        return output
+        return file
 
     def _template_variables(self) -> dict:
         """Return the variables used in rendering the filename template.
@@ -456,18 +427,31 @@ class Version(File, DAGMixin):
         """
         version_template_vars = {
             "version": self,
-            "extension": self.extension,
+            # "extension": self.extension,
         }
         version_template_vars.update(self.task._template_variables())
         return version_template_vars
 
-    def update_paths(self) -> None:
-        """Update the path variables.
+    def generate_path(self, extension: Optional[str] = None) -> Path:
+        """Generate a Path with the template variables from the parent project.
+
+        Args:
+            extension (Optional[str]): An optional string containing the
+                extension for the resulting Path.
 
         Raises:
+            TypeError: If the extension is not None and not a str.
             RuntimeError: If no Version related FilenameTemplate is found in
                 the related `Project.structure`.
+
+        Returns:
+            Path: A `pathlib.Path` object.
         """
+        if extension is not None and not isinstance(extension, str):
+            raise TypeError(
+                "extension should be a str, "
+                f"not {extension.__class__.__name__}: '{extension}'"
+            )
         kwargs = self._template_variables()
 
         # get a suitable FilenameTemplate
@@ -486,19 +470,24 @@ class Version(File, DAGMixin):
                 "(target_entity_type == '{entity_type}') defined in the Structure of "
                 "the related Project instance, please create a new "
                 "stalker.models.template.FilenameTemplate instance with its "
-                "'target_entity_type' attribute is set to '{entity_type}' and assign "
+                "'target_entity_type' attribute is set to '{entity_type}' and add "
                 "it to the `templates` attribute of the structure of the "
                 "project".format(entity_type=self.task.entity_type)
             )
 
-        temp_filename = jinja2.Template(vers_template.filename).render(
-            **kwargs, trim_blocks=True, lstrip_blocks=True
+        path = Path(
+            jinja2.Template(vers_template.path).render(
+                **kwargs, trim_blocks=True, lstrip_blocks=True
+            )
+        ) / Path(
+            jinja2.Template(vers_template.filename).render(
+                **kwargs, trim_blocks=True, lstrip_blocks=True
+            )
         )
-        temp_path = jinja2.Template(vers_template.path).render(
-            **kwargs, trim_blocks=True, lstrip_blocks=True
-        )
-        self.filename = temp_filename
-        self.path = temp_path
+        if extension is not None:
+            path = path.with_suffix(extension)
+
+        return path
 
     @property
     def absolute_full_path(self) -> str:
@@ -509,7 +498,11 @@ class Version(File, DAGMixin):
         Returns:
             str: The absolute full path of this Version instance.
         """
-        return os.path.normpath(os.path.expandvars(self.full_path)).replace("\\", "/")
+        return Path(
+            os.path.normpath(os.path.expandvars(str(self.generate_path()))).replace(
+                "\\", "/"
+            )
+        )
 
     @property
     def absolute_path(self) -> str:
@@ -518,7 +511,41 @@ class Version(File, DAGMixin):
         Returns:
             str: The absolute path.
         """
-        return os.path.normpath(os.path.expandvars(self.path)).replace("\\", "/")
+        return Path(
+            os.path.normpath(
+                os.path.expandvars(str(self.generate_path().parent))
+            ).replace("\\", "/")
+        )
+
+    @property
+    def full_path(self) -> Path:
+        """Return the full path of this version.
+
+        This full path includes the repository path of the related project as
+        it is.
+
+        Returns:
+            Path: The full path of this Version instance.
+        """
+        return self.generate_path()
+
+    @property
+    def path(self) -> Path:
+        """Return the path.
+
+        Returns:
+            Path: The path.
+        """
+        return self.full_path.parent
+    
+    @property
+    def filename(self) -> str:
+        """Return the filename bit of the path.
+        
+        Returns:
+            str: The filename.
+        """
+        return self.full_path.name
 
     def is_latest_published_version(self) -> bool:
         """Return True if this is the latest published Version False otherwise.
@@ -545,33 +572,6 @@ class Version(File, DAGMixin):
             .order_by(Version.version_number.desc())
             .first()
         )
-
-    @validates("created_with")
-    def _validate_created_with(
-        self, key: str, created_with: Union[None, str]
-    ) -> Union[None, str]:
-        """Validate the given created_with value.
-
-        Args:
-            key (str): The name of the validated column.
-            created_with (str): The name of the DCC used to create this Version
-                instance.
-
-        Raises:
-            TypeError: If the given created_with attribute is not None and not a string.
-
-        Returns:
-            Union[None, str]: The validated created with value.
-        """
-        if created_with is not None and not isinstance(created_with, str):
-            raise TypeError(
-                "{}.created_with should be an instance of str, not {}: '{}'".format(
-                    self.__class__.__name__,
-                    created_with.__class__.__name__,
-                    created_with,
-                )
-            )
-        return created_with
 
     def __eq__(self, other):
         """Check the equality.
@@ -612,22 +612,14 @@ class Version(File, DAGMixin):
         all_parents = self.task.parents
         all_parents.append(self.task)
         naming_parents = []
-        if all_parents:
-            significant_parent = all_parents[0]
+        if not all_parents:
+            return naming_parents
 
-            for parent in reversed(all_parents):
-                if parent.entity_type in ["Asset", "Shot", "Sequence"]:
-                    significant_parent = parent
-                    break
+        for parent in reversed(all_parents):
+            naming_parents.insert(0, parent)
+            if parent.entity_type in ["Asset", "Shot", "Sequence"]:
+                break
 
-            # now start from that parent towards the task
-            past_significant_parent = False
-            naming_parents = []
-            for parent in all_parents:
-                if parent is significant_parent:
-                    past_significant_parent = True
-                if past_significant_parent:
-                    naming_parents.append(parent)
         return naming_parents
 
     @property
@@ -641,34 +633,21 @@ class Version(File, DAGMixin):
             "_".join(map(lambda x: x.nice_name, self.naming_parents))
         )
 
-    def walk_inputs(
-        self,
-        method: Union[int, str, TraversalDirection] = TraversalDirection.DepthFirst,
-    ) -> Generator[None, "Version", None]:
-        """Walk the inputs of this version instance.
-
-        Args:
-            method (Union[int, str, TraversalDirection]): The walk method defined by
-                the :class:`.TraversalDirection` enum.
-
-        Yields:
-            Version: Yield the Version instances.
-        """
-        for v in walk_hierarchy(self, "inputs", method=method):
-            yield v
-
-    def request_review(self):
-        """Call the self.task.request_review().
+    def request_review(self) -> List[Review]:
+        """Request a review.
 
         This is a shortcut to the Task.request_review() method of the related
         task.
+
+        Returns:
+            List[Review]: The created Review instances.
         """
         return self.task.request_review(version=self)
 
 
-# VERSION INPUTS
-Version_Inputs = Table(
-    "Version_Inputs",
+# VERSION FILES
+Version_Files = Table(
+    "Version_Files",
     Base.metadata,
     Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
     Column(
@@ -677,12 +656,4 @@ Version_Inputs = Table(
         ForeignKey("Files.id", onupdate="CASCADE", ondelete="CASCADE"),
         primary_key=True,
     ),
-)
-
-# VERSION_OUTPUTS
-Version_Outputs = Table(
-    "Version_Outputs",
-    Base.metadata,
-    Column("version_id", Integer, ForeignKey("Versions.id"), primary_key=True),
-    Column("file_id", Integer, ForeignKey("Files.id"), primary_key=True),
 )

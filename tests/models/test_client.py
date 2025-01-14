@@ -449,8 +449,8 @@ def test_goods_attribute_is_set_to_a_list_of_non_good_instances(setup_client_tes
         client1.goods = ["not", 1, "list", "of", "goods"]
 
     assert str(cm.value) == (
-        "Client.goods attribute should be all "
-        "stalker.models.budget.Good instances, not str: 'not'"
+        "Client.goods should only contain instances of "
+        "stalker.models.budget.Good, not str: 'not'"
     )
 
 

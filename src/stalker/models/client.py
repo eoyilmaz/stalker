@@ -159,8 +159,8 @@ class Client(Entity):
 
         if not isinstance(good, Good):
             raise TypeError(
-                f"{self.__class__.__name__}.goods attribute should be all "
-                "stalker.models.budget.Good instances, "
+                f"{self.__class__.__name__}.goods should only "
+                "contain instances of stalker.models.budget.Good, "
                 f"not {good.__class__.__name__}: '{good}'"
             )
 

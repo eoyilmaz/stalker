@@ -116,7 +116,7 @@ def test_entries_attribute_is_set_to_a_list_of_other_instances_than_a_budget_ent
         data["test_budget"].entries = ["some", "string", 1, 2]
 
     assert str(cm.value) == (
-        "Budget.entries should be a list of BudgetEntry instances, not str: 'some'"
+        "Budget.entries should only contain instances of BudgetEntry, not str: 'some'"
     )
 
 

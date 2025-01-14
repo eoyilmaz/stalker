@@ -123,7 +123,8 @@ def test_shots_attribute_is_a_list_of_other_objects(setup_sequence_db_tests):
         data["test_sequence"].shots = test_value
 
     assert str(cm.value) == (
-        "Sequence.shots should be all stalker.models.shot.Shot instances, not int: '1'"
+        "Sequence.shots should only contain instances of "
+        "stalker.models.shot.Shot, not int: '1'"
     )
 
 
@@ -137,8 +138,8 @@ def test_shots_attribute_elements_tried_to_be_set_to_non_Shot_object(
         data["test_sequence"].shots.append(test_value)
 
     assert str(cm.value) == (
-        "Sequence.shots should be all stalker.models.shot.Shot instances, "
-        "not str: 'a string'"
+        "Sequence.shots should only contain instances of "
+        "stalker.models.shot.Shot, not str: 'a string'"
     )
 
 

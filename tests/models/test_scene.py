@@ -101,7 +101,8 @@ def test_shots_attribute_is_set_to_other_than_a_list(setup_scene_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_scene"].shots = test_value
     assert str(cm.value) == (
-        "Scene.shots needs to be all stalker.models.shot.Shot instances, not int: '1'"
+        "Scene.shots should only contain instances of "
+        "stalker.models.shot.Shot, not int: '1'"
     )
 
 
@@ -112,7 +113,8 @@ def test_shots_attribute_is_a_list_of_other_objects(setup_scene_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_scene"].shots = test_value
     assert str(cm.value) == (
-        "Scene.shots needs to be all stalker.models.shot.Shot instances, not int: '1'"
+        "Scene.shots should only contain instances of "
+        "stalker.models.shot.Shot, not int: '1'"
     )
 
 
@@ -124,8 +126,8 @@ def test_shots_attribute_elements_tried_to_be_set_to_non_shot_object(
     with pytest.raises(TypeError) as cm:
         data["test_scene"].shots.append("a string")
     assert str(cm.value) == (
-        "Scene.shots needs to be all stalker.models.shot.Shot instances, "
-        "not str: 'a string'"
+        "Scene.shots should only contain instances of "
+        "stalker.models.shot.Shot, not str: 'a string'"
     )
 
 

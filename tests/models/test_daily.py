@@ -93,12 +93,12 @@ def setup_daily_tests():
     data["test_file3"] = File(original_filename="test_render3.jpg")
     data["test_file4"] = File(original_filename="test_render4.jpg")
 
-    data["test_version1"].outputs = [
+    data["test_version1"].files = [
         data["test_file1"],
         data["test_file2"],
         data["test_file3"],
     ]
-    data["test_version4"].outputs = [data["test_file4"]]
+    data["test_version4"].files = [data["test_file4"]]
     return data
 
 
@@ -301,12 +301,12 @@ def setup_daily_db_tests(setup_postgresql_db):
         ]
     )
 
-    data["test_version1"].outputs = [
+    data["test_version1"].files = [
         data["test_file1"],
         data["test_file2"],
         data["test_file3"],
     ]
-    data["test_version4"].outputs = [data["test_file4"]]
+    data["test_version4"].files = [data["test_file4"]]
     DBSession.commit()
     yield data
 

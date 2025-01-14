@@ -1927,8 +1927,8 @@ def test_persistence_of_daily(setup_postgresql_db):
     test_file3 = File(original_filename="test_render3.jpg")
     test_file4 = File(original_filename="test_render4.jpg")
 
-    test_version1.outputs = [test_file1, test_file2, test_file3]
-    test_version4.outputs = [test_file4]
+    test_version1.files = [test_file1, test_file2, test_file3]
+    test_version4.files = [test_file4]
 
     DBSession.add_all(
         [
@@ -1995,7 +1995,7 @@ def test_persistence_of_daily(setup_postgresql_db):
     assert isinstance(test_file4_db, File)
 
     assert DailyFile.query.all() == []
-    assert File.query.count() == 8  # including versions
+    assert File.query.count() == 4  # Versions are not files anymore
 
 
 def test_persistence_of_department(setup_postgresql_db):
@@ -2476,13 +2476,36 @@ def test_persistence_of_file(setup_postgresql_db):
     DBSession.commit()
     # create a file Type
     sound_file_type = Type(name="Sound", code="sound", target_entity_type="File")
+    image_seq_type = Type(
+        name="JPEG Sequence", code="JPEGSeq", target_entity_type="File"
+    )
+    video_type = Type(name="Video", code="Video", target_entity_type="File")
 
-    # create a File
+    # create some reference Files
+    ref1 = File(
+        name="My Image Sequence #1",
+        full_path="M:/PROJECTS/my_image_sequence.#.jpg",
+        type=image_seq_type,
+        created_by=user1,
+        created_with="Maya",
+    )
+    ref2 = File(
+        name="My Movie #1",
+        full_path="M:/PROJECTS/my_movie.mp4",
+        type=video_type,
+        created_by=user1,
+        created_with="Blender",
+    )
+    DBSession.save([ref1, ref2])
+
+    # create the main File
     kwargs = {
         "name": "My Sound",
         "full_path": "M:/PROJECTS/my_movie_sound.wav",
+        "references": [ref1, ref2],
         "type": sound_file_type,
         "created_by": user1,
+        "created_with": "Houdini",
     }
     file1 = File(**kwargs)
 
@@ -2503,13 +2526,17 @@ def test_persistence_of_file(setup_postgresql_db):
 
     # store attributes
     created_by = file1.created_by
+    created_with = file1.created_with
     date_created = file1.date_created
     date_updated = file1.date_updated
     description = file1.description
+    full_path = file1.full_path
     name = file1.name
     nice_name = file1.nice_name
     notes = file1.notes
-    full_path = file1.full_path
+    references = file1.references
+    assert isinstance(references, list)
+    assert len(references) > 0
     tags = file1.tags
     type_ = file1.type
     updated_by = file1.updated_by
@@ -2523,13 +2550,15 @@ def test_persistence_of_file(setup_postgresql_db):
     assert isinstance(file1_db, File)
 
     assert file1_db.created_by == created_by
+    assert file1_db.created_with == created_with
     assert file1_db.date_created == date_created
     assert file1_db.date_updated == date_updated
     assert file1_db.description == description
+    assert file1_db.full_path == full_path
     assert file1_db.name == name
     assert file1_db.nice_name == nice_name
     assert file1_db.notes == notes
-    assert file1_db.full_path == full_path
+    assert file1_db.references == references
     assert file1_db.tags == tags
     assert file1_db.type == type_
     assert file1_db.updated_by == updated_by
@@ -3489,8 +3518,9 @@ def test_persistence_of_structure(setup_postgresql_db):
         name="Character Asset Template",
         description="This is the template for character assets",
         path="Assets/{{asset_type.name}}/{{pipeline_step.code}}",
-        filename="{{asset.name}}_{{asset_type.name}}_\
-        v{{version.version_number}}",
+        filename="{{asset.name}}_{{asset_type.name}}"
+        "_r{{version.revision_number}}"
+        "_v{{version.version_number}}",
         target_entity_type="Asset",
         type=v_type,
     )
@@ -3751,6 +3781,18 @@ def test_persistence_of_task(setup_postgresql_db):
         end=datetime.datetime.now(pytz.utc) + datetime.timedelta(3),
     )
     # Versions
+    repr_type = Type(name="Representation", code="Repr", target_entity_type="File")
+    DBSession.save(repr_type)
+
+    file1 = File(name="Version1 Base Repr", type=repr_type)
+    file2 = File(name="Version2 Base Repr", type=repr_type)
+    file3 = File(name="Version3 Base Repr", type=repr_type)
+    file4 = File(name="Version4 Base Repr", type=repr_type)
+    DBSession.save([file1, file2, file3, file4])
+    file3.references = [file2]
+    file2.references = [file1, file4]
+    DBSession.commit()
+
     version1 = Version(task=task1)
     DBSession.add(version1)
     DBSession.commit()
@@ -3767,9 +3809,6 @@ def test_persistence_of_task(setup_postgresql_db):
     DBSession.add(version4)
     DBSession.commit()
 
-    version3.inputs = [version2]
-    version2.inputs = [version1]
-    version2.inputs = [version4]
     DBSession.add(version1)
     DBSession.commit()
 
@@ -3872,25 +3911,6 @@ def test_persistence_of_task(setup_postgresql_db):
     assert isinstance(task1_db.schedule_model, ScheduleModel)
     assert task1_db.schedule_timing == schedule_timing
     assert task1_db.schedule_unit == schedule_unit
-    assert version2.inputs == [version4]
-    assert version3.inputs == [version2]
-    assert version4.inputs == []
-
-    # delete tests
-
-    # deleting a Task should also delete:
-    #
-    # Child Tasks
-    # TimeLogs
-    # Versions
-    # And orphan-references
-    #
-    # task1_db.references = []
-    # with DBSession.no_autoflush:
-    #     for v in task1_db.versions:
-    #         v.inputs = []
-    #         for tv in Version.query.filter(Version.inputs.contains(v)):
-    #             tv.inputs.remove(v)
 
     DBSession.delete(task1_db)
     DBSession.commit()
@@ -3924,9 +3944,6 @@ def test_persistence_of_task(setup_postgresql_db):
     another_task_db = DBSession.get(Task, id_)
     assert resources == [user1]
     assert another_task_db.resources == resources
-
-    assert version3.inputs == []
-    assert version4.inputs == []
 
 
 def test_persistence_of_review(setup_postgresql_db):
@@ -4413,6 +4430,27 @@ def test_persistence_of_vacation(setup_postgresql_db):
 
 def test_persistence_of_version(setup_postgresql_db):
     """Persistence of Version instances."""
+    # create a FilenameTemplate for Tasks
+    test_filename_template = FilenameTemplate(
+        name="Task Filename Template",
+        target_entity_type="Task",
+        path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
+        "{{parent_task.nice_name}}/{%- endfor -%}",
+        filename="{{version.nice_name}}"
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}',
+    )
+    DBSession.add(test_filename_template)
+    DBSession.commit()
+
+    # create a Structure
+    test_structure = Structure(
+        name="Project Structure",
+        templates=[test_filename_template],
+    )
+    DBSession.add(test_structure)
+    DBSession.commit()
+
     # create a project
     test_project = Project(
         name="Test Project",
@@ -4424,8 +4462,10 @@ def test_persistence_of_version(setup_postgresql_db):
             linux_path="/mnt/M/",
             macos_path="/Users/Volumes/M/",
         ),
+        structure=test_structure,
     )
     DBSession.add(test_project)
+    DBSession.commit()
 
     # create a task
     test_task = Task(
@@ -4465,9 +4505,7 @@ def test_persistence_of_version(setup_postgresql_db):
         revision_number=12,
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v002.ma",
-        inputs=[test_version],
     )
-    assert test_version_2.inputs == [test_version]
     DBSession.add(test_version_2)
     DBSession.commit()
     assert test_version_2.revision_number == 12
@@ -4479,11 +4517,10 @@ def test_persistence_of_version(setup_postgresql_db):
     name = test_version.name
     nice_name = test_version.nice_name
     notes = test_version.notes
-    outputs = test_version.outputs
+    files = test_version.files
     is_published = test_version.is_published
-    full_path = test_version.full_path
+    full_path = test_version.generate_path()
     tags = test_version.tags
-    #        tickets = test_version.tickets
     type_ = test_version.type
     updated_by = test_version.updated_by
     revision_number = test_version.revision_number
@@ -4504,9 +4541,9 @@ def test_persistence_of_version(setup_postgresql_db):
     assert test_version_db.name == name
     assert test_version_db.nice_name == nice_name
     assert test_version_db.notes == notes
-    assert test_version_db.outputs == outputs
+    assert test_version_db.files == files
     assert test_version_db.is_published == is_published
-    assert test_version_db.full_path == full_path
+    assert test_version_db.generate_path() == full_path
     assert test_version_db.tags == tags
     assert test_version_db.type == type_
     assert test_version_db.updated_by == updated_by
@@ -4519,9 +4556,6 @@ def test_persistence_of_version(setup_postgresql_db):
     DBSession.delete(test_version_db)
     DBSession.commit()
 
-    assert test_version_2.inputs == []
-
-    # create a new version append it to version_2.inputs and then delete
     # version_2
     test_version_3 = Version(
         name="version for task modeling",
@@ -4529,8 +4563,6 @@ def test_persistence_of_version(setup_postgresql_db):
         full_path="M:/Shows/Proj1/Seq1/Shots/SH001/Lighting"
         "/Proj1_Seq1_Sh001_MAIN_Lighting_v003.ma",
     )
-    test_version_2.inputs.append(test_version_3)
-    assert test_version_2.inputs == [test_version_3]
     DBSession.add(test_version_3)
     DBSession.commit()
 

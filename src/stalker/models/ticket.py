@@ -305,8 +305,8 @@ class Ticket(Entity, StatusMixin):
         """
         if not isinstance(related_ticket, Ticket):
             raise TypeError(
-                "{}.related_ticket attribute should be a list of other "
-                "stalker.models.ticket.Ticket instances, not {}: '{}'".format(
+                "{}.related_ticket should only contain instances of "
+                "stalker.models.ticket.Ticket, not {}: '{}'".format(
                     self.__class__.__name__,
                     related_ticket.__class__.__name__,
                     related_ticket,

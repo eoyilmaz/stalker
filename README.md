@@ -66,10 +66,21 @@ Let's say that you want to query all the Shot Lighting tasks where a specific
 asset is referenced:
 
 ```python
-from stalker import Asset, Shot, Version
+from stalker import Asset, File, Shot, Version
 
 my_asset = Asset.query.filter_by(name="My Asset").first()
-refs = Version.query.filter_by(name="Lighting").filter(Version.inputs.contains(my_asset)).all()
+# Let's assume we have multiple Versions created for this Asset already
+my_asset_version = my_asset.versions[0]
+# get a file from that version
+my_asset_version_file = my_asset_version.files[0]
+# now get any other Lighting Versions that is referencing this file
+refs = (
+    Version.query
+        .join(File, Version.files)
+        .filter(Version.name=="Lighting")
+        .filter(File.references.contains(my_asset_version_file))
+        .all()
+)
 ```
 
 Let's say you want to get all the tasks assigned to you in a specific Project:

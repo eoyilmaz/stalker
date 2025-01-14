@@ -10,6 +10,7 @@ DDL
 DEFERRABLE
 DFS
 DREV
+expandvars
 fetchall
 FilenameTemplates
 formatter
@@ -21,6 +22,7 @@ mixin
 Mixins
 myapp
 mymodel
+normpath
 nullable
 num
 OH
