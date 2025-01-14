@@ -9,6 +9,8 @@ The second project uses a more traditional folder structure where every
 Task/Asset/Shot/Sequence has its own folder and the Task hierarchy is directly
 reflected to folder hierarchy.
 """
+import os
+
 import stalker.db.setup
 from stalker import (
     db,
@@ -86,18 +88,16 @@ db.DBSession.add_all([t1, t2, t3])  # this is enough to store the rest
 
 # lets create a Maya file for the Model task
 t2_v1 = Version(task=t1)
-t2_v1.update_paths()  # for now this is needed to render the template, but will
-# remove it later on
-t2_v1.extension = ".ma"  # set the extension for maya
+# set the extension for maya
+path1 = t2_v1.generate_path(extension=".ma")  # for now this is needed to render the template, but will
 
 # lets create a new version for Lighting
 t3_v1 = Version(task=t3)
-t3_v1.update_paths()
-t3_v1.extension = ".ma"
+path2 = t3_v1.generate_path(extension=".ma")
 
 # you should see that all are in the same folder
-print(t2_v1.absolute_full_path)
-print(t3_v1.absolute_full_path)
+print(os.path.expandvars(path1))
+print(os.path.expandvars(path2))
 
 #
 # Lets create a second Project that use some other folder structure
@@ -164,7 +164,7 @@ db.DBSession.add(shot1)  # this should be enough to add the rest
 
 # now create new maya files for them
 comp_v1 = Version(task=comp, variant_name="Test")
-comp_v1.update_paths()
-comp_v1.extension = ".ma"
+path = comp_v1.generate_path(extension=".ma")
 
-print(comp_v1.absolute_full_path)  # as you see it is in a proper shot folder
+# as you see it is in a proper shot folder
+print(os.path.expandvars(path))
