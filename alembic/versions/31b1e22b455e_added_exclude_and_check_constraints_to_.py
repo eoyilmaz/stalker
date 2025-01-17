@@ -22,97 +22,95 @@ def upgrade():
     # First cleanup TimeLogs table
     logger.info("Removing duplicate TimeLog entries")
     op.execute(
-        """
--- first remove direct duplicates
-with cte as (
-    select
-        row_number() over (partition by resource_id, start) as rn,
-        id,
-        start,
-        "end",
-        resource_id
-    from "TimeLogs"
-    where exists (
-        select
-            1
-        from "TimeLogs" as tlogs
-        where tlogs.start <= "TimeLogs".start
-            and "TimeLogs".start < tlogs.end
-            and tlogs.id != "TimeLogs".id
-            and tlogs.resource_id = "TimeLogs".resource_id
-    )
-    order by start
-) delete from "TimeLogs"
-where "TimeLogs".id in (select id from cte where rn > 1);"""
+        """-- first remove direct duplicates
+        with cte as (
+            select
+                row_number() over (partition by resource_id, start) as rn,
+                id,
+                start,
+                "end",
+                resource_id
+            from "TimeLogs"
+            where exists (
+                select
+                    1
+                from "TimeLogs" as tlogs
+                where tlogs.start <= "TimeLogs".start
+                    and "TimeLogs".start < tlogs.end
+                    and tlogs.id != "TimeLogs".id
+                    and tlogs.resource_id = "TimeLogs".resource_id
+            )
+            order by start
+        ) delete from "TimeLogs"
+        where "TimeLogs".id in (select id from cte where rn > 1);"""
     )
 
     logger.info(
         "Removing contained TimeLog entries (TimeLogs surrounded by other " "TimeLogs"
     )
     op.execute(
-        """
--- remove any contained (TimeLogs surrounded by other TimeLogs) TimeLogs
-with cte as (
-    select
-        "TimeLogs".id,
-        "TimeLogs".start,
-        "TimeLogs".end,
-        "TimeLogs".resource_id
-    from "TimeLogs"
-    join "TimeLogs" as tlogs on
-        "TimeLogs".start > tlogs.start and "TimeLogs".start < tlogs.end
-        and "TimeLogs".end > tlogs.start and "TimeLogs".end < tlogs.end
-        and "TimeLogs".resource_id = tlogs.resource_id
-) delete from "TimeLogs"
-where "TimeLogs".id in (select id from cte);"""
+        """-- remove any contained (TimeLogs surrounded by other TimeLogs) TimeLogs
+        with cte as (
+            select
+                "TimeLogs".id,
+                "TimeLogs".start,
+                "TimeLogs".end,
+                "TimeLogs".resource_id
+            from "TimeLogs"
+            join "TimeLogs" as tlogs on
+                "TimeLogs".start > tlogs.start and "TimeLogs".start < tlogs.end
+                and "TimeLogs".end > tlogs.start and "TimeLogs".end < tlogs.end
+                and "TimeLogs".resource_id = tlogs.resource_id
+        ) delete from "TimeLogs"
+        where "TimeLogs".id in (select id from cte);"""
     )
 
     logger.info("Trimming residual overlapping TimeLog.end values")
     op.execute(
+        """-- then trim the end dates of the TimeLogs that are still overlapping with others
+        update "TimeLogs"
+        set "end" = (
+            select
+                tlogs.start
+            from "TimeLogs" as tlogs
+            where "TimeLogs".start < tlogs.start and "TimeLogs".end > tlogs.start
+                and "TimeLogs".resource_id = tlogs.resource_id
+            limit 1
+        )
+        where "TimeLogs".end - "TimeLogs".start > interval '10 min'
+            and exists(
+                select
+                    1
+                from "TimeLogs" as tlogs
+                where "TimeLogs".start < tlogs.start and "TimeLogs".end > tlogs.start
+                    and "TimeLogs".resource_id = tlogs.resource_id
+            );
         """
--- then trim the end dates of the TimeLogs that are still overlapping with others
-update "TimeLogs"
-set "end" = (
-    select
-        tlogs.start
-    from "TimeLogs" as tlogs
-    where "TimeLogs".start < tlogs.start and "TimeLogs".end > tlogs.start
-        and "TimeLogs".resource_id = tlogs.resource_id
-    limit 1
-)
-where "TimeLogs".end - "TimeLogs".start > interval '10 min'
-    and exists(
-        select
-            1
-        from "TimeLogs" as tlogs
-        where "TimeLogs".start < tlogs.start and "TimeLogs".end > tlogs.start
-            and "TimeLogs".resource_id = tlogs.resource_id
-    );"""
     )
 
     logger.info("Trimming residual overlapping TimeLog.start values")
     op.execute(
+        """-- then trim the start dates of the TimeLogs that are still overlapping with
+        -- others (there may be 10 min TimeLogs left in the previous query)
+        update "TimeLogs"
+        set start = (
+            select
+                tlogs.end
+            from "TimeLogs" as tlogs
+            where "TimeLogs".start > tlogs.start and "TimeLogs".start < tlogs.end
+                and "TimeLogs".resource_id = tlogs.resource_id
+            limit 1
+        )
+        where "TimeLogs".end - "TimeLogs".start > interval '10 min'
+            and exists(
+                select
+                    1
+                from "TimeLogs" as tlogs
+                where "TimeLogs".start > tlogs.start and "TimeLogs".start < tlogs.end
+                    and "TimeLogs".resource_id = tlogs.resource_id
+                limit 1
+            );
         """
--- then trim the start dates of the TimeLogs that are still overlapping with
--- others (there may be 10 min TimeLogs left in the previous query)
-update "TimeLogs"
-set start = (
-    select
-        tlogs.end
-    from "TimeLogs" as tlogs
-    where "TimeLogs".start > tlogs.start and "TimeLogs".start < tlogs.end
-        and "TimeLogs".resource_id = tlogs.resource_id
-    limit 1
-)
-where "TimeLogs".end - "TimeLogs".start > interval '10 min'
-    and exists(
-        select
-            1
-        from "TimeLogs" as tlogs
-        where "TimeLogs".start > tlogs.start and "TimeLogs".start < tlogs.end
-            and "TimeLogs".resource_id = tlogs.resource_id
-        limit 1
-    );"""
     )
 
     logger.info("Adding CheckConstraint(end > start) to TimeLogs table")

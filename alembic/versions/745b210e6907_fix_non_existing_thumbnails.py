@@ -16,17 +16,14 @@ def upgrade():
     """Fix SimpleEntities with none-existing thumbnail_id's."""
     op.execute(
         """
-        update
-          "SimpleEntities"
-        set thumbnail_id = NULL
-        where
-          "SimpleEntities".thumbnail_id is not NULL
-          and not exists(
-            select
-              thum.id
-            from "SimpleEntities" as thum
-            where thum.id = "SimpleEntities".thumbnail_id
-          )
+        UPDATE "SimpleEntities" SET thumbnail_id = NULL
+        WHERE "SimpleEntities".thumbnail_id is not NULL
+            and not exists(
+                select
+                    thum.id
+                from "SimpleEntities" as thum
+                where thum.id = "SimpleEntities".thumbnail_id
+            )
         """
     )
 

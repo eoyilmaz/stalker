@@ -46,14 +46,13 @@ def downgrade():
     # before dropping Project_Repositories, carry all the data back,
     # note that only the first repository found per project will be
     # restored to the Project.repository_id column
-    op.execute(
-        'update "Projects" '
-        "    set repository_id = ("
-        "        select "
-        "            repo_id"
-        '        from "Project_Repositories" '
-        '        where project_id = "Projects".id limit 1'
-        "    )"
+    op.execute("""
+        UPDATE "Projects" SET repository_id = (
+            SELECT
+                repo_id
+            FROM "Project_Repositories"
+            WHERE project_id = "Projects".id LIMIT 1
+        )"""
     )
 
     op.drop_table("Project_Repositories")

@@ -157,14 +157,7 @@ def upgrade():
         sa.Column("dependency_target", task_dependency_target_enum, nullable=True),
     )
     # fill data
-    op.execute(
-        """
-        UPDATE
-           "Task_Dependencies"
-        SET
-            dependency_target = 'onend'
-    """
-    )
+    op.execute("""UPDATE "Task_Dependencies" SET dependency_target = 'onend'""")
 
     # alter column to be nullable false
     op.alter_column(
@@ -182,14 +175,7 @@ def upgrade():
         "Task_Dependencies", sa.Column("gap_constraint", sa.Integer(), nullable=True)
     )
     # fill data
-    op.execute(
-        """
-        UPDATE
-           "Task_Dependencies"
-        SET
-            gap_constraint = 0
-    """
-    )
+    op.execute("""UPDATE "Task_Dependencies" SET gap_constraint = 0 """)
 
     # alter column to be nullable false
     op.alter_column(
@@ -204,14 +190,7 @@ def upgrade():
         sa.Column("gap_model", task_dependency_gap_model, nullable=True),
     )
     # fill data
-    op.execute(
-        """
-        UPDATE
-           "Task_Dependencies"
-        SET
-            gap_model = 'length'
-    """
-    )
+    op.execute("""UPDATE "Task_Dependencies" SET gap_model = 'length'""")
 
     # alter column to be nullable false
     op.alter_column(

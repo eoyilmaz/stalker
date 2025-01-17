@@ -127,7 +127,7 @@ class SimpleEntity(Base):
     )
 
     created_by_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("Users.id", use_alter=True, name="xc"),
+        ForeignKey("Users.id", use_alter=True, name="SimpleEntities_created_by_id_fkey"),
         doc="The id of the :class:`.User` who has created this entity.",
     )
 
@@ -139,7 +139,7 @@ class SimpleEntity(Base):
 
     updated_by_id: Mapped[Optional[int]] = mapped_column(
         "updated_by_id",
-        ForeignKey("Users.id", use_alter=True, name="xu"),
+        ForeignKey("Users.id", use_alter=True, name="SimpleEntities_updated_by_id_fkey"),
         nullable=True,
         doc="The id of the :class:`.User` who has updated this entity.",
     )
@@ -166,7 +166,7 @@ class SimpleEntity(Base):
     )
 
     type_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("Types.id", use_alter=True, name="y"),
+        ForeignKey("Types.id", use_alter=True, name="SimpleEntities_type_id_fkey"),
         doc="""The id of the :class:`.Type` of this entity. Mainly used by
         SQLAlchemy to create a Many-to-One relates between SimpleEntities and
         Types.
@@ -198,7 +198,11 @@ class SimpleEntity(Base):
     )
 
     thumbnail_id: Mapped[Optional[int]] = mapped_column(
-        ForeignKey("Files.id", use_alter=True, name="z")
+        ForeignKey(
+            "Files.id",
+            use_alter=True,
+            name="SimpleEntities_thumbnail_id_fkey",
+        )
     )
 
     thumbnail: Mapped[Optional["File"]] = relationship(
