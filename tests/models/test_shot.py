@@ -8,7 +8,7 @@ from stalker import (
     Asset,
     Entity,
     ImageFormat,
-    Link,
+    File,
     Project,
     Repository,
     Scene,
@@ -1144,23 +1144,23 @@ def test_inequality(setup_shot_db_tests):
 def test_ReferenceMixin_initialization(setup_shot_db_tests):
     """ReferenceMixin part is initialized correctly."""
     data = setup_shot_db_tests
-    link_type_1 = Type(name="Image", code="image", target_entity_type="Link")
+    file_type_1 = Type(name="Image", code="image", target_entity_type="File")
 
-    link1 = Link(
+    file1 = File(
         name="Artwork 1",
         full_path="/mnt/M/JOBs/TEST_PROJECT",
         filename="a.jpg",
-        type=link_type_1,
+        type=file_type_1,
     )
 
-    link2 = Link(
+    file2 = File(
         name="Artwork 2",
         full_path="/mnt/M/JOBs/TEST_PROJECT",
         filename="b.jbg",
-        type=link_type_1,
+        type=file_type_1,
     )
 
-    references = [link1, link2]
+    references = [file1, file2]
 
     data["kwargs"]["code"] = "SH12314"
     data["kwargs"]["references"] = references

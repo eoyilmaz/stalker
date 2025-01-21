@@ -34,7 +34,6 @@ class ScheduleConstraint(IntEnum):
 
         Args:
             constraint (Union[str, ScheduleConstraint]): Input `constraint` value.
-            quiet (bool): To raise any exception for invalid value.
 
         Raises:
             TypeError: Input value type is invalid.
@@ -95,12 +94,15 @@ class ScheduleConstraintDecorator(TypeDecorator):
         # just return the value
         return value.value
 
-    def process_result_value(self, value, dialect):
+    def process_result_value(self, value: int, dialect: str) -> ScheduleConstraint:
         """Return a ScheduleConstraint.
 
         Args:
             value (int): The integer value.
             dialect (str): The name of the dialect.
+
+        Returns:
+            ScheduleConstraint: ScheduleConstraint created from the DB data.
         """
         return ScheduleConstraint.to_constraint(value)
 
@@ -188,6 +190,9 @@ class TimeUnitDecorator(TypeDecorator):
         Args:
             value (str): The string value to convert to TimeUnit.
             dialect (str): The name of the dialect.
+
+        Returns:
+            TimeUnit: The TimeUnit which is created from the DB data.
         """
         return TimeUnit.to_unit(value)
 
@@ -251,7 +256,7 @@ class ScheduleModel(Enum):
 class ScheduleModelDecorator(TypeDecorator):
     """Store ScheduleModel as a str and restore as ScheduleModel."""
 
-    impl = saEnum(*[m.value for m in ScheduleModel], name=f"ScheduleModel")
+    impl = saEnum(*[m.value for m in ScheduleModel], name="ScheduleModel")
 
     def process_bind_param(self, value, dialect) -> str:
         """Return the str value of the ScheduleModel.
@@ -272,6 +277,9 @@ class ScheduleModelDecorator(TypeDecorator):
         Args:
             value (str): The string value to convert to ScheduleModel.
             dialect (str): The name of the dialect.
+
+        Returns:
+            ScheduleModel: The ScheduleModel created from the DB data.
         """
         return ScheduleModel.to_model(value)
 
@@ -355,6 +363,9 @@ class DependencyTargetDecorator(TypeDecorator):
         Args:
             value (str): The string value to convert to DependencyTarget.
             dialect (str): The name of the dialect.
+
+        Returns:
+            DependencyTarget: The DependencyTarget created from str.
         """
         return DependencyTarget.to_target(value)
 

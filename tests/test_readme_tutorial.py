@@ -117,18 +117,18 @@ def test_readme_tutorial_code(setup_sqlite3):
     DBSession.save([animation, lighting])
 
     new_version = Version(task=animation)
-    new_version.update_paths()  # to render the naming convention template
+    new_version.generate_path()  # to render the naming convention template
     new_version.extension = ".ma"  # let's say that we have created under Maya
     DBSession.save(new_version)
 
-    assert new_version.absolute_full_path == (
-        f"{repo.path}TP/SH001/Animation/SH001_Animation_v001.ma"
-    )
+    path = new_version.generate_path(extension=".ma")
+    assert str(path) == f"{repo.path}TP/SH001/Animation/SH001_Animation_v001.ma"
     assert new_version.version_number == 1
 
     new_version2 = Version(task=animation)
-    new_version2.update_paths()  # to render the naming convention template
-    new_version2.extension = ".ma"  # let's say that we have created under Maya
     DBSession.save(new_version2)
 
+    # to render the naming convention template
+    # let's say that we have created under Maya
+    # path = new_version2.generate_path(extension = ".ma")
     assert new_version2.version_number == 2

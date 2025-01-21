@@ -5,7 +5,7 @@ import pytest
 
 from stalker import (
     Entity,
-    Link,
+    File,
     Project,
     Repository,
     Sequence,
@@ -123,7 +123,8 @@ def test_shots_attribute_is_a_list_of_other_objects(setup_sequence_db_tests):
         data["test_sequence"].shots = test_value
 
     assert str(cm.value) == (
-        "Sequence.shots should be all stalker.models.shot.Shot instances, not int: '1'"
+        "Sequence.shots should only contain instances of "
+        "stalker.models.shot.Shot, not int: '1'"
     )
 
 
@@ -137,8 +138,8 @@ def test_shots_attribute_elements_tried_to_be_set_to_non_Shot_object(
         data["test_sequence"].shots.append(test_value)
 
     assert str(cm.value) == (
-        "Sequence.shots should be all stalker.models.shot.Shot instances, "
-        "not str: 'a string'"
+        "Sequence.shots should only contain instances of "
+        "stalker.models.shot.Shot, not str: 'a string'"
     )
 
 
@@ -175,21 +176,21 @@ def test_inequality(setup_sequence_db_tests):
 def test_reference_mixin_initialization(setup_sequence_db_tests):
     """ReferenceMixin part is initialized correctly."""
     data = setup_sequence_db_tests
-    link_type_1 = Type(name="Image", code="image", target_entity_type="Link")
+    file_type_1 = Type(name="Image", code="image", target_entity_type="File")
 
-    link1 = Link(
+    file1 = File(
         name="Artwork 1",
         full_path="/mnt/M/JOBs/TEST_PROJECT",
         filename="a.jpg",
-        type=link_type_1,
+        type=file_type_1,
     )
-    link2 = Link(
+    file2 = File(
         name="Artwork 2",
         full_path="/mnt/M/JOBs/TEST_PROJECT",
         filename="b.jbg",
-        type=link_type_1,
+        type=file_type_1,
     )
-    references = [link1, link2]
+    references = [file1, file2]
     data["kwargs"]["references"] = references
     new_sequence = Sequence(**data["kwargs"])
     assert new_sequence.references == references

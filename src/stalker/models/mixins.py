@@ -58,7 +58,7 @@ if TYPE_CHECKING:  # pragma: no cover
     from stalker.models.auth import Permission
     from stalker.models.project import Project
     from stalker.models.status import Status, StatusList
-    from stalker.models.link import Link
+    from stalker.models.file import File
     from stalker.models.studio import WorkingHours
 
 
@@ -531,9 +531,6 @@ class StatusMixin(object):
             status = self.status_list[status]
 
         # check if the given status is in the status_list
-        # logger.debug(f'self.status_list: {self.status_list}')
-        # logger.debug(f'given status: {status}')
-
         if status not in self.status_list:
             raise ValueError(
                 f"The given Status instance for {self.__class__.__name__}.status is "
@@ -1042,20 +1039,20 @@ class ProjectMixin(object):
 class ReferenceMixin(object):
     """Adds reference capabilities to the mixed in class.
 
-    References are :class:`stalker.models.link.Link` instances or anything
+    References are :class:`stalker.models.file.File` instances or anything
     derived from it, which adds information to the attached objects. The aim of
     the References are generally to give more info to direct the evolution of
     the object.
 
     Args:
-        references (Link): A list of :class:`.Link` instances.
+        references (File): A list of :class:`.File` instances.
     """
 
     # add this lines for Sphinx
     #    __tablename__ = "ReferenceMixins"
 
     def __init__(
-        self, references: Optional[List["Link"]] = None, **kwargs: Dict[str, Any]
+        self, references: Optional[List["File"]] = None, **kwargs: Dict[str, Any]
     ) -> None:
         if references is None:
             references = []
@@ -1063,49 +1060,57 @@ class ReferenceMixin(object):
         self.references = references
 
     @declared_attr
-    def references(cls) -> Mapped[Optional[List["Link"]]]:
+    def references(cls) -> Mapped[Optional[List["File"]]]:
         """Create the references attribute as a declared attribute.
 
         Returns:
             relationship: The relationship object related to the references attribute.
         """
+        primary_cls_name = f"{cls.__name__}"
+        secondary_cls_name = "Reference"
+        primary_cls_table_name = f"{cls.__tablename__}"
+        secondary_cls_table_name = "Files"
+        secondary_table_name = f"{cls.__name__}_References"
+
         # get secondary table
         secondary_table = create_secondary_table(
-            cls.__name__,
-            "Link",
-            cls.__tablename__,
-            "Links",
-            f"{cls.__name__}_References",
+            primary_cls_name=primary_cls_name,
+            secondary_cls_name=secondary_cls_name,
+            primary_cls_table_name=primary_cls_table_name,
+            secondary_cls_table_name=secondary_cls_table_name,
+            secondary_table_name=secondary_table_name,
         )
         # return the relationship
         return relationship(
             secondary=secondary_table,
-            doc="""A list of :class:`.Link` instances given as a reference for
+            primaryjoin=f"{primary_cls_table_name}.c.id=={secondary_table_name}.c.{primary_cls_name.lower()}_id",
+            secondaryjoin=f"{secondary_table_name}.c.{secondary_cls_name.lower()}_id=={secondary_cls_table_name}.c.id",
+            doc="""A list of :class:`.File` instances given as a reference for
             this entity.
             """,
         )
 
     @validates("references")
-    def _validate_references(self, key: str, reference: "Link") -> "Link":
+    def _validate_references(self, key: str, reference: "File") -> "File":
         """Validate the given reference.
 
         Args:
             key (str): The name of the validated column.
-            reference (Link): The reference value to be validated.
+            reference (File): The reference value to be validated.
 
         Raises:
-            TypeError: If the reference is not a Link instance.
+            TypeError: If the reference is not a File instance.
 
         Returns:
-            Link: The validated reference value.
+            File: The validated reference value.
         """
-        from stalker.models.link import Link
+        from stalker.models.file import File
 
-        # all the items should be instance of stalker.models.entity.Entity
-        if not isinstance(reference, Link):
+        # all items should be instance of stalker.models.entity.Entity
+        if not isinstance(reference, File):
             raise TypeError(
-                f"All the items in the {self.__class__.__name__}.references should "
-                "be stalker.models.link.Link instances, "
+                f"{self.__class__.__name__}.references should only contain "
+                "instances of stalker.models.file.File, "
                 f"not {reference.__class__.__name__}: '{reference}'"
             )
         return reference
@@ -1499,7 +1504,7 @@ class ScheduleMixin(object):
         self,
         key: str,
         schedule_constraint: Union[None, int, str],
-    ) -> int:
+    ) -> ScheduleConstraint:
         """Validate the given schedule_constraint value.
 
         Args:
@@ -1930,8 +1935,8 @@ class DAGMixin(object):
         """
         if not isinstance(child, self.__class__):
             raise TypeError(
-                "{cls}.children should be a list of {cls} (or derivative) "
-                "instances, not {child_cls}: '{child}'".format(
+                "{cls}.children should only contain instances of {cls} "
+                "(or derivative), not {child_cls}: '{child}'".format(
                     cls=self.__class__.__name__,
                     child_cls=child.__class__.__name__,
                     child=child,

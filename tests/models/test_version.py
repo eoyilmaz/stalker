@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import copy
 import logging
+from pathlib import Path
 import sys
 
 import pytest
@@ -8,7 +9,7 @@ import pytest
 from stalker import (
     Asset,
     FilenameTemplate,
-    Link,
+    File,
     Project,
     Repository,
     Scene,
@@ -20,12 +21,14 @@ from stalker import (
     Task,
     Type,
     User,
+    Variant,
     Version,
     defaults,
     log,
 )
 from stalker.db.session import DBSession
 from stalker.exceptions import CircularDependencyError
+from stalker.models.entity import Entity
 
 from tests.utils import PlatformPatcher
 
@@ -74,8 +77,23 @@ def setup_version_db_tests(setup_postgresql_db):
     )
     DBSession.add(data["test_project_type"])
 
+    # create a filename template for Variants
+    data["test_filename_template"] = FilenameTemplate(
+        name="Variant Filename Template",
+        target_entity_type="Variant",
+        path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
+        "{{parent_task.nice_name}}/{%- endfor -%}",
+        filename="{{version.nice_name}}"
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}'
+        "{{extension}}",
+    )
+    DBSession.add(data["test_filename_template"])
+    DBSession.commit()
     # create a structure
-    data["test_structure"] = Structure(name="Test Project Structure")
+    data["test_structure"] = Structure(
+        name="Test Project Structure", templates=[data["test_filename_template"]]
+    )
     DBSession.add(data["test_structure"])
 
     # create a project
@@ -118,47 +136,64 @@ def setup_version_db_tests(setup_postgresql_db):
     DBSession.commit()
 
     # create a group of Tasks for the shot
-    data["test_task1"] = Task(name="Task1", parent=data["test_shot1"])
+    data["test_task1"] = Task(name="FX", parent=data["test_shot1"])
     DBSession.add(data["test_task1"])
     DBSession.commit()
 
-    # a Link for the input file
-    data["test_input_link1"] = Link(
-        name="Input Link 1",
+    data["test_variant1"] = Variant(name="Main", parent=data["test_task1"])
+    DBSession.add(data["test_variant1"])
+    DBSession.commit()
+
+    # a File for the files attribute
+    data["test_file1"] = File(
+        name="File 1",
+        full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
+        "SH001_FX_Main_r01_v001.ma",
+    )
+    DBSession.add(data["test_file1"])
+
+    data["test_file2"] = File(
+        name="File 2",
+        full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
+        "SH001_FX_Main_r01_v002.ma",
+    )
+    DBSession.add(data["test_file2"])
+
+    # a File for the input file
+    data["test_input_file1"] = File(
+        name="Input File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
-    DBSession.add(data["test_input_link1"])
+    DBSession.add(data["test_input_file1"])
 
-    data["test_input_link2"] = Link(
-        name="Input Link 2",
+    data["test_input_file2"] = File(
+        name="Input File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
-    DBSession.add(data["test_input_link2"])
+    DBSession.add(data["test_input_file2"])
 
-    # a Link for the output file
-    data["test_output_link1"] = Link(
-        name="Output Link 1",
+    # a File for the output file
+    data["test_output_file1"] = File(
+        name="Output File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
-    DBSession.add(data["test_output_link1"])
+    DBSession.add(data["test_output_file1"])
 
-    data["test_output_link2"] = Link(
-        name="Output Link 2",
+    data["test_output_file2"] = File(
+        name="Output File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
-    DBSession.add(data["test_output_link2"])
+    DBSession.add(data["test_output_file2"])
     DBSession.commit()
 
     # now create a version for the Task
     data["kwargs"] = {
-        "inputs": [data["test_input_link1"], data["test_input_link2"]],
-        "outputs": [data["test_output_link1"], data["test_output_link2"]],
-        "task": data["test_task1"],
-        "created_with": "Houdini",
+        "files": [data["test_file1"], data["test_file2"]],
+        "task": data["test_variant1"],
     }
 
     # and the Version
@@ -176,6 +211,11 @@ def setup_version_db_tests(setup_postgresql_db):
 def test___auto_name__class_attribute_is_set_to_true():
     """__auto_name__ class attribute is set to True for Version class."""
     assert Version.__auto_name__ is True
+
+
+def test_version_derives_from_entity():
+    """Version class derives from Entity."""
+    assert Entity == Version.__mro__[1]
 
 
 def test_task_argument_is_skipped(setup_version_db_tests):
@@ -211,7 +251,8 @@ def test_task_argument_is_not_a_task(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
     assert str(cm.value) == (
-        "Version.task should be a stalker.models.task.Task instance, not str: 'a task'"
+        "Version.task should be a Task, Asset, Shot, Scene, Sequence or Variant "
+        "instance, not str: 'a task'"
     )
 
 
@@ -221,15 +262,16 @@ def test_task_attribute_is_not_a_task(setup_version_db_tests):
     with pytest.raises(TypeError) as cm:
         data["test_version"].task = "a task"
     assert str(cm.value) == (
-        "Version.task should be a stalker.models.task.Task instance, not str: 'a task'"
+        "Version.task should be a Task, Asset, Shot, Scene, Sequence or Variant "
+        "instance, not str: 'a task'"
     )
 
 
 def test_task_attribute_is_working_as_expected(setup_version_db_tests):
     """task attribute is working as expected."""
     data = setup_version_db_tests
-    new_task = Task(
-        name="New Test Task",
+    new_task = Variant(
+        name="New Test Variant",
         parent=data["test_shot1"],
     )
     DBSession.add(new_task)
@@ -558,132 +600,68 @@ def test_version_number_attribute_is_set_to_a_lower_then_it_should_be(
     assert new_version.version_number == 100
 
 
-def test_inputs_argument_is_skipped(setup_version_db_tests):
-    """inputs attribute an empty list if the inputs argument is skipped."""
+def test_files_argument_is_skipped(setup_version_db_tests):
+    """files attribute an empty list if the files argument is skipped."""
     data = setup_version_db_tests
-    data["kwargs"].pop("inputs")
+    data["kwargs"].pop("files")
     new_version = Version(**data["kwargs"])
-    assert new_version.inputs == []
+    assert new_version.files == []
 
 
-def test_inputs_argument_is_none(setup_version_db_tests):
-    """inputs attribute an empty list if the inputs argument is None."""
+def test_files_argument_is_none(setup_version_db_tests):
+    """files attribute an empty list if the files argument is None."""
     data = setup_version_db_tests
-    data["kwargs"]["inputs"] = None
+    data["kwargs"]["files"] = None
     new_version = Version(**data["kwargs"])
-    assert new_version.inputs == []
+    assert new_version.files == []
 
 
-def test_inputs_attribute_is_none(setup_version_db_tests):
-    """TypeError raised if the inputs argument is set to None."""
+def test_files_attribute_is_none(setup_version_db_tests):
+    """TypeError raised if the files argument is set to None."""
     data = setup_version_db_tests
     with pytest.raises(TypeError) as cm:
-        data["test_version"].inputs = None
+        data["test_version"].files = None
     assert str(cm.value) == "Incompatible collection type: None is not list-like"
 
 
-def test_inputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the inputs attr is not a Link instance."""
+def test_files_argument_is_not_a_list_of_file_instances(setup_version_db_tests):
+    """TypeError raised if the files attr is not a list of File instances."""
     data = setup_version_db_tests
     test_value = [132, "231123"]
-    data["kwargs"]["inputs"] = test_value
+    data["kwargs"]["files"] = test_value
     with pytest.raises(TypeError) as cm:
         Version(**data["kwargs"])
 
     assert (
-        str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
+        str(cm.value) == "Version.files should only contain instances of "
+        "stalker.models.file.File, not int: '132'"
     )
 
 
-def test_inputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the inputs attr is set to something other than a Link."""
+def test_files_attribute_is_not_a_list_of_file_instances(setup_version_db_tests):
+    """TypeError raised if the files attr is set to something other than a File."""
     data = setup_version_db_tests
     test_value = [132, "231123"]
     with pytest.raises(TypeError) as cm:
-        data["test_version"].inputs = test_value
+        data["test_version"].files = test_value
 
     assert (
-        str(cm.value) == "All elements in Version.inputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
+        str(cm.value) == "Version.files should only contain instances of "
+        "stalker.models.file.File, not int: '132'"
     )
 
 
-def test_inputs_attribute_is_working_as_expected(setup_version_db_tests):
-    """inputs attribute is working as expected."""
+def test_files_attribute_is_working_as_expected(setup_version_db_tests):
+    """files attribute is working as expected."""
     data = setup_version_db_tests
-    data["kwargs"].pop("inputs")
+    data["kwargs"].pop("files")
     new_version = Version(**data["kwargs"])
-    assert data["test_input_link1"] not in new_version.inputs
-    assert data["test_input_link2"] not in new_version.inputs
+    assert data["test_file1"] not in new_version.files
+    assert data["test_file2"] not in new_version.files
 
-    new_version.inputs = [data["test_input_link1"], data["test_input_link2"]]
-    assert data["test_input_link1"] in new_version.inputs
-    assert data["test_input_link2"] in new_version.inputs
-
-
-def test_outputs_argument_is_skipped(setup_version_db_tests):
-    """outputs attribute an empty list if the outputs argument is skipped."""
-    data = setup_version_db_tests
-    data["kwargs"].pop("outputs")
-    new_version = Version(**data["kwargs"])
-    assert new_version.outputs == []
-
-
-def test_outputs_argument_is_none(setup_version_db_tests):
-    """outputs attribute an empty list if the outputs argument is None."""
-    data = setup_version_db_tests
-    data["kwargs"]["outputs"] = None
-    new_version = Version(**data["kwargs"])
-    assert new_version.outputs == []
-
-
-def test_outputs_attribute_is_none(setup_version_db_tests):
-    """TypeError raised if the outputs argument is set to None."""
-    data = setup_version_db_tests
-    with pytest.raises(TypeError) as cm:
-        data["test_version"].outputs = None
-    assert str(cm.value) == "Incompatible collection type: None is not list-like"
-
-
-def test_outputs_argument_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the outputs attr is not a Link instance."""
-    data = setup_version_db_tests
-    test_value = [132, "231123"]
-    data["kwargs"]["outputs"] = test_value
-    with pytest.raises(TypeError) as cm:
-        Version(**data["kwargs"])
-
-    assert (
-        str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
-    )
-
-
-def test_outputs_attribute_is_not_a_list_of_link_instances(setup_version_db_tests):
-    """TypeError raised if the outputs attr is not a Link instance."""
-    data = setup_version_db_tests
-    test_value = [132, "231123"]
-    with pytest.raises(TypeError) as cm:
-        data["test_version"].outputs = test_value
-
-    assert (
-        str(cm.value) == "All elements in Version.outputs should be all "
-        "stalker.models.link.Link instances, not int: '132'"
-    )
-
-
-def test_outputs_attribute_is_working_as_expected(setup_version_db_tests):
-    """outputs attribute is working as expected."""
-    data = setup_version_db_tests
-    data["kwargs"].pop("outputs")
-    new_version = Version(**data["kwargs"])
-    assert data["test_output_link1"] not in new_version.outputs
-    assert data["test_output_link2"] not in new_version.outputs
-
-    new_version.outputs = [data["test_output_link1"], data["test_output_link2"]]
-    assert data["test_output_link1"] in new_version.outputs
-    assert data["test_output_link2"] in new_version.outputs
+    new_version.files = [data["test_file1"], data["test_file2"]]
+    assert data["test_file1"] in new_version.files
+    assert data["test_file2"] in new_version.files
 
 
 def test_is_published_attribute_is_false_by_default(setup_version_db_tests):
@@ -800,8 +778,8 @@ def test_parent_attribute_will_not_allow_circular_dependencies(setup_version_db_
         data["test_version"].parent = version1
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_v001 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
+        str(cm.value) == "<tp_SH001_FX_Main_v001 (Version)> (Version) and "
+        "<tp_SH001_FX_Main_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -824,8 +802,8 @@ def test_parent_attribute_will_not_allow_deeper_circular_dependencies(
         data["test_version"].parent = version2
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_v001 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
+        str(cm.value) == "<tp_SH001_FX_Main_v001 (Version)> (Version) and "
+        "<tp_SH001_FX_Main_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -857,8 +835,8 @@ def test_children_attribute_is_not_set_to_a_list_of_version_instances(
         data["test_version"].children = ["not a Version instance", 3]
 
     assert str(cm.value) == (
-        "Version.children should be a list of Version (or derivative) "
-        "instances, not str: 'not a Version instance'"
+        "Version.children should only contain instances of "
+        "Version (or derivative), not str: 'not a Version instance'"
     )
 
 
@@ -906,8 +884,8 @@ def test_children_attribute_will_not_allow_circular_dependencies(
         new_version1.children.append(new_version2)
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_v003 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
+        str(cm.value) == "<tp_SH001_FX_Main_v003 (Version)> (Version) and "
+        "<tp_SH001_FX_Main_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
@@ -936,132 +914,108 @@ def test_children_attribute_will_not_allow_deeper_circular_dependencies(
         new_version1.children.append(new_version3)
 
     assert (
-        str(cm.value) == "<tp_SH001_Task1_v004 (Version)> (Version) and "
-        "<tp_SH001_Task1_v002 (Version)> (Version) are in a "
+        str(cm.value) == "<tp_SH001_FX_Main_v004 (Version)> (Version) and "
+        "<tp_SH001_FX_Main_v002 (Version)> (Version) are in a "
         'circular dependency in their "children" attribute'
     )
 
 
-def test_update_paths_will_render_the_appropriate_template_from_the_related_project(
-    setup_version_db_tests,
-):
-    """update_paths method updates Version.full_path by rendering the related Project
-    FilenameTemplate.."""
+def test_generate_path_extension_can_be_skipped(setup_version_db_tests):
+    """generate_path() extension can be skipped."""
     data = setup_version_db_tests
-    # create a FilenameTemplate for Task instances
-
-    # A Template for Assets
-    # ......../Assets/{{asset.type.name}}/{{asset.nice_name}}/{{task.type.name}}/
-    #
-    # Project1/Assets/Character/Sero/Modeling/Sero_Modeling_Main_v001.ma
-    #
-    # + Project1
-    # |
-    # +-+ Assets (Task)
-    # | |
-    # | +-+ Characters
-    # |   |
-    # |   +-+ Sero (Asset)
-    # |     |
-    # |     +-> Version 1
-    # |     |
-    # |     +-+ Modeling (Task)
-    # |       |
-    # |       +-+ Body Modeling (Task)
-    # |         |
-    # |         +-+ Coarse Modeling (Task)
-    # |         | |
-    # |         | +-> Version 1 (Version)
-    # |         |
-    # |         +-+ Fine Modeling (Task)
-    # |           |
-    # |           +-> Version 1 (Version): Fine_Modeling_Main_v001.ma
-    # |                                  Assets/Characters/Sero/Modeling/Body_Modeling/Fine_Modeling/Fine_Modeling_Main_v001.ma
-    # |
-    # +-+ Shots (Task)
-    #   |
-    #   +-+ Shot 10 (Shot)
-    #   | |
-    #   | +-+ Layout (Task)
-    #   |   |
-    #   |   +-> Version 1 (Version): Layout_v001.ma
-    #   |                            Shots/Shot_1/Layout/Layout_Main_v001.ma
-    #   |
-    #   +-+ Shot 2 (Shot)
-    #     |
-    #     +-+ FX (Task)
-    #       |
-    #       +-> Version 1 (Version)
-
-    ft = FilenameTemplate(
-        name="Task Filename Template",
-        target_entity_type="Task",
-        path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
-        "{{parent_task.nice_name}}/{%- endfor -%}",
-        filename="{{task.nice_name}}"
-        '_v{{"%03d"|format(version.version_number)}}{{extension}}',
-    )
-    data["test_project"].structure.templates.append(ft)
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
     DBSession.commit()
-    new_version1.update_paths()
-    assert new_version1.path == "tp/SH001/Task1"
-
-    new_version1.extension = ".ma"
-    assert new_version1.filename == "Task1_v002.ma"
+    # extension can be skipped
+    _ = new_version1.generate_path()
 
 
-def test_update_paths_will_preserve_extension(setup_version_db_tests):
-    """update_paths method will preserve the extension."""
+def test_generate_path_extension_can_be_None(setup_version_db_tests):
+    """generate_path() extension can be None."""
     data = setup_version_db_tests
-    # create a FilenameTemplate for Task instances
-    ft = FilenameTemplate(
-        name="Task Filename Template",
-        target_entity_type="Task",
-        path="{{project.code}}/{%- for parent_task in parent_tasks -%}"
-        "{{parent_task.nice_name}}/{%- endfor -%}",
-        filename="{{task.nice_name}}"
-        '_v{{"%03d"|format(version.version_number)}}{{extension}}',
-    )
-    data["test_project"].structure.templates.append(ft)
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
     DBSession.commit()
-    new_version1.update_paths()
-    assert new_version1.path == "tp/SH001/Task1"
-
-    extension = ".ma"
-    new_version1.extension = extension
-    assert new_version1.filename == "Task1_v002.ma"
-
-    # rename the task and update the paths
-    data["test_task1"].name = "Task2"
-
-    # now call update_paths and expect the extension to be preserved
-    new_version1.update_paths()
-    assert new_version1.filename == "Task2_v002.ma"
-    assert new_version1.extension == extension
+    # extension can be skipped
+    path = new_version1.generate_path(extension=None)
+    assert path.suffix == ""
 
 
-def test_update_paths_will_raise_a_runtime_error_if_there_is_no_suitable_filename_template(
+def test_generate_path_extension_is_not_a_str(setup_version_db_tests):
+    """generate_path() extension is not a str will raise a TypeError."""
+    data = setup_version_db_tests
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+    # extension is not str raises TypeError
+    with pytest.raises(TypeError) as cm:
+        _ = new_version1.generate_path(extension=1234)
+
+    assert str(cm.value) == "extension should be a str, not int: '1234'"
+
+
+def test_generate_path_extension_can_be_an_empty_str(setup_version_db_tests):
+    """generate_path() extension can be an empty str."""
+    data = setup_version_db_tests
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+    # extension can be an empty string
+    path = new_version1.generate_path(extension="")
+    assert path.suffix == ""
+
+
+def test_generate_path_will_render_the_appropriate_template_from_the_related_project(
     setup_version_db_tests,
 ):
-    """update_paths method raises a RuntimeError if there is no suitable
+    """generate_path() generates a Path by rendering the related Project FilenameTemplate."""
+    data = setup_version_db_tests
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+    path = new_version1.generate_path()
+    assert isinstance(path, Path)
+    assert str(path.parent) == "tp/SH001/FX/Main"
+
+    path = path.with_suffix(".ma")
+    assert str(path.name) == "SH001_FX_Main_r01_v002.ma"
+
+
+def test_generate_path_will_use_the_given_extension(setup_version_db_tests):
+    """generate_path method uses the given extension."""
+    data = setup_version_db_tests
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+    path = new_version1.generate_path(extension=".ma")
+    assert isinstance(path, Path)
+    assert str(path.parent) == "tp/SH001/FX/Main"
+    assert str(path.name) == "SH001_FX_Main_r01_v002.ma"
+
+
+def test_generate_path_will_raise_a_runtime_error_if_there_is_no_suitable_filename_template(
+    setup_version_db_tests,
+):
+    """generate_path method raises a RuntimeError if there is no suitable
     FilenameTemplate instance found."""
     data = setup_version_db_tests
+    data["test_structure"].templates.remove(data["test_filename_template"])
+    DBSession.commit()
+
+    DBSession.delete(data["test_filename_template"])
+    DBSession.commit()
     data["kwargs"]["parent"] = None
     new_version1 = Version(**data["kwargs"])
     with pytest.raises(RuntimeError) as cm:
-        new_version1.update_paths()
+        new_version1.generate_path()
 
     assert (
         str(cm.value)
         == "There are no suitable FilenameTemplate (target_entity_type == "
-        "'Task') defined in the Structure of the related Project "
+        "'Variant') defined in the Structure of the related Project "
         "instance, please create a new "
         "stalker.models.template.FilenameTemplate instance with its "
-        "'target_entity_type' attribute is set to 'Task' and assign it "
+        "'target_entity_type' attribute is set to 'Variant' and add it "
         "to the `templates` attribute of the structure of the project"
     )
 
@@ -1156,53 +1110,146 @@ def test_template_variables_for_a_shot_version_contains_sequence(
 def test_absolute_path_works_as_expected(setup_version_db_tests):
     """absolute_path attribute works as expected."""
     data = setup_version_db_tests
-    data["patcher"].patch("Linux")
+    # data["patcher"].patch("Linux")
+
+    data["test_structure"].templates.remove(data["test_filename_template"])
+    DBSession.delete(data["test_filename_template"])
+    DBSession.commit()
+
     ft = FilenameTemplate(
         name="Task Filename Template",
-        target_entity_type="Task",
-        path="{{project.repositories[0].path}}/{{project.code}}/"
+        target_entity_type="Variant",
+        path="$REPO{{project.repositories[0].code}}/{{project.code}}/"
         "{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/"
         "{%- endfor -%}",
         filename="{{task.nice_name}}"
-        '_v{{"%03d"|format(version.version_number)}}{{extension}}',
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}',
     )
     data["test_project"].structure.templates.append(ft)
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
     DBSession.commit()
 
-    new_version1.update_paths()
-    new_version1.extension = ".ma"
-    assert new_version1.extension == ".ma"
-
-    assert new_version1.absolute_path == "/mnt/T/tp/SH001/Task1"
+    repo_path = data["test_repo"].path
+    assert new_version1.absolute_path == Path(f"{repo_path}/tp/SH001/FX/Main")
 
 
 def test_absolute_full_path_works_as_expected(setup_version_db_tests):
     """absolute_full_path attribute works as expected."""
     data = setup_version_db_tests
-    data["patcher"].patch("Linux")
+    # data["patcher"].patch("Linux")
+
+    data["test_structure"].templates.remove(data["test_filename_template"])
+    DBSession.delete(data["test_filename_template"])
+    DBSession.commit()
+
     ft = FilenameTemplate(
         name="Task Filename Template",
-        target_entity_type="Task",
-        path="{{project.repositories[0].path}}/{{project.code}}/"
+        target_entity_type="Variant",
+        path="$REPO{{project.repositories[0].code}}/{{project.code}}/"
         "{%- for parent_task in parent_tasks -%}"
         "{{parent_task.nice_name}}/"
         "{%- endfor -%}",
         filename="{{task.nice_name}}"
-        '_v{{"%03d"|format(version.version_number)}}{{extension}}',
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}',
     )
     data["test_project"].structure.templates.append(ft)
     new_version1 = Version(**data["kwargs"])
     DBSession.add(new_version1)
     DBSession.commit()
 
-    new_version1.update_paths()
-    new_version1.extension = ".ma"
-    assert new_version1.extension == ".ma"
+    repo_path = data["test_repo"].path
+    assert new_version1.absolute_full_path == Path(
+        f"{repo_path}/tp/SH001/FX/Main/Main_r01_v002"
+    )
 
-    assert new_version1.absolute_full_path == "/mnt/T/tp/SH001/Task1/Task1_v002.ma"
+
+def test_path_works_as_expected(setup_version_db_tests):
+    """path attribute works as expected."""
+    data = setup_version_db_tests
+    data["patcher"].patch("Linux")
+
+    data["test_structure"].templates.remove(data["test_filename_template"])
+    DBSession.delete(data["test_filename_template"])
+    DBSession.commit()
+
+    ft = FilenameTemplate(
+        name="Task Filename Template",
+        target_entity_type="Variant",
+        path="$REPO{{project.repositories[0].code}}/{{project.code}}/"
+        "{%- for parent_task in parent_tasks -%}"
+        "{{parent_task.nice_name}}/"
+        "{%- endfor -%}",
+        filename="{{task.nice_name}}"
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}',
+    )
+    data["test_project"].structure.templates.append(ft)
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+
+    assert new_version1.path == Path("$REPOTR/tp/SH001/FX/Main")
+
+
+def test_full_path_works_as_expected(setup_version_db_tests):
+    """full_path attribute works as expected."""
+    data = setup_version_db_tests
+    data["patcher"].patch("Linux")
+
+    data["test_structure"].templates.remove(data["test_filename_template"])
+    DBSession.delete(data["test_filename_template"])
+    DBSession.commit()
+
+    ft = FilenameTemplate(
+        name="Task Filename Template",
+        target_entity_type="Variant",
+        path="$REPO{{project.repositories[0].code}}/{{project.code}}/"
+        "{%- for parent_task in parent_tasks -%}"
+        "{{parent_task.nice_name}}/"
+        "{%- endfor -%}",
+        filename="{{task.nice_name}}"
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}',
+    )
+    data["test_project"].structure.templates.append(ft)
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+
+    assert new_version1.full_path == Path("$REPOTR/tp/SH001/FX/Main/Main_r01_v002")
+
+
+def test_filename_works_as_expected(setup_version_db_tests):
+    """filename attribute works as expected."""
+    data = setup_version_db_tests
+    data["patcher"].patch("Linux")
+
+    data["test_structure"].templates.remove(data["test_filename_template"])
+    DBSession.delete(data["test_filename_template"])
+    DBSession.commit()
+
+    ft = FilenameTemplate(
+        name="Task Filename Template",
+        target_entity_type="Variant",
+        path="$REPO{{project.repositories[0].code}}/{{project.code}}/"
+        "{%- for parent_task in parent_tasks -%}"
+        "{{parent_task.nice_name}}/"
+        "{%- endfor -%}",
+        filename="{{task.nice_name}}"
+        '_r{{"%02d"|format(version.revision_number)}}'
+        '_v{{"%03d"|format(version.version_number)}}',
+    )
+    data["test_project"].structure.templates.append(ft)
+    new_version1 = Version(**data["kwargs"])
+    DBSession.add(new_version1)
+    DBSession.commit()
+
+    assert new_version1.filename == "Main_r01_v002"
+    assert isinstance(new_version1.filename, str)
 
 
 def test_latest_published_version_is_read_only(setup_version_db_tests):
@@ -1467,66 +1514,6 @@ def test_inequality_operator(setup_version_db_tests):
     assert (new_version8 != new_version8) is False
 
 
-def test_created_with_argument_can_be_skipped(setup_version_db_tests):
-    """created_with argument can be skipped."""
-    data = setup_version_db_tests
-    data["kwargs"].pop("created_with")
-    Version(**data["kwargs"])
-
-
-def test_created_with_argument_can_be_none(setup_version_db_tests):
-    """created_with argument can be None."""
-    data = setup_version_db_tests
-    data["kwargs"]["created_with"] = None
-    Version(**data["kwargs"])
-
-
-def test_created_with_attribute_can_be_set_to_none(setup_version_db_tests):
-    """created with attribute can be set to None."""
-    data = setup_version_db_tests
-    data["test_version"].created_with = None
-
-
-def test_created_with_argument_accepts_only_string_or_none(setup_version_db_tests):
-    """TypeError raised if the created_with arg is not a string or None."""
-    data = setup_version_db_tests
-    data["kwargs"]["created_with"] = 234
-    with pytest.raises(TypeError) as cm:
-        Version(**data["kwargs"])
-    assert str(cm.value) == (
-        "Version.created_with should be an instance of str, not int: '234'"
-    )
-
-
-def test_created_with_attribute_accepts_only_string_or_none(setup_version_db_tests):
-    """TypeError raised if the created_with attr is not a str or None."""
-    data = setup_version_db_tests
-    with pytest.raises(TypeError) as cm:
-        data["test_version"].created_with = 234
-
-    assert str(cm.value) == (
-        "Version.created_with should be an instance of str, not int: '234'"
-    )
-
-
-def test_created_with_argument_is_working_as_expected(setup_version_db_tests):
-    """created_with argument value is passed to created_with attribute."""
-    data = setup_version_db_tests
-    test_value = "Maya"
-    data["kwargs"]["created_with"] = test_value
-    test_version = Version(**data["kwargs"])
-    assert test_version.created_with == test_value
-
-
-def test_created_with_attribute_is_working_as_expected(setup_version_db_tests):
-    """created_with attribute is working as expected."""
-    data = setup_version_db_tests
-    test_value = "Maya"
-    assert data["test_version"].created_with != test_value
-    data["test_version"].created_with = test_value
-    assert data["test_version"].created_with == test_value
-
-
 def test_max_version_number_attribute_is_read_only(setup_version_db_tests):
     """max_version_number attribute is read only."""
     data = setup_version_db_tests
@@ -1689,6 +1676,7 @@ def test_naming_parents_attribute_is_working_as_expected(setup_version_db_tests)
     assert data["test_version"].naming_parents == [
         data["test_shot1"],
         data["test_task1"],
+        data["test_variant1"],
     ]
 
     # for a new version of a task
@@ -1760,6 +1748,7 @@ def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
     assert data["test_version"].naming_parents == [
         data["test_shot1"],
         data["test_task1"],
+        data["test_variant1"],
     ]
 
     # for a new version of a task
@@ -1834,7 +1823,7 @@ def test_nice_name_attribute_is_working_as_expected(setup_version_db_tests):
 def test_string_representation_is_a_little_bit_meaningful(setup_version_db_tests):
     """__str__ or __repr__ result is meaningful."""
     data = setup_version_db_tests
-    assert "<tp_SH001_Task1_v001 (Version)>" == f'{data["test_version"]}'
+    assert "<tp_SH001_FX_Main_v001 (Version)>" == f'{data["test_version"]}'
 
 
 def test_walk_hierarchy_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
@@ -1849,28 +1838,6 @@ def test_walk_hierarchy_is_working_as_expected_in_dfs_mode(setup_version_db_test
     visited_versions = []
     for v in v1.walk_hierarchy():
         visited_versions.append(v)
-    assert expected_result == visited_versions
-
-
-def test_walk_inputs_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
-    """walk_inputs() method is working in DFS mode correctly."""
-    data = setup_version_db_tests
-    v1 = Version(task=data["test_task1"])
-    v2 = Version(task=data["test_task1"])
-    v3 = Version(task=data["test_task1"])
-    v4 = Version(task=data["test_task1"])
-    v5 = Version(task=data["test_task1"])
-
-    v5.inputs = [v4]
-    v4.inputs = [v3, v2]
-    v3.inputs = [v1]
-    v2.inputs = [v1]
-
-    expected_result = [v5, v4, v3, v1, v2, v1]
-    visited_versions = []
-    for v in v5.walk_inputs():
-        visited_versions.append(v)
-
     assert expected_result == visited_versions
 
 
@@ -1899,12 +1866,12 @@ def test_walk_inputs_is_working_as_expected_in_dfs_mode(setup_version_db_tests):
 def test_reviews_attribute_is_a_list_of_reviews(setup_version_db_tests):
     """Version.reviews attribute is filled with Review instances."""
     data = setup_version_db_tests
-    data["test_task1"].status = data["status_wip"]
-    data["test_task1"].responsible = [data["test_user1"], data["test_user2"]]
-    version = Version(task=data["test_task1"])
+    data["test_variant1"].status = data["status_wip"]
+    data["test_variant1"].responsible = [data["test_user1"], data["test_user2"]]
+    version = Version(task=data["test_variant1"])
 
     # request a review
-    reviews = data["test_task1"].request_review(version=version)
+    reviews = data["test_variant1"].request_review(version=version)
     assert reviews[0].version == version
     assert reviews[1].version == version
     assert isinstance(version.reviews, list)
@@ -2060,38 +2027,35 @@ def setup_version_tests():
         status_list=data["test_task_status_list"],
     )
 
-    # a Link for the input file
-    data["test_input_link1"] = Link(
-        name="Input Link 1",
+    # a File for the input file
+    data["test_input_file1"] = File(
+        name="Input File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
 
-    data["test_input_link2"] = Link(
-        name="Input Link 2",
+    data["test_input_file2"] = File(
+        name="Input File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
 
-    # a Link for the output file
-    data["test_output_link1"] = Link(
-        name="Output Link 1",
+    # a File for the output file
+    data["test_output_file1"] = File(
+        name="Output File 1",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_beauty_v001.###.exr",
     )
 
-    data["test_output_link2"] = Link(
-        name="Output Link 2",
+    data["test_output_file2"] = File(
+        name="Output File 2",
         full_path="/mnt/M/JOBs/TestProj/Seqs/TestSeq/Shots/SH001/FX/"
         "Outputs/SH001_occ_v001.###.exr",
     )
 
     # now create a version for the Task
     data["kwargs"] = {
-        "inputs": [data["test_input_link1"], data["test_input_link2"]],
-        "outputs": [data["test_output_link1"], data["test_output_link2"]],
         "task": data["test_task1"],
-        "created_with": "Houdini",
     }
 
     # and the Version
@@ -2219,7 +2183,7 @@ def test_request_review_method_calls_task_request_review_method(
 def test_request_review_method_returns_reviews(setup_version_db_tests):
     """request_review() returns Reviews."""
     data = setup_version_db_tests
-    task = data["test_task1"]
+    task = data["test_variant1"]
     task.responsible = [
         data["test_user1"],
         data["test_user2"],

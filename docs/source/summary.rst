@@ -35,8 +35,8 @@ Summary
    stalker.models.entity.Entity
    stalker.models.entity.EntityGroup
    stalker.models.entity.SimpleEntity
+   stalker.models.file.File
    stalker.models.format.ImageFormat
-   stalker.models.link.Link
    stalker.models.message.Message
    stalker.models.mixins.ACLMixin
    stalker.models.mixins.CodeMixin
@@ -55,7 +55,7 @@ Summary
    stalker.models.repository.Repository
    stalker.models.review.Review
    stalker.models.review.Daily
-   stalker.models.review.DailyLink
+   stalker.models.review.DailyFile
    stalker.models.scene.Scene
    stalker.models.schedulers.SchedulerBase
    stalker.models.schedulers.TaskJugglerScheduler
@@ -75,5 +75,6 @@ Summary
    stalker.models.ticket.TicketLog
    stalker.models.type.EntityType
    stalker.models.type.Type
+   stalker.models.variant.Variant
    stalker.models.version.Version
    stalker.models.wiki.Page

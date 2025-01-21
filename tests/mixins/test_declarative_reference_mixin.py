@@ -3,7 +3,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from stalker import Link, SimpleEntity
+from stalker import File, SimpleEntity
 from stalker.models.mixins import ReferenceMixin
 
 
@@ -40,11 +40,11 @@ def test_reference_mixin_setup():
     a_ins = DeclRefMixA(name="ozgur")
     b_ins = DeclRefMixB(name="bozgur")
 
-    new_link1 = Link(name="test link 1", full_path="none")
-    new_link2 = Link(name="test link 2", full_path="no path")
+    new_file1 = File(name="test file 1", full_path="none")
+    new_file2 = File(name="test file 2", full_path="no path")
 
-    a_ins.references.append(new_link1)
-    b_ins.references.append(new_link2)
+    a_ins.references.append(new_file1)
+    b_ins.references.append(new_file2)
 
-    assert new_link1 in a_ins.references
-    assert new_link2 in b_ins.references
+    assert new_file1 in a_ins.references
+    assert new_file2 in b_ins.references

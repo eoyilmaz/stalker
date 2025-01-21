@@ -20,7 +20,7 @@ def setup_structure_tests():
         name="Test Shot Template", target_entity_type="Shot", type=vers_type
     )
     data["reference_template"] = FilenameTemplate(
-        name="Test Reference Template", target_entity_type="Link", type=ref_type
+        name="Test Reference Template", target_entity_type="File", type=ref_type
     )
     data["test_templates"] = [
         data["asset_template"],
@@ -158,8 +158,8 @@ def test_templates_argument_accepts_only_list_of_filename_template_instances(
     with pytest.raises(TypeError) as cm:
         Structure(**data["kwargs"])
     assert str(cm.value) == (
-        "All the items in the Structure.templates should be a "
-        "stalker.models.template.FilenameTemplate instance, not int: '1'"
+        "Structure.templates should only contain instances of "
+        "stalker.models.template.FilenameTemplate, not int: '1'"
     )
 
 
@@ -182,8 +182,8 @@ def test_templates_attribute_accpets_only_list_of_filename_template_instances(
         data["test_structure"].templates = test_value
 
     assert str(cm.value) == (
-        "All the items in the Structure.templates should be a "
-        "stalker.models.template.FilenameTemplate instance, not int: '1'"
+        "Structure.templates should only contain instances of "
+        "stalker.models.template.FilenameTemplate, not int: '1'"
     )
 
 

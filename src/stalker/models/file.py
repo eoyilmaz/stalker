@@ -1,63 +1,74 @@
 # -*- coding: utf-8 -*-
-"""Link related classes and utility functions are situated here."""
+"""File related classes and utility functions are situated here."""
 
 import os
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Generator, List, Optional, Union
 
 from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, validates
 
 from stalker.log import get_logger
 from stalker.models.entity import Entity
+from stalker.models.enum import TraversalDirection
+from stalker.models.mixins import ReferenceMixin
+from stalker.utils import walk_hierarchy
+
 
 logger = get_logger(__name__)
 
 
-class Link(Entity):
-    """Holds data about external links.
+class File(Entity, ReferenceMixin):
+    """Holds data about files or file sequences.
 
-    Links are all about giving some external information to the current entity (external
-    to the database, so it can be something on the :class:`.Repository` or in the Web or
-    anywhere that the server can reach). The type of the link (general, file, folder,
-    web page, image, image sequence, video, movie, sound, text etc.) can be defined by a
-    :class:`.Type` instance (you can also use multiple :class:`.Tag` instances to add
-    more information, and to filter them back). Again it is defined by the needs of the
-    studio.
+    Files are all about giving some external information to the current entity
+    (external to the database, so it can be something on the
+    :class:`.Repository` or in the Web or anywhere that the server can reach).
+    The type of the file (general, file, folder, web page, image, image
+    sequence, video, movie, sound, text etc.) can be defined by a
+    :class:`.Type` instance (you can also use multiple :class:`.Tag` instances
+    to add more information, and to filter them back). Again it is defined by
+    the needs of the studio.
 
-    For sequences of files the file name should be in "%h%p%t %R" format in PySeq_
-    formatting rules.
+    For sequences of files the file name should be in "%h%p%t %R" format in
+    PySeq_ formatting rules.
 
-    There are three secondary attributes (properties to be more precise) ``path``,
-    ``filename`` and ``extension``. These attributes are derived from the
-    :attr:`.full_path` attribute and they modify it.
+    There are three secondary attributes (properties to be more precise)
+    ``path``, ``filename`` and ``extension``. These attributes are derived from
+    the :attr:`.full_path` attribute and they modify it.
 
     Path
-        It is the path part of the full_path
+        It is the path part of the full_path.
 
     Filename
-        It is the filename part of the full_path, also includes the extension, so
-        changing the filename also changes the extension part.
+        It is the filename part of the full_path, also includes the extension,
+        so changing the filename also changes the extension part.
 
     Extension
-        It is the extension part of the full_path. It also includes the extension
-        separator ('.' for most of the file systems).
+        It is the extension part of the full_path. It also includes the
+        extension separator ('.' for most of the file systems).
+
+    .. versionadded:: 1.1.0
+
+       Inputs or references can now be tracked per File instance through the
+       :attr:`.File.references` attribute. So, that all the references can be
+       tracked per individual file instance.
 
     Args:
-        full_path (str): The full path to the link, it can be a path to a folder or a
-            file in the file system, or a web page. For file sequences use "%h%p%t %R"
-            format, for more information see `PySeq Documentation`_. It can be set to
-            empty string (or None which will be converted to an empty string
-            automatically).
+        full_path (str): The full path to the File, it can be a path to a
+            folder or a file in the file system, or a web page. For file
+            sequences use "%h%p%t %R" format, for more information see
+            `PySeq Documentation`_. It can be set to empty string (or None
+            which will be converted to an empty string automatically).
 
     .. _PySeq: http://packages.python.org/pyseq/
     .. _PySeq Documentation: http://packages.python.org/pyseq/
     """
 
     __auto_name__ = True
-    __tablename__ = "Links"
-    __mapper_args__ = {"polymorphic_identity": "Link"}
+    __tablename__ = "Files"
+    __mapper_args__ = {"polymorphic_identity": "File"}
 
-    link_id: Mapped[int] = mapped_column(
+    file_id: Mapped[int] = mapped_column(
         "id",
         ForeignKey("Entities.id"),
         primary_key=True,
@@ -67,18 +78,24 @@ class Link(Entity):
     original_filename: Mapped[Optional[str]] = mapped_column(String(256))
     # file systems
     full_path: Mapped[Optional[str]] = mapped_column(
-        Text, doc="The full path of the url to the link."
+        Text, doc="The full path of the url to the file."
     )
+
+    created_with: Mapped[Optional[str]] = mapped_column(String(256))
 
     def __init__(
         self,
         full_path: Optional[str] = "",
         original_filename: Optional[str] = "",
+        references: Optional[List["File"]] = None,
+        created_with: Optional[str] = None,
         **kwargs: Optional[Dict[str, Any]],
     ) -> None:
-        super(Link, self).__init__(**kwargs)
+        super(File, self).__init__(**kwargs)
+        ReferenceMixin.__init__(self, references=references)
         self.full_path = full_path
         self.original_filename = original_filename
+        self.created_with = created_with
 
     @validates("full_path")
     def _validate_full_path(self, key: str, full_path: Union[None, str]) -> str:
@@ -99,11 +116,39 @@ class Link(Entity):
 
         if not isinstance(full_path, str):
             raise TypeError(
-                f"{self.__class__.__name__}.full_path should be an instance of string, "
+                f"{self.__class__.__name__}.full_path should be a str, "
                 f"not {full_path.__class__.__name__}: '{full_path}'"
             )
 
         return self._format_path(full_path)
+
+    @validates("created_with")
+    def _validate_created_with(
+        self, key: str, created_with: Union[None, str]
+    ) -> Union[None, str]:
+        """Validate the given created_with value.
+
+        Args:
+            key (str): The name of the validated column.
+            created_with (str): The name of the application used to create this
+                File.
+
+        Raises:
+            TypeError: If the given created_with attribute is not None and not
+                a string.
+
+        Returns:
+            Union[None, str]: The validated created with value.
+        """
+        if created_with is not None and not isinstance(created_with, str):
+            raise TypeError(
+                "{}.created_with should be an instance of str, not {}: '{}'".format(
+                    self.__class__.__name__,
+                    created_with.__class__.__name__,
+                    created_with,
+                )
+            )
+        return created_with
 
     @validates("original_filename")
     def _validate_original_filename(
@@ -130,8 +175,7 @@ class Link(Entity):
 
         if not isinstance(original_filename, str):
             raise TypeError(
-                f"{self.__class__.__name__}.original_filename should be an instance of "
-                "string, "
+                f"{self.__class__.__name__}.original_filename should be a str, "
                 f"not {original_filename.__class__.__name__}: '{original_filename}'"
             )
 
@@ -179,7 +223,7 @@ class Link(Entity):
 
         if not isinstance(path, str):
             raise TypeError(
-                f"{self.__class__.__name__}.path should be an instance of str, "
+                f"{self.__class__.__name__}.path should be a str, "
                 f"not {path.__class__.__name__}: '{path}'"
             )
 
@@ -214,7 +258,7 @@ class Link(Entity):
 
         if not isinstance(filename, str):
             raise TypeError(
-                f"{self.__class__.__name__}.filename should be an instance of str, "
+                f"{self.__class__.__name__}.filename should be a str, "
                 f"not {filename.__class__.__name__}: '{filename}'"
             )
 
@@ -244,7 +288,7 @@ class Link(Entity):
 
         if not isinstance(extension, str):
             raise TypeError(
-                f"{self.__class__.__name__}.extension should be an instance of str, "
+                f"{self.__class__.__name__}.extension should be a str, "
                 f"not {extension.__class__.__name__}: '{extension}'"
             )
 
@@ -254,19 +298,35 @@ class Link(Entity):
 
         self.filename = os.path.splitext(self.filename)[0] + extension
 
+    def walk_references(
+        self,
+        method: Union[int, str, TraversalDirection] = TraversalDirection.DepthFirst,
+    ) -> Generator[None, "File", None]:
+        """Walk the references of this file.
+
+        Args:
+            method (Union[int, str, TraversalDirection]): The walk method
+                defined by the :class:`.TraversalDirection` enum.
+
+        Yields:
+            File: Yield the File instances.
+        """
+        for v in walk_hierarchy(self, "references", method=method):
+            yield v
+
     def __eq__(self, other: Any) -> bool:
-        """Check if the other is equal to this Link.
+        """Check if the other is equal to this File.
 
         Args:
             other (Any): The other object to be checked for equality.
 
         Returns:
-            bool: If the other object is a Link instance and has the same full_path and
-                type value.
+            bool: If the other object is a File instance and has the same
+                full_path and type value.
         """
         return (
-            super(Link, self).__eq__(other)
-            and isinstance(other, Link)
+            super(File, self).__eq__(other)
+            and isinstance(other, File)
             and self.full_path == other.full_path
             and self.type == other.type
         )
@@ -279,4 +339,4 @@ class Link(Entity):
         Returns:
             int: The hash value.
         """
-        return super(Link, self).__hash__()
+        return super(File, self).__hash__()

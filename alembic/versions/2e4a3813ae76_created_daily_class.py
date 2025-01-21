@@ -98,39 +98,39 @@ def upgrade():
     # Insert in to SimpleEntities
     op.execute(
         f"""INSERT INTO "SimpleEntities" (entity_type, name, description,
-created_by_id, updated_by_id, date_created, date_updated, type_id,
-thumbnail_id, html_style, html_class, stalker_version)
-VALUES ('StatusList', 'Daily Statuses', '', NULL, NULL,
-(SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
-(SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
-'', '', '{stalker.__version__}')"""
+        created_by_id, updated_by_id, date_created, date_updated, type_id,
+        thumbnail_id, html_style, html_class, stalker_version)
+        VALUES ('StatusList', 'Daily Statuses', '', NULL, NULL,
+        (SELECT CAST(NOW() at time zone 'utc' AS timestamp)),
+        (SELECT CAST(NOW() at time zone 'utc' AS timestamp)), NULL, NULL,
+        '', '', '{stalker.__version__}')"""
     )
 
     # insert in to Entities and StatusLists
     op.execute(
         """INSERT INTO "Entities" (id)
-VALUES ((
-  SELECT id
-  FROM "SimpleEntities"
-  WHERE "SimpleEntities".name = 'Daily Statuses'
-));
-INSERT INTO "StatusLists" (id, target_entity_type)
-VALUES ((
-  SELECT id
-  FROM "SimpleEntities"
-  WHERE "SimpleEntities".name = 'Daily Statuses'), 'Daily');"""
+        VALUES ((
+            SELECT id
+            FROM "SimpleEntities"
+            WHERE "SimpleEntities".name = 'Daily Statuses'
+        ));
+        INSERT INTO "StatusLists" (id, target_entity_type)
+        VALUES ((
+            SELECT id
+            FROM "SimpleEntities"
+            WHERE "SimpleEntities".name = 'Daily Statuses'), 'Daily');"""
     )
 
     # Add Review Statues To StatusList_Statuses
     # Add new Task statuses to StatusList
     op.execute(
         """INSERT INTO "StatusList_Statuses" (status_list_id, status_id)
-VALUES
-    ((SELECT id FROM "StatusLists" WHERE target_entity_type = 'Daily'),
-    (SELECT id FROM "Statuses" WHERE code = 'OPEN')),
-    ((SELECT id FROM "StatusLists" WHERE target_entity_type = 'Daily'),
-    (SELECT id FROM "Statuses" WHERE code = 'CLS'))
-"""
+        VALUES
+            ((SELECT id FROM "StatusLists" WHERE target_entity_type = 'Daily'),
+            (SELECT id FROM "Statuses" WHERE code = 'OPEN')),
+            ((SELECT id FROM "StatusLists" WHERE target_entity_type = 'Daily'),
+            (SELECT id FROM "Statuses" WHERE code = 'CLS'))
+        """
     )
 
 
@@ -142,17 +142,12 @@ def downgrade():
     # Delete Open Status
     op.execute(
         """DELETE FROM "StatusList_Statuses" WHERE
-    status_id IN (
-    select id FROM "SimpleEntities" WHERE
-    name = 'Open');
+    status_id IN (select id FROM "SimpleEntities" WHERE name = 'Open');
     DELETE FROM "Statuses" WHERE
-      id IN (select id FROM "SimpleEntities" WHERE
-    name = 'Open');
+        id IN (select id FROM "SimpleEntities" WHERE name = 'Open');
     DELETE FROM "Entities" WHERE
-    id IN (select id FROM "SimpleEntities" WHERE
-    name = 'Open');
-    DELETE FROM "SimpleEntities" WHERE
-    name = 'Open';
+        id IN (select id FROM "SimpleEntities" WHERE name = 'Open');
+    DELETE FROM "SimpleEntities" WHERE name = 'Open';
     """
     )
 

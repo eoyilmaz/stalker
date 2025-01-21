@@ -175,8 +175,8 @@ def test_children_attribute_accepts_correct_class_instances_only(dag_mixin_test_
         d.children = ["not", 1, "", "of", "correct", "instances"]
 
     assert str(cm.value) == (
-        "DAGMixinFooMixedInClass.children should be a list of "
-        "DAGMixinFooMixedInClass (or derivative) instances, not str: 'not'"
+        "DAGMixinFooMixedInClass.children should only contain instances of "
+        "DAGMixinFooMixedInClass (or derivative), not str: 'not'"
     )
 
 

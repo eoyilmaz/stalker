@@ -77,8 +77,8 @@ def test_goods_argument_is_a_list_of_objects_which_are_not_goods(
         PriceList(**data["kwargs"])
 
     assert str(cm.value) == (
-        "PriceList.goods should be a list of stalker.model.budget.Good instances, "
-        "not str: 'not'"
+        "PriceList.goods should only contain instances of "
+        "stalker.model.budget.Good, not str: 'not'"
     )
 
 
@@ -92,8 +92,8 @@ def test_good_attribute_is_a_list_of_objects_which_are_not_goods(
         p.goods = ["not", 1, "good", "instances"]
 
     assert str(cm.value) == (
-        "PriceList.goods should be a list of "
-        "stalker.model.budget.Good instances, not str: 'not'"
+        "PriceList.goods should only contain instances of "
+        "stalker.model.budget.Good, not str: 'not'"
     )
 
 

@@ -12,7 +12,7 @@ import stalker
 
 from stalker import (
     Department,
-    Link,
+    File,
     Project,
     Repository,
     SimpleEntity,
@@ -657,35 +657,35 @@ def test_thumbnail_attr_is_none(setup_simple_entity_tests):
     assert data["test_simple_entity"].thumbnail is None
 
 
-def test_thumbnail_arg_is_not_a_link_instance(setup_simple_entity_tests):
-    """TypeError raised if the thumbnail arg is not a Link instance."""
+def test_thumbnail_arg_is_not_a_file_instance(setup_simple_entity_tests):
+    """TypeError raised if the thumbnail arg is not a File instance."""
     data = setup_simple_entity_tests
-    data["kwargs"]["thumbnail"] = "not a Link"
+    data["kwargs"]["thumbnail"] = "not a File"
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
 
     assert str(cm.value) == (
-        "SimpleEntity.thumbnail should be a stalker.models.link.Link instance, "
-        "not str: 'not a Link'"
+        "SimpleEntity.thumbnail should be a stalker.models.file.File instance, "
+        "not str: 'not a File'"
     )
 
 
-def test_thumbnail_attr_is_not_a_link_instance(setup_simple_entity_tests):
-    """TypeError raised if the thumbnail is not a Link instance."""
+def test_thumbnail_attr_is_not_a_file_instance(setup_simple_entity_tests):
+    """TypeError raised if the thumbnail is not a File instance."""
     data = setup_simple_entity_tests
     with pytest.raises(TypeError) as cm:
-        data["test_simple_entity"].thumbnail = "not a Link"
+        data["test_simple_entity"].thumbnail = "not a File"
 
     assert str(cm.value) == (
-        "SimpleEntity.thumbnail should be a stalker.models.link.Link instance, "
-        "not str: 'not a Link'"
+        "SimpleEntity.thumbnail should be a stalker.models.file.File instance, "
+        "not str: 'not a File'"
     )
 
 
 def test_thumbnail_arg_is_working_as_expected(setup_simple_entity_tests):
     """thumbnail arg value is passed to the thumbnail attr correctly."""
     data = setup_simple_entity_tests
-    thumb = Link(full_path="some path")
+    thumb = File(full_path="some path")
     data["kwargs"]["thumbnail"] = thumb
     new_simple_entity = SimpleEntity(**data["kwargs"])
     assert new_simple_entity.thumbnail == thumb
@@ -694,7 +694,7 @@ def test_thumbnail_arg_is_working_as_expected(setup_simple_entity_tests):
 def test_thumbnail_attr_is_working_as_expected(setup_simple_entity_tests):
     """thumbnail attr is working as expected."""
     data = setup_simple_entity_tests
-    thumb = Link(full_path="some path")
+    thumb = File(full_path="some path")
     assert not data["test_simple_entity"].thumbnail == thumb
     data["test_simple_entity"].thumbnail = thumb
     assert data["test_simple_entity"].thumbnail == thumb
@@ -730,9 +730,7 @@ def test_html_style_arg_is_not_a_string(setup_simple_entity_tests):
     data["kwargs"]["html_style"] = 123
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
-    assert str(cm.value) == (
-        "SimpleEntity.html_style should be a basestring instance, not int: '123'"
-    )
+    assert str(cm.value) == ("SimpleEntity.html_style should be a str, not int: '123'")
 
 
 def test_html_style_attr_is_not_set_to_a_string(setup_simple_entity_tests):
@@ -741,7 +739,7 @@ def test_html_style_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].html_style = 34324
     assert str(cm.value) == (
-        "SimpleEntity.html_style should be a basestring instance, not int: '34324'"
+        "SimpleEntity.html_style should be a str, not int: '34324'"
     )
 
 
@@ -792,9 +790,7 @@ def test_html_class_arg_is_not_a_string(setup_simple_entity_tests):
     data["kwargs"]["html_class"] = 123
     with pytest.raises(TypeError) as cm:
         SimpleEntity(**data["kwargs"])
-    assert str(cm.value) == (
-        "SimpleEntity.html_class should be a basestring instance, not int: '123'"
-    )
+    assert str(cm.value) == ("SimpleEntity.html_class should be a str, not int: '123'")
 
 
 def test_html_class_attr_is_not_set_to_a_string(setup_simple_entity_tests):
@@ -803,7 +799,7 @@ def test_html_class_attr_is_not_set_to_a_string(setup_simple_entity_tests):
     with pytest.raises(TypeError) as cm:
         data["test_simple_entity"].html_class = 34324
     assert str(cm.value) == (
-        "SimpleEntity.html_class should be a basestring instance, not int: '34324'"
+        "SimpleEntity.html_class should be a str, not int: '34324'"
     )
 
 

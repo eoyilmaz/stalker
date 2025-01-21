@@ -364,8 +364,8 @@ def test_resources_arg_is_set_to_a_list_of_other_values_then_user(
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.resources should be a list of stalker.models.auth.User instances, "
-        "not str: 'a'"
+        "Task.resources should only contain instances of "
+        "stalker.models.auth.User, not str: 'a'"
     )
 
 
@@ -379,8 +379,8 @@ def test_resources_attr_is_set_to_a_list_of_other_values_then_user(
         new_task.resources = ["a", "list", "of", "resources", data["test_user1"]]
 
     assert str(cm.value) == (
-        "Task.resources should be a list of stalker.models.auth.User instances, "
-        "not str: 'a'"
+        "Task.resources should only contain instances of "
+        "stalker.models.auth.User, not str: 'a'"
     )
 
 
@@ -553,8 +553,8 @@ def test_watchers_arg_is_set_to_a_list_of_other_values_then_user(setup_task_test
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.watchers should be a list of stalker.models.auth.User instances,"
-        " not str: 'a'"
+        "Task.watchers should only contain instances of "
+        "stalker.models.auth.User, not str: 'a'"
     )
 
 
@@ -731,7 +731,7 @@ def test_depends_arg_is_a_list_of_other_objects_than_a_task(setup_task_tests):
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "TaskDependency.depends_on can should be and instance of "
+        "TaskDependency.depends_on should be and instance of "
         "stalker.models.task.Task, not str: 'a'"
     )
 
@@ -746,7 +746,7 @@ def test_depends_attr_is_a_list_of_other_objects_than_a_task(setup_task_tests):
         new_task.depends_on = test_value
 
     assert str(cm.value) == (
-        "TaskDependency.depends_on can should be and instance of "
+        "TaskDependency.depends_on should be and instance of "
         "stalker.models.task.Task, not str: 'a'"
     )
 
@@ -1203,8 +1203,8 @@ def test_time_logs_attr_is_not_a_list_of_timelog_instances(setup_task_tests):
         new_task.time_logs = [1, "1", 1.2, "a time_log"]
 
     assert str(cm.value) == (
-        "Task.time_logs should be all stalker.models.task.TimeLog instances, "
-        "not int: '1'"
+        "Task.time_logs should only contain instances of "
+        "stalker.models.task.TimeLog, not int: '1'"
     )
 
 
@@ -1619,8 +1619,8 @@ def test_versions_attr_is_not_a_list_of_version_instances(setup_task_tests):
         new_task.versions = [1, 1.2, "a version"]
 
     assert str(cm.value) == (
-        "Task.versions should only have stalker.models.version.Version instances, "
-        "and not int: '1'"
+        "Task.versions should only contain instances of "
+        "stalker.models.version.Version, and not int: '1'"
     )
 
 
@@ -3571,8 +3571,8 @@ def test_responsible_arg_is_not_a_list_of_user_instance(setup_task_tests):
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.responsible should be a list of stalker.models.auth.User instances, "
-        "not str: 'not a user instance'"
+        "Task.responsible should only contain instances of "
+        "stalker.models.auth.User, not str: 'not a user instance'"
     )
 
 
@@ -3588,8 +3588,8 @@ def test_responsible_attr_is_set_to_something_other_than_a_list_of_user_instance
         new_task.responsible = ["not a user instance"]
 
     assert str(cm.value) == (
-        "Task.responsible should be a list of stalker.models.auth.User instances, "
-        "not str: 'not a user instance'"
+        "Task.responsible should only contain instances of "
+        "stalker.models.auth.User, not str: 'not a user instance'"
     )
 
 
@@ -3799,8 +3799,8 @@ def test_reviews_is_not_a_list_of_review_instances(setup_task_tests):
         new_task.reviews = test_value
 
     assert str(cm.value) == (
-        "Task.reviews should be all stalker.models.review.Review "
-        "instances, not int: '1234'"
+        "Task.reviews should only contain instances of "
+        "stalker.models.review.Review, not int: '1234'"
     )
 
 
@@ -3900,8 +3900,8 @@ def test_task_depends_on_is_not_a_task_dependency_object(setup_task_tests):
     with pytest.raises(TypeError) as cm:
         new_task.task_depends_on.append("not a TaskDependency object.")
     assert str(cm.value) == (
-        "All the items in the Task.task_depends_on should be a TaskDependency "
-        "instance, not str: 'not a TaskDependency object.'"
+        "Task.task_depends_on should only contain instances of TaskDependency, "
+        "not str: 'not a TaskDependency object.'"
     )
 
 
@@ -3965,8 +3965,8 @@ def test_alternative_resources_arg_elements_are_not_user_instances(
         Task(**kwargs)
 
     assert str(cm.value) == (
-        "Task.alternative_resources should be a list of stalker.models.auth.User "
-        "instances, not str: 'not'"
+        "Task.alternative_resources should only contain instances of "
+        "stalker.models.auth.User, not str: 'not'"
     )
 
 
@@ -3980,8 +3980,8 @@ def test_alternative_resources_attr_elements_are_not_all_user_instances(
         new_task.alternative_resources = ["not", 1, "user"]
 
     assert str(cm.value) == (
-        "Task.alternative_resources should be a list of stalker.models.auth.User "
-        "instances, not str: 'not'"
+        "Task.alternative_resources should only contain instances of "
+        "stalker.models.auth.User, not str: 'not'"
     )
 
 
@@ -4201,8 +4201,8 @@ def test_computed_resources_is_not_a_user_instance(setup_task_tests):
         new_task.computed_resources.append("not a user")
 
     assert str(cm.value) == (
-        "Task.computed_resources should be a list of stalker.models.auth.User "
-        "instances, not str: 'not a user'"
+        "Task.computed_resources should only contain instances of "
+        "stalker.models.auth.User, not str: 'not a user'"
     )
 
 

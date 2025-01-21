@@ -29,9 +29,9 @@ def upgrade():
         )
         # copy data from Links.path to Links_Temp.full_path
         op.execute(
-            'INSERT INTO "Versions".task_id '
-            'SELECT "Versions".version_of_id '
-            'FROM "Versions"'
+            """INSERT INTO "Versions".task_id
+            SELECT "Versions".version_of_id FROM "Versions"
+            """
         )
 
 
@@ -49,7 +49,8 @@ def downgrade():
             sa.Column(sa.Integer, sa.ForeignKey("Tasks.id"), nullable=False),
         )
         op.execute(
-            'INSERT INTO "Versions".version_of_id '
-            'SELECT "Versions".task_id '
-            'FROM "Versions"'
+            """INSERT INTO "Versions".version_of_id
+            SELECT "Versions".task_id
+            FROM "Versions"
+            """
         )

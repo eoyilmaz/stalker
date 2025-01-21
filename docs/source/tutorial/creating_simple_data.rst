@@ -20,9 +20,9 @@ Project setup
 .. note::
    When the Stalker database is first initialized (with ``db.setup.init()``), a
    set of default :class:`.Status` instances for :class:`.Task`,
-   :class:`.Asset`, :class:`.Shot`, :class:`.Sequence` and :class:`.Ticket`
-   classes are created, along with their respective :class:`.StatusList`
-   instances.
+   :class:`.Asset`, :class:`.Shot`, :class:`.Sequence`, :class:`.Ticket` and
+   :class:`.Variant` classes are created, along with their respective
+   :class:`.StatusList` instances.
 
 Creating a Repository
 ---------------------
@@ -92,7 +92,7 @@ Let's add more details to the project:
 Saving the Project
 ------------------
 
-To save the proejct and its associated data to the database:
+To save the project and its associated data to the database:
 
 .. code-block:: python
 

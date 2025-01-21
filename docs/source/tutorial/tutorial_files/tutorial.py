@@ -1,5 +1,8 @@
+# -*- coding: utf-8 -*-
+
+import os
+
 import stalker.db.setup
-from stalker import db
 
 stalker.db.setup.setup({"sqlalchemy.url": "sqlite:///"})
 stalker.db.setup.init()
@@ -254,12 +257,12 @@ from stalker import Version
 vers1 = Version(task=comp)
 
 # we need to update the paths
-vers1.update_paths()
+path = vers1.generate_path()
 
 # check the path and filename
-print(vers1.path)  # '$REPO33/FC/SH001/comp'
-print(vers1.filename)  # 'SH001_comp_Main_v001'
-print(vers1.full_path)  # '$REPO33/FC/SH001/comp/SH001_comp_Main_v001'
+print(path.parent)  # '$REPO33/FC/SH001/comp'
+print(path.name)  # 'SH001_comp_Main_v001'
+print(path)  # '$REPO33/FC/SH001/comp/SH001_comp_Main_v001'
 # now the absolute values, values with repository root
 # because I'm running this code in a Linux laptop, my results are using the
 # linux path of the repository
@@ -280,7 +283,7 @@ vers1.is_published = False  # I still work on this version, this is not a
 # be sure that you've committed the previous version to the database
 # to let Stalker now what number to give for the next version
 vers2 = Version(task=comp)
-vers2.update_paths()  # this call probably will disappear in next version of
+vers2.generate_path()  # this call probably will disappear in next version of
 # Stalker, so Stalker will automatically update the
 # paths on Version.__init__()
 
@@ -292,7 +295,7 @@ DBSession.commit()
 
 # now create a new version
 vers3 = Version(task=comp)
-vers3.update_paths()
+vers3.generate_path()
 
 print(vers3.version_number)  # 3
 print(vers3.filename)  # 'SH001_comp_Main_v002'

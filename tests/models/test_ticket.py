@@ -289,8 +289,8 @@ def test_related_tickets_attribute_is_set_to_something_other_then_a_list_of_tick
         data["test_ticket"].related_tickets = ["a ticket"]
 
     assert str(cm.value) == (
-        "Ticket.related_ticket attribute should be a list of other "
-        "stalker.models.ticket.Ticket instances, not str: 'a ticket'"
+        "Ticket.related_ticket should only contain instances of "
+        "stalker.models.ticket.Ticket, not str: 'a ticket'"
     )
 
 
