@@ -47,7 +47,7 @@ def condition_tjp_output(data: str) -> str:
         str: The formatted data.
     """
     assert isinstance(data, str)
-    data_out = re.subn("[\s]+", " ", data)[0]
+    data_out = re.subn(r"[\s]+", " ", data)[0]
     return data_out
 
 
