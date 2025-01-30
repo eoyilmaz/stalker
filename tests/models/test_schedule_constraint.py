@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from stalker.models.enum import ScheduleConstraint
+from stalker.models.enum import ScheduleConstraint, ScheduleConstraintDecorator
 
 
 @pytest.mark.parametrize(
@@ -133,3 +133,8 @@ def test_to_constraint_constraint_is_not_a_valid_str():
 def test_to_constraint_is_working_properly(constraint_name, constraint):
     """ScheduleConstraint can parse schedule constraint names."""
     assert ScheduleConstraint.to_constraint(constraint_name) == constraint
+
+
+def test_cache_ok_is_true_in_type_decorator():
+    """ScheduleConstraintDecorator.cache_ok is True."""
+    assert ScheduleConstraintDecorator.cache_ok is True

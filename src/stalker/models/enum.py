@@ -79,6 +79,7 @@ class ScheduleConstraint(IntEnum):
 class ScheduleConstraintDecorator(TypeDecorator):
     """Store ScheduleConstraint as an integer and restore as ScheduleConstraint."""
 
+    cache_ok = True
     impl = Integer
 
     def process_bind_param(self, value, dialect) -> int:
@@ -169,6 +170,7 @@ class TimeUnit(Enum):
 class TimeUnitDecorator(TypeDecorator):
     """Store TimeUnit as an str and restore as TimeUnit."""
 
+    cache_ok = True
     impl = saEnum(*[u.value for u in TimeUnit], name="TimeUnit")
 
     def process_bind_param(self, value: TimeUnit, dialect: str) -> str:
@@ -256,6 +258,7 @@ class ScheduleModel(Enum):
 class ScheduleModelDecorator(TypeDecorator):
     """Store ScheduleModel as a str and restore as ScheduleModel."""
 
+    cache_ok = True
     impl = saEnum(*[m.value for m in ScheduleModel], name="ScheduleModel")
 
     def process_bind_param(self, value, dialect) -> str:
@@ -342,6 +345,7 @@ class DependencyTarget(Enum):
 class DependencyTargetDecorator(TypeDecorator):
     """Store DependencyTarget as an enum and restore as DependencyTarget."""
 
+    cache_ok = True
     impl = saEnum(*[m.value for m in DependencyTarget], name="TaskDependencyTarget")
 
     def process_bind_param(self, value, dialect) -> str:

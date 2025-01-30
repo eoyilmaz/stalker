@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from stalker.models.enum import TimeUnit
+from stalker.models.enum import TimeUnit, TimeUnitDecorator
 
 
 @pytest.mark.parametrize(
@@ -182,3 +182,8 @@ def test_to_unit_unit_is_not_a_valid_str():
 def test_schedule_unit_to_unit_is_working_properly(unit_name, unit):
     """TimeUnit can parse schedule unit names."""
     assert TimeUnit.to_unit(unit_name) == unit
+
+
+def test_cache_ok_is_true_in_type_decorator():
+    """TimeUnitDecorator.cache_ok is True."""
+    assert TimeUnitDecorator.cache_ok is True

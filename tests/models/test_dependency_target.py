@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from stalker.models.enum import DependencyTarget
+from stalker.models.enum import DependencyTarget, DependencyTargetDecorator
 
 
 @pytest.mark.parametrize(
@@ -121,3 +121,8 @@ def test_to_target_target_is_not_a_valid_str():
 def test_to_target_is_working_properly(target_name, target):
     """DependencyTarget can parse dependency target names."""
     assert DependencyTarget.to_target(target_name) == target
+
+
+def test_cache_ok_is_true_in_type_decorator():
+    """DependencyTargetDecorator.cache_ok is True."""
+    assert DependencyTargetDecorator.cache_ok is True
