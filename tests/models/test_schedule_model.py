@@ -5,7 +5,7 @@ import sys
 
 import pytest
 
-from stalker.models.enum import ScheduleModel
+from stalker.models.enum import ScheduleModel, ScheduleModelDecorator
 
 
 @pytest.mark.parametrize(
@@ -136,3 +136,8 @@ def test_to_model_model_is_not_a_valid_str():
 def test_to_model_is_working_properly(model_name, model):
     """ScheduleModel can parse schedule model names."""
     assert ScheduleModel.to_model(model_name) == model
+
+
+def test_cache_ok_is_true_in_type_decorator():
+    """ScheduleModelDecorator.cache_ok is True."""
+    assert ScheduleModelDecorator.cache_ok is True
