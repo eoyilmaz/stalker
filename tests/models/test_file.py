@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 
 import pytest
 
-from stalker import File, Type
+from stalker import File, Repository, Type
 from stalker.db.session import DBSession
 
 
@@ -13,7 +14,7 @@ def setup_file_tests():
     """Set up the test for the File class."""
     data = dict()
 
-    # create a mock FileType object
+    # create a Type object for Files
     data["test_file_type1"] = Type(
         name="Test Type 1",
         code="test type1",
@@ -56,7 +57,7 @@ def setup_file_tests():
     }
 
     data["test_file"] = File(**data["kwargs"])
-    return data
+    yield data
 
 
 def test___auto_name__class_attribute_is_set_to_true():
@@ -592,3 +593,51 @@ def test_walk_references_is_working_as_expected_in_dfs_mode(setup_file_tests):
         visited_versions.append(v)
 
     assert expected_result == visited_versions
+
+
+def test_absolute_path_is_read_only(setup_file_tests):
+    """absolute_path property is read-only."""
+    data = setup_file_tests
+    with pytest.raises(AttributeError) as cm:
+        data["test_file"].absolute_path = "C:/A_NEW_PROJECT/td/dsdf"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'absolute_path'",
+        11: "property 'absolute_path' of 'File' object has no setter",
+    }.get(sys.version_info.minor, "property 'absolute_path' of 'File' object has no setter")
+    assert str(cm.value) == error_message
+
+
+def test_absolute_path_returns_the_absolute_path(setup_file_tests):
+    """absolute_path property returns the absolute path of the full_path attribute."""
+    data = setup_file_tests
+    file = data["test_file"]
+    os.environ["REPOPR1"] = "/mnt/project_server/Projects"
+    file.full_path = "$REPOPR1/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
+    expected_result = "/mnt/project_server/Projects/A_NEW_PROJECT/td/dsdf"
+    assert data["test_file"].absolute_path == expected_result
+
+
+def test_absolute_full_path_is_read_only(setup_file_tests):
+    """absolute_full_path property is read-only."""
+    data = setup_file_tests
+    with pytest.raises(AttributeError) as cm:
+        data["test_file"].absolute_full_path = "C:/A_NEW_PROJECT/td/dsdf"
+    error_message = {
+        8: "can't set attribute",
+        9: "can't set attribute",
+        10: "can't set attribute 'absolute_full_path'",
+        11: "property 'absolute_full_path' of 'File' object has no setter",
+    }.get(sys.version_info.minor, "property 'absolute_full_path' of 'File' object has no setter")
+    assert str(cm.value) == error_message
+
+
+def test_absolute_full_path_returns_the_absolute_full_path(setup_file_tests):
+    """absolute_full_path property returns the absolute path of the full_path attribute."""
+    data = setup_file_tests
+    os.environ["REPOPR1"] = "/mnt/project_server/Projects"
+    file = data["test_file"]
+    file.full_path = "$REPOPR1/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
+    expected_result = "/mnt/project_server/Projects/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
+    assert data["test_file"].absolute_full_path == expected_result

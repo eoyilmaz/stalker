@@ -298,6 +298,24 @@ class File(Entity, ReferenceMixin):
 
         self.filename = os.path.splitext(self.filename)[0] + extension
 
+    @property
+    def absolute_full_path(self) -> str:
+        """Return the absolute full path of the file.
+
+        Returns:
+            str: The absolute full path of the file.
+        """
+        return os.path.normpath(os.path.expandvars(self.full_path))
+
+    @property
+    def absolute_path(self) -> str:
+        """Return the absolute path of the file.
+
+        Returns:
+            str: The absolute path of the file.
+        """
+        return os.path.dirname(self.absolute_full_path)
+
     def walk_references(
         self,
         method: Union[int, str, TraversalDirection] = TraversalDirection.DepthFirst,
