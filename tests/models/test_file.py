@@ -14,15 +14,6 @@ def setup_file_tests():
     """Set up the test for the File class."""
     data = dict()
 
-    # create a test Repository
-    data["test_repo"] = Repository(
-        name="Projects Repository",
-        code="PR1",
-        windows_path="M:/Projects",
-        linux_path="/mnt/projects_server/Projects",
-        macos_path="/Volumes/projects_server/Projects",
-    )
-
     # create a Type object for Files
     data["test_file_type1"] = Type(
         name="Test Type 1",
@@ -66,7 +57,7 @@ def setup_file_tests():
     }
 
     data["test_file"] = File(**data["kwargs"])
-    return data
+    yield data
 
 
 def test___auto_name__class_attribute_is_set_to_true():
@@ -618,13 +609,13 @@ def test_absolute_path_is_read_only(setup_file_tests):
     assert str(cm.value) == error_message
 
 
-def test_absolute_path_returns_the_absolute_path(setup_file_tests, monkeypatch):
+def test_absolute_path_returns_the_absolute_path(setup_file_tests):
     """absolute_path property returns the absolute path of the full_path attribute."""
     data = setup_file_tests
-    monkeypatch.setattr("stalker.models.repository.platform.system", lambda: "Darwin")
     file = data["test_file"]
+    os.environ["REPOPR1"] = "/mnt/project_server/Projects"
     file.full_path = "$REPOPR1/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
-    expected_result = "/Volumes/projects_server/Projects/A_NEW_PROJECT/td/dsdf"
+    expected_result = "/mnt/project_server/Projects/A_NEW_PROJECT/td/dsdf"
     assert data["test_file"].absolute_path == expected_result
 
 
@@ -642,11 +633,11 @@ def test_absolute_full_path_is_read_only(setup_file_tests):
     assert str(cm.value) == error_message
 
 
-def test_absolute_full_path_returns_the_absolute_full_path(setup_file_tests, monkeypatch):
+def test_absolute_full_path_returns_the_absolute_full_path(setup_file_tests):
     """absolute_full_path property returns the absolute path of the full_path attribute."""
     data = setup_file_tests
-    monkeypatch.setattr("stalker.models.repository.platform.system", lambda: "Darwin")
+    os.environ["REPOPR1"] = "/mnt/project_server/Projects"
     file = data["test_file"]
     file.full_path = "$REPOPR1/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
-    expected_result = "/Volumes/projects_server/Projects/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
+    expected_result = "/mnt/project_server/Projects/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
     assert data["test_file"].absolute_full_path == expected_result
