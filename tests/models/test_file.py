@@ -7,14 +7,12 @@ import pytest
 
 from stalker import File, Repository, Type
 from stalker.db.session import DBSession
-from tests.utils import PlatformPatcher
 
 
 @pytest.fixture(scope="function")
 def setup_file_tests():
     """Set up the test for the File class."""
     data = dict()
-    data["patcher"] = PlatformPatcher()
 
     # create a test Repository
     data["test_repo"] = Repository(
@@ -620,10 +618,10 @@ def test_absolute_path_is_read_only(setup_file_tests):
     assert str(cm.value) == error_message
 
 
-def test_absolute_path_returns_the_absolute_path(setup_file_tests):
+def test_absolute_path_returns_the_absolute_path(setup_file_tests, monkeypatch):
     """absolute_path property returns the absolute path of the full_path attribute."""
     data = setup_file_tests
-    data["patcher"].patch("Darwin")
+    monkeypatch.setattr("stalker.models.repository.platform.system", lambda: "Darwin")
     file = data["test_file"]
     file.full_path = "$REPOPR1/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
     expected_result = "/Volumes/projects_server/Projects/A_NEW_PROJECT/td/dsdf"
@@ -644,10 +642,10 @@ def test_absolute_full_path_is_read_only(setup_file_tests):
     assert str(cm.value) == error_message
 
 
-def test_absolute_full_path_returns_the_absolute_full_path(setup_file_tests):
+def test_absolute_full_path_returns_the_absolute_full_path(setup_file_tests, monkeypatch):
     """absolute_full_path property returns the absolute path of the full_path attribute."""
     data = setup_file_tests
-    data["patcher"].patch("Darwin")
+    monkeypatch.setattr("stalker.models.repository.platform.system", lambda: "Darwin")
     file = data["test_file"]
     file.full_path = "$REPOPR1/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
     expected_result = "/Volumes/projects_server/Projects/A_NEW_PROJECT/td/dsdf/22-fdfffsd-32342-dsf2332-dsfd-3.exr"
