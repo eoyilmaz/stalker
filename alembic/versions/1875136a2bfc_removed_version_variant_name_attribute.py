@@ -127,6 +127,7 @@ def upgrade():
                 persistent_allocation,
                 priority,
                 bid_timing,
+                bid_unit,
                 schedule_seconds,
                 total_logged_seconds,
                 review_number,
@@ -153,6 +154,7 @@ def upgrade():
                     sel1.persistent_allocation,
                     sel1.priority,
                     sel1.bid_timing,
+                    CAST(sel1.bid_unit as public."TimeUnit"),
                     sel1.schedule_seconds,
                     sel1.total_logged_seconds,
                     sel1.review_number,
@@ -170,7 +172,7 @@ def upgrade():
                     sel1.schedule_model,
                     sel1.task_id -- use the original task as the parent of the new Variant
                 FROM sel1, ins1
-                WHERE sel1.name = ins1.variant_name AND sel1.task_id = ins1.variant_parent_id 
+                WHERE sel1.name = ins1.variant_name AND sel1.task_id = ins1.variant_parent_id
             )
         )
         INSERT INTO "Variants" (id) (SELECT ins1.variant_id FROM ins1);
@@ -241,7 +243,7 @@ def downgrade():
                 -- "Versions".variant_name,
                 -- "Versions".task_id
             FROM "Variants"
-            JOIN "Tasks" AS "Variant_Tasks" ON "Variants".id = "Variant_Tasks".id 
+            JOIN "Tasks" AS "Variant_Tasks" ON "Variants".id = "Variant_Tasks".id
             JOIN "Versions" ON "Variant_Tasks".parent_id = "Versions".task_id
             JOIN "SimpleEntities" AS "Variant_SimpleEntities" ON "Variants".id = "Variant_SimpleEntities".id
             WHERE "Variant_SimpleEntities".name = "Versions".variant_name
