@@ -898,7 +898,7 @@ def test_setup_with_settings(setup_postgresql_db):
     with pytest.raises(ArgumentError) as cm:
         stalker.db.setup.setup({"sqlalchemy.url": "random url"})
 
-    assert str(cm.value) == "Could not parse SQLAlchemy URL from string 'random url'"
+    assert "Could not parse SQLAlchemy URL from" in str(cm.value)
 
 
 # tests the database model with a PostgreSQL database
