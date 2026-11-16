@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 """Authentication related classes and functions situated here."""
 import base64
+import hashlib
+import hmac
+import secrets
 import copy
 import json
 import os
@@ -789,10 +792,16 @@ class User(Entity, ACLMixin):
                 f"{self.__class__.__name__}.password cannot be an empty string"
             )
 
-        # mangle the password
-        mangled_password_bytes = base64.b64encode(password.encode("utf-8"))
-        mangled_password_str = str(mangled_password_bytes.decode("utf-8"))
-        return mangled_password_str
+        # hash the password with a per-user random salt using PBKDF2-HMAC-SHA256
+        # so that the stored value is not reversible to the raw password
+        salt = secrets.token_bytes(16)
+        iterations = 100000
+        derived = hashlib.pbkdf2_hmac(
+            "sha256", password.encode("utf-8"), salt, iterations
+        )
+        return "pbkdf2_sha256${}${}${}".format(
+            iterations, salt.hex(), derived.hex()
+        )
 
     def check_password(self, raw_password: str) -> bool:
         """Check the given raw_password.
@@ -811,10 +820,27 @@ class User(Entity, ACLMixin):
         Returns:
             bool: If the given raw password matches the password stored in the db.
         """
-        mangled_password_str = str(self.password)
-        raw_password_bytes = base64.b64encode(bytes(raw_password.encode("utf-8")))
-        raw_password_encrypted_str = str(raw_password_bytes.decode("utf-8"))
-        return mangled_password_str == raw_password_encrypted_str
+        stored = str(self.password)
+        if stored.startswith("pbkdf2_sha256$"):
+            try:
+                _, iter_str, salt_hex, hash_hex = stored.split("$", 3)
+                iterations = int(iter_str)
+                salt = bytes.fromhex(salt_hex)
+                expected = bytes.fromhex(hash_hex)
+            except (ValueError, TypeError):
+                return False
+            derived = hashlib.pbkdf2_hmac(
+                "sha256", raw_password.encode("utf-8"), salt, iterations
+            )
+            return hmac.compare_digest(derived, expected)
+
+        # legacy fallback: previously passwords were stored as reversible base64.
+        # keep verifying them so existing databases keep working; they get
+        # upgraded to a real hash the next time the password is set.
+        legacy = str(
+            base64.b64encode(raw_password.encode("utf-8")).decode("utf-8")
+        )
+        return hmac.compare_digest(stored, legacy)
 
     @validates("groups")
     def _validate_groups(self, key: str, group: Group) -> Group:
